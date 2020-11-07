@@ -1,11 +1,10 @@
 #include <stdio.h>
 
 int main() {
+    board[8][8] = 0;
+    for(row = 0; row < 8; row++)
+        for(col = 0; col < 8; col++)
+            printf("%d", i);
 
-    printf("Hola mundo :3");
     return 0;
-
-
-    //hola soy Vania
-    //qué tal
 }
