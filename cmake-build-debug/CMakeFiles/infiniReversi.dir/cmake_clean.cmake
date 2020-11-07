@@ -2,8 +2,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/infiniReversi.dir/main.c.obj"
   "infiniReversi.exe"
   "infiniReversi.exe.manifest"
+  "infiniReversi.lib"
   "infiniReversi.pdb"
-  "libinfiniReversi.dll.a"
 )
 
 # Per-language clean rules from dependency scanning.
