@@ -154,6 +154,33 @@ main.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\infiniReversi.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\infiniReversi.dir\main.c.s
 .PHONY : main.c.s
 
+reversi.obj: reversi.c.obj
+
+.PHONY : reversi.obj
+
+# target to build an object file
+reversi.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\infiniReversi.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\infiniReversi.dir\reversi.c.obj
+.PHONY : reversi.c.obj
+
+reversi.i: reversi.c.i
+
+.PHONY : reversi.i
+
+# target to preprocess a source file
+reversi.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\infiniReversi.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\infiniReversi.dir\reversi.c.i
+.PHONY : reversi.c.i
+
+reversi.s: reversi.c.s
+
+.PHONY : reversi.s
+
+# target to generate assembly for a file
+reversi.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\infiniReversi.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\infiniReversi.dir\reversi.c.s
+.PHONY : reversi.c.s
+
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -166,6 +193,9 @@ help:
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s
+	@echo ... reversi.obj
+	@echo ... reversi.i
+	@echo ... reversi.s
 .PHONY : help
 
 

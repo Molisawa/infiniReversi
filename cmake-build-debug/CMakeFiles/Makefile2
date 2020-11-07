@@ -78,12 +78,12 @@ clean: CMakeFiles\infiniReversi.dir\clean
 CMakeFiles\infiniReversi.dir\all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\infiniReversi.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\infiniReversi.dir\depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\infiniReversi.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\infiniReversi.dir\build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=C:\Users\vania\CLionProjects\infiniReversi\cmake-build-debug\CMakeFiles --progress-num=1,2 "Built target infiniReversi"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=C:\Users\vania\CLionProjects\infiniReversi\cmake-build-debug\CMakeFiles --progress-num=1,2,3 "Built target infiniReversi"
 .PHONY : CMakeFiles\infiniReversi.dir\all
 
 # Build rule for subdir invocation for target.
 CMakeFiles\infiniReversi.dir\rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\vania\CLionProjects\infiniReversi\cmake-build-debug\CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\vania\CLionProjects\infiniReversi\cmake-build-debug\CMakeFiles 3
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 /nologo -$(MAKEFLAGS) CMakeFiles\infiniReversi.dir\all
 	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\vania\CLionProjects\infiniReversi\cmake-build-debug\CMakeFiles 0
 .PHONY : CMakeFiles\infiniReversi.dir\rule

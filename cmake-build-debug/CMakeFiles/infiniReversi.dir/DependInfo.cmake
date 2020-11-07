@@ -5,6 +5,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
   "C:/Users/vania/CLionProjects/infiniReversi/main.c" "C:/Users/vania/CLionProjects/infiniReversi/cmake-build-debug/CMakeFiles/infiniReversi.dir/main.c.obj"
+  "C:/Users/vania/CLionProjects/infiniReversi/reversi.c" "C:/Users/vania/CLionProjects/infiniReversi/cmake-build-debug/CMakeFiles/infiniReversi.dir/reversi.c.obj"
   )
 set(CMAKE_C_COMPILER_ID "MSVC")
 

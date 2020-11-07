@@ -80,17 +80,38 @@ CMakeFiles\infiniReversi.dir\main.c.s: cmake_force
  /nologo $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) /FoNUL /FAs /FaCMakeFiles\infiniReversi.dir\main.c.s /c C:\Users\vania\CLionProjects\infiniReversi\main.c
 <<
 
+CMakeFiles\infiniReversi.dir\reversi.c.obj: CMakeFiles\infiniReversi.dir\flags.make
+CMakeFiles\infiniReversi.dir\reversi.c.obj: ..\reversi.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\vania\CLionProjects\infiniReversi\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/infiniReversi.dir/reversi.c.obj"
+	C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1427~1.291\bin\Hostx86\x86\cl.exe @<<
+ /nologo $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) /FoCMakeFiles\infiniReversi.dir\reversi.c.obj /FdCMakeFiles\infiniReversi.dir\ /FS -c C:\Users\vania\CLionProjects\infiniReversi\reversi.c
+<<
+
+CMakeFiles\infiniReversi.dir\reversi.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/infiniReversi.dir/reversi.c.i"
+	C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1427~1.291\bin\Hostx86\x86\cl.exe > CMakeFiles\infiniReversi.dir\reversi.c.i @<<
+ /nologo $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E C:\Users\vania\CLionProjects\infiniReversi\reversi.c
+<<
+
+CMakeFiles\infiniReversi.dir\reversi.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/infiniReversi.dir/reversi.c.s"
+	C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1427~1.291\bin\Hostx86\x86\cl.exe @<<
+ /nologo $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) /FoNUL /FAs /FaCMakeFiles\infiniReversi.dir\reversi.c.s /c C:\Users\vania\CLionProjects\infiniReversi\reversi.c
+<<
+
 # Object files for target infiniReversi
 infiniReversi_OBJECTS = \
-"CMakeFiles\infiniReversi.dir\main.c.obj"
+"CMakeFiles\infiniReversi.dir\main.c.obj" \
+"CMakeFiles\infiniReversi.dir\reversi.c.obj"
 
 # External object files for target infiniReversi
 infiniReversi_EXTERNAL_OBJECTS =
 
 infiniReversi.exe: CMakeFiles\infiniReversi.dir\main.c.obj
+infiniReversi.exe: CMakeFiles\infiniReversi.dir\reversi.c.obj
 infiniReversi.exe: CMakeFiles\infiniReversi.dir\build.make
 infiniReversi.exe: CMakeFiles\infiniReversi.dir\objects1.rsp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\vania\CLionProjects\infiniReversi\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable infiniReversi.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\vania\CLionProjects\infiniReversi\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking C executable infiniReversi.exe"
 	"C:\Program Files\JetBrains\CLion 2020.2.3\bin\cmake\win\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\infiniReversi.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100183~1.0\x86\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100183~1.0\x86\mt.exe --manifests  -- C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1427~1.291\bin\Hostx86\x86\link.exe /nologo @CMakeFiles\infiniReversi.dir\objects1.rsp @<<
  /out:infiniReversi.exe /implib:infiniReversi.lib /pdb:C:\Users\vania\CLionProjects\infiniReversi\cmake-build-debug\infiniReversi.pdb /version:0.0  /machine:X86 /debug /INCREMENTAL /subsystem:console  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib 
 <<

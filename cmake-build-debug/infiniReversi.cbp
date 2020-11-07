@@ -85,6 +85,9 @@
 		<Unit filename="C:/Users/vania/CLionProjects/infiniReversi/main.c">
 			<Option target="infiniReversi"/>
 		</Unit>
+		<Unit filename="C:/Users/vania/CLionProjects/infiniReversi/reversi.c">
+			<Option target="infiniReversi"/>
+		</Unit>
 		<Unit filename="C:/Users/vania/CLionProjects/infiniReversi/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>

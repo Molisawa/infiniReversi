@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/infiniReversi.dir/main.c.obj"
+  "CMakeFiles/infiniReversi.dir/reversi.c.obj"
   "infiniReversi.exe"
   "infiniReversi.exe.manifest"
   "infiniReversi.lib"
