@@ -8,6 +8,13 @@ typedef struct board_struct{
     Piece* state[][];
     int currentPlayer;
 }Board;
+
+/*
+ *      board[SIZE/2 - 1][SIZE/2 - 1] = board[SIZE/2][SIZE/2] = 'O';
+        board[SIZE/2 - 1][SIZE/2] = board[SIZE/2][SIZE/2 - 1] = 'X';
+        Calculos para sacar la posicion de las fichas en cualquier tablero
+ *
+ * */
 void playReversi();
 void initializeGame();
 void endGame();
