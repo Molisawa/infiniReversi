@@ -1,0 +1,3 @@
+C:/Users/is725664/CLionProjects/infiniReversi/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/is725664/CLionProjects/infiniReversi/cmake-build-debug/CMakeFiles/infiniReversi.dir
+C:/Users/is725664/CLionProjects/infiniReversi/cmake-build-debug/CMakeFiles/rebuild_cache.dir
