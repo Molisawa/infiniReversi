@@ -2,11 +2,17 @@
 typedef  struct piece_struct{
     int player;
     int x, y;
+    char pieceType
 }Piece;
 
 typedef struct board_struct{
     Piece* state[8][8];
     int currentPlayer;
+    int noOfGames;
+    int noOfMoves;
+    int invalidMoves;
+    int compScore;
+    int userScore;
 }Board;
 
 /*
@@ -17,6 +23,7 @@ typedef struct board_struct{
  * */
 void playReversi();
 void initializeGame();
+void initializeBoard();
 void endGame();
 void saveGame();
 void loadGame();
