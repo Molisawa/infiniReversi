@@ -5,7 +5,7 @@ typedef  struct piece_struct{
 }Piece;
 
 typedef struct board_struct{
-    Piece* state[][];
+    Piece* state[8][8];
     int currentPlayer;
 }Board;
 
@@ -21,7 +21,7 @@ void endGame();
 void saveGame();
 void loadGame();
 void display();
-int valid_moves();
+int isValidMove(Board currentState, int player);
 void make_move();
 void computer_move();
 int best_move();
