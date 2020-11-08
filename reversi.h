@@ -22,14 +22,14 @@ typedef struct board_struct{
  *
  * */
 void playReversi();
-void initializeGame();
-void initializeBoard();
+void initializeGame(Board* b,int SIZE);
+void initializeBoard(Board* Board, int SIZE);
 void endGame();
 void saveGame();
 void loadGame();
 void display();
 int isValidMove(Board currentState, int player);
 void make_move();
-void computer_move();
+void computer_move(Board* board,int SIZE);
 int best_move();
 int get_score();
