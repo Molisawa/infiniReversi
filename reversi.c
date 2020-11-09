@@ -14,10 +14,10 @@ void playReversi()
         printf("Por favor ingresa un valor par: \n");
         scanf("%d",&SIZE);
     }
-    
+
 }
 
-void initializeGame(Board* b,int SIZE){
+void initializeGame(Board* b){
 
 b->noOfGames = 0;
 b->currentPlayer = 0;
@@ -25,10 +25,13 @@ b->compScore = 0;
 b->noOfGames = 0;
 b->invalidMoves = 0;
 b->userScore = 0;
-initializeBoard(b->state,SIZE);
+b->Size = 8;
+initializeBoard(b->state);
 }
 
-void initializeBoard(Board* Board, int SIZE){
+void initializeBoard(Board* Board){
+
+    int SIZE = Board->Size;
 
  Board->state[SIZE/2 - 1][SIZE/2 - 1] = Board->state[SIZE/2][SIZE/2] = malloc(sizeof(Piece));
  Board->state[SIZE/2 - 1][SIZE/2] = Board->state[SIZE/2][SIZE/2 - 1] = malloc(sizeof(Piece));
@@ -43,12 +46,34 @@ int isValidMove(Board currentState, int player){
 
 }
 
-int get_score(Board* b,Piece* p)
-{
-    int score = 0;
-    int row = 0;
-    int col = 0;
+void display(Board* b){
 
-    char opponent = p->player == 'O' ? '@' : 'O';
+    int SIZE = b->Size;
+
+    int row  = 0;
+    int col = 0;
+    char col_label = 'a';
+
+    printf("\n ");
+    for(col = 0 ; col<SIZE ;col++)
+        printf("   %c", col_label+col);
+    printf("\n");
+
+    for(row = 0; row < SIZE; row++)
+    {
+        printf("  +");
+        for(col = 0; col<SIZE; col++)
+            printf("---+");
+        printf("\n%2d|",row + 1);
+
+        for(col = 0; col<SIZE; col++)
+            printf(" %s |", b->state[row][col]);
+        printf("\n");
+    }
+
+    printf("  +");
+    for(col = 0 ; col<SIZE ;col++)
+        printf("---+");
+    printf("\n");
 
 }

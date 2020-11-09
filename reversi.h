@@ -2,7 +2,7 @@
 typedef  struct piece_struct{
     int player;
     int x, y;
-    char pieceType
+    char pieceType;
 }Piece;
 
 typedef struct board_struct{
@@ -13,6 +13,7 @@ typedef struct board_struct{
     int invalidMoves;
     int compScore;
     int userScore;
+    int Size;
 }Board;
 
 /*
@@ -22,14 +23,14 @@ typedef struct board_struct{
  *
  * */
 void playReversi();
-void initializeGame(Board* b,int SIZE);
-void initializeBoard(Board* Board, int SIZE);
+void initializeGame(Board* b);
+void initializeBoard(Board* Board);
 void endGame();
 void saveGame();
 void loadGame();
 void display();
 int isValidMove(Board currentState, int player);
 void make_move();
-void computer_move(Board* board,int SIZE);
+void computer_move();
 int best_move();
 int get_score();
