@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "reversi.h"
+#include "reversi.c"
 
 int main()
 {

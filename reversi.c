@@ -57,7 +57,7 @@ int isValidMove(Board currentState, int player){
 void display(Board* b){
 
     int SIZE = b->Size;
-
+    int string = ' ';
     int row  = 0;
     int col = 0;
     char col_label = 'a';
@@ -74,9 +74,11 @@ void display(Board* b){
                 printf("---+");
             printf("\n%2d|", row + 1);
 
-            for (col = 0; col < SIZE; col++) { //YA IMPRIME EL TABLERO PERO LAS FICHAS DEL CENTRO SE IMPRIMEN MAL
+            for (col = 0; col < SIZE; col++) { //YA IMPRIME EL TABLERO
                 if (b->state[row][col] != NULL)
                     printf(" %c |", b->state[row][col]->pieceType);
+                else
+                    printf(" %c |", string); // Esto imprime espacios vacios y una barra si la casilla es NULL
             }
             printf("\n");
         }
