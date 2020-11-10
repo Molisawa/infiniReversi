@@ -6,12 +6,6 @@
 
 #IncludeRegexTransform: 
 
-C:/Users/vania/CLionProjects/infiniReversi/main.c
-stdio.h
--
-reversi.h
-C:/Users/vania/CLionProjects/infiniReversi/reversi.h
-
 C:/Users/vania/CLionProjects/infiniReversi/reversi.c
 stdio.h
 -

@@ -26,7 +26,7 @@ b->noOfGames = 0;
 b->invalidMoves = 0;
 b->userScore = 0;
 b->Size = 8;
-initializeBoard(b->state);
+initializeBoard(b);
 }
 
 void initializeBoard(Board* Board){
@@ -67,7 +67,7 @@ void display(Board* b){
         printf("\n%2d|",row + 1);
 
         for(col = 0; col<SIZE; col++)
-            printf(" %s |", b->state[row][col]);
+            printf(" %c |", b->state[row][col]->pieceType);
         printf("\n");
     }
 
