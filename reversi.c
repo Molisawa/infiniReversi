@@ -11,7 +11,7 @@ void playReversi()
     scanf("%d", &SIZE);
     if( (SIZE%2) != 0)
     {
-        printf("Por favor ingresa un valor par: \n");
+        printf("P-or favor ingresa un valor par: \n");
         scanf("%d",&SIZE);
     }
 
@@ -32,6 +32,14 @@ initializeBoard(b);
 void initializeBoard(Board* Board){
 
     int SIZE = Board->Size;
+
+    for(int i=0;i< Board->Size;i++)
+    {
+        for(int j=0;j< Board->Size;j++)
+        {
+            Board->state[i][j] = NULL;
+        }
+    }
 
  Board->state[SIZE/2 - 1][SIZE/2 - 1] = Board->state[SIZE/2][SIZE/2] = malloc(sizeof(Piece));
  Board->state[SIZE/2 - 1][SIZE/2] = Board->state[SIZE/2][SIZE/2 - 1] = malloc(sizeof(Piece));
@@ -54,26 +62,27 @@ void display(Board* b){
     int col = 0;
     char col_label = 'a';
 
-    printf("\n ");
-    for(col = 0 ; col<SIZE ;col++)
-        printf("   %c", col_label+col);
-    printf("\n");
+        printf("\n ");
+        for (col = 0; col < SIZE; col++)
+            printf("   %c", col_label + col);
+        printf("\n");
 
-    for(row = 0; row < SIZE; row++)
-    {
+        for (row = 0; row < SIZE; row++) {
+            printf("  +");
+
+            for (col = 0; col < SIZE; col++)
+                printf("---+");
+            printf("\n%2d|", row + 1);
+
+            for (col = 0; col < SIZE; col++) { //YA IMPRIME EL TABLERO PERO LAS FICHAS DEL CENTRO SE IMPRIMEN MAL
+                if (b->state[row][col] != NULL)
+                    printf(" %c |", b->state[row][col]->pieceType);
+            }
+            printf("\n");
+        }
+
         printf("  +");
-        for(col = 0; col<SIZE; col++)
+        for (col = 0; col < SIZE; col++)
             printf("---+");
-        printf("\n%2d|",row + 1);
-
-        for(col = 0; col<SIZE; col++)
-            printf(" %c |", b->state[row][col]->pieceType);
         printf("\n");
     }
-
-    printf("  +");
-    for(col = 0 ; col<SIZE ;col++)
-        printf("---+");
-    printf("\n");
-
-}
