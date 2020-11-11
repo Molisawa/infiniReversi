@@ -30,7 +30,7 @@ void saveGame();
 void loadGame();
 void display();
 int isValidMove(Board currentState, int player);
-void make_move();
+void make_move(Board* board, int row, int col, char player);
 void computer_move();
 int best_move();
 int get_score();

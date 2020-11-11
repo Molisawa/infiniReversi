@@ -88,3 +88,58 @@ void display(Board* b){
             printf("---+");
         printf("\n");
     }
+
+
+
+void make_move(Board* board, int row, int col, char player)
+{
+
+    int SIZE = board->Size;
+    int rowchange = 0;
+    int colchange = 0;
+    int x = 0;
+    int y = 0;
+    char opponent = (player == 'O')? '@' : 'O';
+
+    board->state[row][col]->player = player;
+
+
+    for(rowchange = -1; rowchange <= 1; rowchange++)
+        for(colchange = -1; colchange <= 1; colchange++)
+        {
+            if(row + rowchange < 0 || row + rowchange >= SIZE ||
+               col + colchange < 0 || col + colchange >= SIZE ||
+               (rowchange==0 && colchange== 0))
+                continue;
+
+            if(board->state[row + rowchange][col + colchange]->player == opponent)
+            {
+
+                x = row + rowchange;
+                y = col + colchange;
+
+                for(;;)
+                {
+                    x += rowchange;
+                    y += colchange;
+
+
+                    if(x < 0 || x >= SIZE || y < 0 || y >= SIZE)
+                        break;
+
+
+                    if(board->state[x][y]->pieceType == ' ')
+                        break;
+
+                    if(board->state[x][y]->pieceType == player)
+                    {
+                        while(board->state[x-=rowchange][y-=colchange]->pieceType==opponent)
+                            board->state[x][y]->pieceType = player;
+                        break;
+                    }
+                }
+            }
+        }
+}
+
+
