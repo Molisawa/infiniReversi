@@ -1,13 +1,19 @@
 /*Function prototypes*/
+
+#define BOARD_SIZE 8 // Must be even number
 typedef  struct piece_struct{
-    int player;
-    int x, y;
     char pieceType;
 }Piece;
 
+typedef struct movement{
+    const char pieceType;
+    const int x, y;
+} Movement;
+
 typedef struct board_struct{
-    Piece* state[8][8];
-    int currentPlayer;
+    Piece* state[BOARD_SIZE][BOARD_SIZE];
+    Movement* history;
+    char currentPlayer;
     int noOfGames;
     int noOfMoves;
     int invalidMoves;
@@ -16,12 +22,6 @@ typedef struct board_struct{
     int Size;
 }Board;
 
-/*
- *      board[SIZE/2 - 1][SIZE/2 - 1] = board[SIZE/2][SIZE/2] = 'O';
-        board[SIZE/2 - 1][SIZE/2] = board[SIZE/2][SIZE/2 - 1] = 'X';
-        Calculos para sacar la posicion de las fichas en cualquier tablero
- *
- * */
 void playReversi();
 void initializeGame(Board* b);
 void initializeBoard(Board* Board);
@@ -30,7 +30,7 @@ void saveGame();
 void loadGame();
 void display();
 int isValidMove(Board currentState, int player);
-void make_move(Board* board, int row, int col, char player);
+void make_move(Board* board, int row, int col, char pieceType);
 void computer_move();
 int best_move();
 int get_score();
