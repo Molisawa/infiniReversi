@@ -1,3 +1,0 @@
-C:/Users/vania/CLionProjects/infiniReversi/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/vania/CLionProjects/infiniReversi/cmake-build-debug/CMakeFiles/infinireversi.dir
-C:/Users/vania/CLionProjects/infiniReversi/cmake-build-debug/CMakeFiles/rebuild_cache.dir
