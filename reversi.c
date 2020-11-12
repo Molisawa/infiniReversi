@@ -37,12 +37,10 @@ void initializeBoard(Board* Board){
     {
         for(int j=0;j< Board->Size;j++)
         {
-            Board->state[i][j] = NULL;
+            Board->state[i][j] = malloc(sizeof(Piece));
+            Board->state[i][j]->pieceType = ' ';
         }
     }
-
-    Board->state[SIZE/2 - 1][SIZE/2 - 1] = Board->state[SIZE/2][SIZE/2] = malloc(sizeof(Piece));
-    Board->state[SIZE/2 - 1][SIZE/2] = Board->state[SIZE/2][SIZE/2 - 1] = malloc(sizeof(Piece));
     Board->state[SIZE/2 - 1][SIZE/2 - 1]->pieceType = 'O';
     Board->state[SIZE/2][SIZE/2]->pieceType = 'O';
     Board->state[SIZE/2 - 1][SIZE/2]->pieceType = 'X';
@@ -57,7 +55,6 @@ int isValidMove(Board currentState, int player){
 void display(Board* b){
 
     int SIZE = b->Size;
-    int string = ' ';
     int row  = 0;
     int col = 0;
     char col_label = 'a';
@@ -74,11 +71,9 @@ void display(Board* b){
             printf("---+");
         printf("\n%2d|", row + 1);
 
-        for (col = 0; col < SIZE; col++) { //YA IMPRIME EL TABLERO
-            if (b->state[row][col] != NULL)
-                printf(" %c |", b->state[row][col]->pieceType);
-            else
-                printf(" %c |", string); // Esto imprime espacios vacios y una barra si la casilla es NULL
+        for (col = 0; col < SIZE; col++) {
+            printf(" %c |", b->state[col][row]->pieceType);
+
         }
         printf("\n");
     }
@@ -91,32 +86,30 @@ void display(Board* b){
 
 
 
-void make_move(Board* board, int row, int col, char pieceType)
-{
-
+void make_move(Board* board, Movement lastMove){
     int SIZE = board->Size;
     int rowchange = 0;
     int colchange = 0;
     int x = 0;
     int y = 0;
-    char opponent = (pieceType == 'O') ? 'X' : 'O';
 
-    board->state[row][col]->pieceType = pieceType;
+    char opponent =(lastMove.pieceType == 'O') ? 'X' : 'O';
 
+    board->state[lastMove.x][lastMove.y]->pieceType = lastMove.pieceType;
 
     for(rowchange = -1; rowchange <= 1; rowchange++)
         for(colchange = -1; colchange <= 1; colchange++)
         {
-            if(row + rowchange < 0 || row + rowchange >= SIZE ||
-               col + colchange < 0 || col + colchange >= SIZE ||
+            if(lastMove.x + rowchange < 0 || lastMove.x + rowchange >= SIZE ||
+               lastMove.y + colchange < 0 || lastMove.y + colchange >= SIZE ||
                (rowchange==0 && colchange== 0))
                 continue;
 
-            if(board->state[row + rowchange][col + colchange]->pieceType == opponent)
+            if(board->state[lastMove.x + rowchange][lastMove.y + colchange]->pieceType == opponent)
             {
 
-                x = row + rowchange;
-                y = col + colchange;
+                x = lastMove.x + rowchange;
+                y = lastMove.y + colchange;
 
                 for(;;)
                 {
@@ -131,10 +124,10 @@ void make_move(Board* board, int row, int col, char pieceType)
                     if(board->state[x][y]->pieceType == ' ')
                         break;
 
-                    if(board->state[x][y]->pieceType == pieceType)
+                    if(board->state[x][y]->pieceType == lastMove.pieceType)
                     {
                         while(board->state[x-=rowchange][y-=colchange]->pieceType==opponent)
-                            board->state[x][y]->pieceType = pieceType;
+                            board->state[x][y]->pieceType = lastMove.pieceType;
                         break;
                     }
                 }
