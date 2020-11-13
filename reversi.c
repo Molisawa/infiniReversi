@@ -14,7 +14,7 @@ int playReversi()
         printf("Por favor ingresa un valor par\n\n");
         playReversi();
     }
-return SIZE;
+    return SIZE;
 }
 
 Movement askMove() {
@@ -22,7 +22,7 @@ Movement askMove() {
     int row;
     puts("Dame la posicion a donde te quieres mover");
     scanf("%c%d", &col, &row);
-    Movement m = {.pieceType = 'O', .x =col-'a', .y = row-1};
+    Movement m = {.pieceState = WHITE_PIECE, .x =col - 'a', .y = row - 1};
     return m;
 }
 
@@ -47,50 +47,18 @@ void initializeBoard(Board* Board){
         for(int j=0;j< Board->Size;j++)
         {
             Board->state[i][j] = malloc(sizeof(Piece));
-            Board->state[i][j]->pieceType = ' ';
+            Board->state[i][j]->pieceType = VOID;
         }
     }
-    Board->state[SIZE/2 - 1][SIZE/2 - 1]->pieceType = 'O';
-    Board->state[SIZE/2][SIZE/2]->pieceType = 'O';
-    Board->state[SIZE/2 - 1][SIZE/2]->pieceType = 'X';
-    Board->state[SIZE/2][SIZE/2 - 1]->pieceType = 'X';
+    Board->state[SIZE/2 - 1][SIZE/2 - 1]->pieceType = WHITE_PIECE;
+    Board->state[SIZE/2][SIZE/2]->pieceType = WHITE_PIECE;
+    Board->state[SIZE/2 - 1][SIZE/2]->pieceType = BLACK_PIECE;
+    Board->state[SIZE/2][SIZE/2 - 1]->pieceType = BLACK_PIECE;
 
 }
 
 int isValidMove(Board currentState, int player){
 
-}
-
-void display(Board* b){
-
-    int SIZE = b->Size;
-    int row  = 0;
-    int col = 0;
-    char col_label = 'a';
-
-    printf("\n ");
-    for (col = 0; col < SIZE; col++)
-        printf("   %c", col_label + col);
-    printf("\n");
-
-    for (row = 0; row < SIZE; row++) {
-        printf("  +");
-
-        for (col = 0; col < SIZE; col++)
-            printf("---+");
-        printf("\n%2d|", row + 1);
-
-        for (col = 0; col < SIZE; col++) {
-            printf(" %c |", b->state[col][row]->pieceType);
-
-        }
-        printf("\n");
-    }
-
-    printf("  +");
-    for (col = 0; col < SIZE; col++)
-        printf("---+");
-    printf("\n");
 }
 
 
@@ -102,9 +70,9 @@ void make_move(Board* board, Movement lastMove){
     int x = 0;
     int y = 0;
 
-    char opponent =(lastMove.pieceType == 'O') ? 'X' : 'O';
+    char opponent = (lastMove.pieceState == WHITE_PIECE) ? BLACK_PIECE : WHITE_PIECE;
 
-    board->state[lastMove.x][lastMove.y]->pieceType = lastMove.pieceType;
+    board->state[lastMove.x][lastMove.y]->pieceType = lastMove.pieceState;
 
     for(rowchange = -1; rowchange <= 1; rowchange++)
         for(colchange = -1; colchange <= 1; colchange++)
@@ -133,16 +101,19 @@ void make_move(Board* board, Movement lastMove){
                     if(board->state[x][y]->pieceType == ' ')
                         break;
 
-                    if(board->state[x][y]->pieceType == lastMove.pieceType)
+                    if(board->state[x][y]->pieceType == lastMove.pieceState)
                     {
                         while(board->state[x-=rowchange][y-=colchange]->pieceType==opponent)
-                            board->state[x][y]->pieceType = lastMove.pieceType;
+                            board->state[x][y]->pieceType = lastMove.pieceState;
                         break;
                     }
                 }
             }
         }
 }
+
+
+
 
 
 

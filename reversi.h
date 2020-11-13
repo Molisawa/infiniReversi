@@ -1,12 +1,14 @@
 /*Function prototypes*/
+#define BOARD_SIZE 8
 
-#define BOARD_SIZE 8 // Must be even number
+enum StateFlags {VOID,BLACK_PIECE,WHITE_PIECE,HELPER};// Must be even number
 typedef  struct piece_struct{
-    char pieceType;
+    enum StateFlags pieceType;
 }Piece;
 
+
 typedef struct movement{
-    const char pieceType;
+    const enum StateFlags pieceState;
     const int x, y;
 } Movement;
 
