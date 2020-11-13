@@ -4,7 +4,9 @@
 
 void UpdateDrawingState(Board *board, int size);
 
-void CheckHumanInteraction(Board *board, int SQUARE_SIZE, int clicked);
+void CheckPiecePlayed(Board *board, int SQUARE_SIZE, int clicked);
+
+void CheckButtonPressed(int clicked, Rectangle rectangle, Board *board);
 
 int main()
 {
@@ -16,16 +18,16 @@ int main()
 
     initializeGame(&board);
     InitWindow(screenWidth, screenHeight, "Reversi");
-    //Movement m = {.pieceState=BLACK_PIECE, .x=5, .y=5};
-    //make_move(&board, m);
 
     static Vector2 offset = { 0 };
 
-    int SQUARE_SIZE = screenHeight/board.Size;
+    int SQUARE_SIZE = screenHeight/board.size;
 
-    printf("%d",SQUARE_SIZE);
     offset.x = screenWidth%SQUARE_SIZE;
     offset.y = screenHeight%SQUARE_SIZE;
+
+
+    Rectangle goBackButton = (Rectangle){board.size * SQUARE_SIZE+20, 30, screenWidth-board.size * SQUARE_SIZE-40,150};
 
 
     while (!WindowShouldClose())    // Detect window close button or ESC key
@@ -33,22 +35,28 @@ int main()
         BeginDrawing();
 
         ClearBackground(DARKGREEN);
-        for (int i = 0; i < board.Size + 1; i++)
+        for (int i = 0; i < board.size + 1; i++)
         {
-            DrawLineV((Vector2){SQUARE_SIZE*i + offset.x/2, offset.y/2}, (Vector2){SQUARE_SIZE*i + offset.x/2, board.Size * SQUARE_SIZE}, BLACK);
+            DrawLineV((Vector2){SQUARE_SIZE*i + offset.x/2, offset.y/2}, (Vector2){SQUARE_SIZE*i + offset.x/2, board.size * SQUARE_SIZE}, BLACK);
         }
 
-        for (int i = 0; i < board.Size + 1; i++)
+        for (int i = 0; i < board.size + 1; i++)
         {
-            DrawLineV((Vector2){offset.x/2, SQUARE_SIZE*i + offset.y/2}, (Vector2){board.Size * SQUARE_SIZE, SQUARE_SIZE*i + offset.y/2}, BLACK);
+            DrawLineV((Vector2){offset.x/2, SQUARE_SIZE*i + offset.y/2}, (Vector2){board.size * SQUARE_SIZE, SQUARE_SIZE * i + offset.y / 2}, BLACK);
         }
+        DrawRectangle(board.size * SQUARE_SIZE+1, 0,screenWidth-1, screenHeight, WHITE);
+        DrawRectangle(board.size * SQUARE_SIZE+1, 0,screenWidth-1, screenHeight, Fade(DARKGREEN, 0.5f));
+        DrawRectangle(goBackButton.x, goBackButton.y, goBackButton.width, goBackButton.height, WHITE);
+        DrawText("Go back",goBackButton.x-MeasureText("Go back",30)/2+goBackButton.width/2,goBackButton.y+goBackButton.height/2-15,30, BLACK);
         SetHelpers(&board);
         UpdateDrawingState(&board, SQUARE_SIZE);
 
         int clicked = 0;
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
             clicked = 1;
-        CheckHumanInteraction(&board, SQUARE_SIZE, clicked);
+        CheckPiecePlayed(&board, SQUARE_SIZE, clicked);
+        CheckButtonPressed(clicked, goBackButton, &board);
+
 
         EndDrawing();
         //----------------------------------------------------------------------------------
@@ -61,11 +69,17 @@ int main()
     return 0;
 }
 
-void CheckHumanInteraction(Board *board,int SQUARE_SIZE, int clicked) {
+void CheckButtonPressed(int clicked, Rectangle rectangle, Board *board) {
+    if(clicked && CheckCollisionPointRec(GetMousePosition(),rectangle)) {
+        goBack(board);
+    }
 
+}
+
+void CheckPiecePlayed(Board *board, int SQUARE_SIZE, int clicked) {
     Vector2 mousePoint = GetMousePosition();
-    for (int i = 0; i < board->Size; i++) {
-        for (int j = 0; j < board->Size; j++) {
+    for (int i = 0; i < board->size; i++) {
+        for (int j = 0; j < board->size; j++) {
             Vector2 vector;
             switch (board->state[i][j]->pieceType) {
                 case HELPER:
@@ -93,8 +107,8 @@ void CheckHumanInteraction(Board *board,int SQUARE_SIZE, int clicked) {
 
 void UpdateDrawingState(Board *board, int SQUARE_SIZE) {
 
-    for (int i = 0; i < board->Size; i++) {
-        for (int j = 0; j < board->Size; j++) {
+    for (int i = 0; i < board->size; i++) {
+        for (int j = 0; j < board->size; j++) {
             switch (board->state[i][j]->pieceType) {
                 case VOID:
                     break;
