@@ -4,3 +4,5 @@ project(infinireversi)
 set(CMAKE_C_STANDARD 99)
 
 add_executable(infinireversi main.c)
+add_subdirectory(libs/raylib)
+target_link_libraries(infinireversi PRIVATE raylib)

@@ -22,7 +22,8 @@ typedef struct board_struct{
     int Size;
 }Board;
 
-void playReversi();
+int playReversi();
+Movement askMove();
 void initializeGame(Board* b);
 void initializeBoard(Board* Board);
 void endGame();

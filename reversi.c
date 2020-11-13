@@ -3,7 +3,7 @@
 #include <string.h>
 #include "reversi.h"
 
-void playReversi()
+int playReversi()
 {
     int SIZE;
 
@@ -14,7 +14,16 @@ void playReversi()
         printf("Por favor ingresa un valor par\n\n");
         playReversi();
     }
+return SIZE;
+}
 
+Movement askMove() {
+    char col;
+    int row;
+    puts("Dame la posicion a donde te quieres mover");
+    scanf("%c%d", &col, &row);
+    Movement m = {.pieceType = 'O', .x =col-'a', .y = row-1};
+    return m;
 }
 
 void initializeGame(Board* b){
