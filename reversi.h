@@ -1,6 +1,9 @@
 #define BOARD_SIZE 8 // Must be even number
 
 enum StateFlags {VOID,BLACK_PIECE,WHITE_PIECE,HELPER};
+
+enum winners {WINNER,LOSER, TIE};
+
 typedef  struct piece_struct{
     enum StateFlags pieceType;
 }Piece;
@@ -13,8 +16,10 @@ typedef struct movement{
 
 typedef struct board_struct{
     Piece* state[BOARD_SIZE][BOARD_SIZE];
-    Movement* history;
-    int *noOfMoves;
+    Movement* historyBack;
+    Movement* historyForward;
+    int noOfMovesBack;
+    int noOfMovesFoward;
     int compScore;
     int userScore;
     int size;
@@ -23,13 +28,17 @@ typedef struct board_struct{
 void initializeGame(Board *b);
 void initializeBoard(Board *board);
 void goBack(Board *board);
+void goForward(Board *board);
+int canGoBack(Board *board);
+int canGoFoward(Board *board);
 void endGame();
 void saveGame();
 void loadGame();
 int isValidMove(Board *board, Movement lastMove);
 int isGameOver(Board *board);
+int getWinner(Board *board);
 void SetHelpers(Board *board);
-void make_move(Board *board, Movement lastMove);
-void computer_move();
-int best_move();
-int get_score();
+void makeMove(Board *board, Movement lastMove, int replace);
+void computerMove(Board *board);
+Movement bestMove(Board *board);
+int getScore(Board *board, int pieceType);

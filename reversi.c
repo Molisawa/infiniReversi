@@ -5,11 +5,16 @@
 void initializeGame(Board *board){
     board->compScore = 0;
     board->userScore = 0;
-    board->noOfMoves = malloc(sizeof(int));
-    board->noOfMoves[0] = 0;
-    board->history = malloc(sizeof(Movement));
+    board->noOfMovesBack = 0;
+    board->historyBack = malloc(sizeof(Movement));
+    board->noOfMovesFoward = 0;
+    board->historyForward = malloc(sizeof(Movement));
     board->size = BOARD_SIZE;
     initializeBoard(board);
+}
+
+void computerMove(Board *board){
+    makeMove(board,bestMove(board),0);
 }
 
 void initializeBoard(Board *board){
@@ -51,12 +56,36 @@ int isGameOver(Board *board) {
     return 0;
 }
 
+int getWinner(Board *board){
+    int white_moves = 0, black_moves = 0;
+    for (int i = 0; i < board->size; i++) {
+        for (int j = 0; j < board->size; j++){
+            if (board->state[i][j]->pieceType ==WHITE_PIECE) white_moves++;
+            if (board->state[i][j]->pieceType ==BLACK_PIECE) black_moves++;
+        }
+    }
+    if (white_moves == black_moves) return TIE;
+    if (white_moves>black_moves) {
+        return LOSER;
+    } else {
+        return WINNER;
+    }
+}
+
+int canGoBack(Board *board) {
+    return board->noOfMovesBack > 0;
+}
+
+int canGoFoward(Board *board) {
+    return board->noOfMovesFoward > 0;
+}
+
 void SetHelpers(Board *board){
     for(int i=0;i<board->size; i++){
         for(int j = 0; j < board->size; j++) {
             if(board->state[i][j]->pieceType == VOID) {
                 Movement m = {.pieceState = BLACK_PIECE, .x= i, .y=j};
-                if (isValidMove(board,m)){
+                if (isValidMove(board,m)) {
                     board->state[i][j]->pieceType = HELPER;
                 }
             }
@@ -64,73 +93,199 @@ void SetHelpers(Board *board){
     }
 }
 
-int isValidMove(Board *board, Movement lastMove){
-    int rowchange = 0;
-    int colchange = 0;
-    int x = 0;
-    int y = 0;
+int getScore(Board *board, int piece){
+    int score = 0;
+    for(int i=0;i<board->size; i++){
+        for(int j= 0; j < board->size; j++){
+            if (board->state[i][j]->pieceType ==piece)
+                score++;
+        }
+    }
+    return score;
+}
 
-    char opponent = (lastMove.pieceState == WHITE_PIECE) ? BLACK_PIECE : WHITE_PIECE;
-
-
-    for(rowchange = -1; rowchange <= 1; rowchange++)
-        for(colchange = -1; colchange <= 1; colchange++)
-        {
-            if(lastMove.x + rowchange < 0 || lastMove.x + rowchange >= BOARD_SIZE ||
-               lastMove.y + colchange < 0 || lastMove.y + colchange >= BOARD_SIZE ||
-               (rowchange==0 && colchange== 0))
-                continue;
-
-            if(board->state[lastMove.x + rowchange][lastMove.y + colchange]->pieceType == opponent)
-            {
-
-                x = lastMove.x + rowchange;
-                y = lastMove.y + colchange;
-
-                for(;;)
-                {
-                    x += rowchange;
-                    y += colchange;
-
-
-                    if(x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE)
-                        return 0;
-
-
-                    if(board->state[x][y]->pieceType == VOID || board->state[x][y]->pieceType == HELPER)
-                        return 0;
-
-                    if(board->state[x][y]->pieceType == lastMove.pieceState)
-                        return 1;
+Movement bestMove(Board * board){
+    int bestScore = 0,x,y;
+    for(int i = 0; i < board->size; i++){
+        for (int j = 0; j < board->size; j++) {
+            if (board->state[i][j]->pieceType == HELPER) {
+                board->state[i][j]->pieceType = VOID;
+            }
+        }
+    }
+    for(int i=0;i<board->size; i++){
+        for(int j = 0; j < board->size; j++) {
+            Board tmp;
+            initializeGame(&tmp);
+            for (int k = 0; k < board->size; k++) {
+                for (int l = 0; l < board->size; l++){
+                    tmp.state[k][l]->pieceType=board->state[k][l]->pieceType;
+                }
+            }
+            if(tmp.state[i][j]->pieceType == VOID) {
+                Movement m = {.pieceState = WHITE_PIECE, .x= i, .y=j};
+                if (isValidMove(&tmp,m)){
+                    makeMove(&tmp,m,0);
+                    if (getScore(&tmp,WHITE_PIECE) - getScore(board,WHITE_PIECE)> bestScore){
+                        bestScore = getScore(&tmp,WHITE_PIECE) - getScore(board,WHITE_PIECE);
+                        x = i;
+                        y = j;
+                    }
                 }
             }
         }
+    }
+    Movement m = {.pieceState = WHITE_PIECE, .x= x,.y=y};
+
+    return m;
+}
+
+int isValidMove(Board *board, Movement lastMove){
+    char opponent = (lastMove.pieceState == WHITE_PIECE) ? BLACK_PIECE : WHITE_PIECE;
+
+    int colIndex , rowIndex , offset;
+
+    colIndex = lastMove.x - 1;
+    rowIndex = lastMove.y;
+    offset = 0;
+    while(colIndex > 0 && board->state[colIndex][rowIndex]->pieceType == opponent){
+        colIndex--;
+        offset++;
+    }
+    if(colIndex >= 0 && board->state[colIndex][rowIndex]->pieceType == lastMove.pieceState && offset > 0) return 1;
+
+
+    //move down
+    colIndex = lastMove.x + 1;
+    rowIndex = lastMove.y;
+    offset = 0;
+    while(colIndex < 7 && board->state[colIndex][rowIndex]->pieceType == opponent){
+        colIndex++;
+        offset++;
+    }
+    if(colIndex <= 7 && board->state[colIndex][rowIndex]->pieceType == lastMove.pieceState && offset > 0) return 1;
+
+    //move left
+    colIndex = lastMove.x;
+    rowIndex = lastMove.y - 1;
+    offset = 0;
+    while(rowIndex > 0 && board->state[colIndex][rowIndex]->pieceType == opponent){
+        rowIndex--;
+        offset++;
+    }
+    if(rowIndex >= 0 && board->state[colIndex][rowIndex]->pieceType == lastMove.pieceState && offset > 0) return 1;
+
+    //move right
+    colIndex = lastMove.x;
+    rowIndex = lastMove.y + 1;
+    offset = 0;
+    while(rowIndex < 7 && board->state[colIndex][rowIndex]->pieceType == opponent){
+        rowIndex++;
+        offset++;
+    }
+    if(rowIndex <= 7 && board->state[colIndex][rowIndex]->pieceType == lastMove.pieceState && offset > 0) return 1;
+
+    //move up left
+    colIndex = lastMove.x - 1;
+    rowIndex = lastMove.y - 1;
+    offset = 0;
+    while(colIndex > 0 && rowIndex > 0 && board->state[colIndex][rowIndex]->pieceType == opponent){
+        colIndex--;
+        rowIndex--;
+        offset++;
+    }
+    if(colIndex >= 0 && rowIndex >= 0 && board->state[colIndex][rowIndex]->pieceType == lastMove.pieceState && offset > 0) return 1;
+
+    //move up right
+    colIndex = lastMove.x - 1;
+    rowIndex = lastMove.y + 1;
+    offset = 0;
+    while(colIndex > 0 && rowIndex < 7 && board->state[colIndex][rowIndex]->pieceType == opponent){
+        colIndex--;
+        rowIndex++;
+        offset++;
+    }
+    if(colIndex >= 0 && rowIndex <= 7 && board->state[colIndex][rowIndex]->pieceType == lastMove.pieceState && offset > 0) return 1;
+
+    //move down left
+    colIndex = lastMove.x + 1;
+    rowIndex = lastMove.y - 1;
+    offset = 0;
+    while(colIndex < 7 && rowIndex > 0 && board->state[colIndex][rowIndex]->pieceType == opponent){
+        colIndex++;
+        rowIndex--;
+        offset++;
+    }
+    if(colIndex <= 7 && rowIndex >= 0 && board->state[colIndex][rowIndex]->pieceType == lastMove.pieceState && offset > 0) return 1;
+
+    //move down right
+    colIndex = lastMove.x + 1;
+    rowIndex = lastMove.y + 1;
+    offset = 0;
+    while(colIndex < 7 && rowIndex < 7 && board->state[colIndex][rowIndex]->pieceType == opponent){
+        colIndex++;
+        rowIndex++;
+        offset++;
+    }
+    if(colIndex <= 7 && rowIndex <= 7 && board->state[colIndex][rowIndex]->pieceType == lastMove.pieceState && offset > 0) return 1;
+
+    //when all hopes fade away
     return 0;
 }
 
-void goBack(Board *board){
-    if (board->noOfMoves[0]>0) {
-        Movement *m = malloc(sizeof(Movement) * (board->noOfMoves[0] - 1));
-        for (int i = 0; i < board->noOfMoves[0]; ++i) {
-            m[i] = board->history[i];
+void goBack(Board *board) {
+    if (canGoBack(board)) {
+        Movement *m = malloc(sizeof(Movement) * (board->noOfMovesBack - 1));
+        for (int i = 0; i < board->noOfMovesBack - 1; ++i) {
+            m[i] = board->historyBack[i];
         }
-        free(board->history);
+        board->historyForward = realloc(board->historyForward, sizeof(Movement) * (board->noOfMovesFoward + 1));
+        board->historyForward[board->noOfMovesFoward] = board->historyBack[board->noOfMovesBack - 1];
+        board->noOfMovesFoward += 1;
+        int moves = board->noOfMovesBack;
         initializeBoard(board);
-        board->history = m;
-        board->noOfMoves[0]--;
-        for(int i =0; i < board->noOfMoves[0];++i){
-            make_move(board, m[i]);
+        board->historyBack = realloc(board->historyBack, sizeof(Movement) * (moves - 1));
+        board->historyBack = m;
+        board->noOfMovesBack = 0;
+        for (int i = 0; i < moves - 1; ++i) {
+            makeMove(board, m[i], 0);
         }
     }
-
 }
 
-void make_move(Board *board, Movement lastMove){
+void goForward(Board *board) {
+    if (canGoFoward(board)) {
+        Movement *m = malloc(sizeof(Movement) * (board->noOfMovesFoward - 1));
+        for (int i = 0; i < board->noOfMovesFoward-1; ++i) {
+            m[i] = board->historyForward[i];
+        }
+        board->historyBack = realloc(board->historyBack, sizeof(Movement) * (board->noOfMovesBack + 1));
+        board->historyBack[board->noOfMovesBack] = board->historyForward[board->noOfMovesFoward - 1];
+        board->noOfMovesFoward -= 1;
+        int moves = board->noOfMovesBack+1;
+        Movement *historyRebuild = board->historyBack;
+        initializeBoard(board);
+        board->historyForward = realloc(board->historyForward, sizeof(Movement) * (moves - 1));
+        board->historyForward = m;
+        board->noOfMovesBack = 0;
+        for (int i = 0; i < moves; ++i) {
+            makeMove(board, historyRebuild[i], 0);
+        }
+    }
+}
+
+void makeMove(Board *board, Movement lastMove, int replace){
     int SIZE = board->size;
-    int rowchange = 0;
-    int colchange = 0;
-    int x = 0;
-    int y = 0;
+    int rowChange;
+    int colChange;
+    int x;
+    int y;
+
+    if (replace) {
+        free(board->historyForward);
+        board->historyForward = malloc(sizeof(Movement));
+        board->noOfMovesFoward =0;
+    }
 
     for(int i = 0; i < board->size; i++){
         for (int j = 0; j < board->size; j++) {
@@ -144,24 +299,24 @@ void make_move(Board *board, Movement lastMove){
 
     board->state[lastMove.x][lastMove.y]->pieceType = lastMove.pieceState;
 
-    for(rowchange = -1; rowchange <= 1; rowchange++)
-        for(colchange = -1; colchange <= 1; colchange++)
+    for(rowChange = -1; rowChange <= 1; rowChange++)
+        for(colChange = -1; colChange <= 1; colChange++)
         {
-            if(lastMove.x + rowchange < 0 || lastMove.x + rowchange >= SIZE ||
-               lastMove.y + colchange < 0 || lastMove.y + colchange >= SIZE ||
-               (rowchange==0 && colchange== 0))
+            if(lastMove.x + rowChange < 0 || lastMove.x + rowChange >= SIZE ||
+               lastMove.y + colChange < 0 || lastMove.y + colChange >= SIZE ||
+               (rowChange == 0 && colChange == 0))
                 continue;
 
-            if(board->state[lastMove.x + rowchange][lastMove.y + colchange]->pieceType == opponent)
+            if(board->state[lastMove.x + rowChange][lastMove.y + colChange]->pieceType == opponent)
             {
 
-                x = lastMove.x + rowchange;
-                y = lastMove.y + colchange;
+                x = lastMove.x + rowChange;
+                y = lastMove.y + colChange;
 
                 for(;;)
                 {
-                    x += rowchange;
-                    y += colchange;
+                    x += rowChange;
+                    y += colChange;
 
 
                     if(x < 0 || x >= SIZE || y < 0 || y >= SIZE)
@@ -173,16 +328,16 @@ void make_move(Board *board, Movement lastMove){
 
                     if(board->state[x][y]->pieceType == lastMove.pieceState)
                     {
-                        while(board->state[x-=rowchange][y-=colchange]->pieceType==opponent)
+                        while(board->state[x-=rowChange][y-=colChange]->pieceType == opponent)
                             board->state[x][y]->pieceType = lastMove.pieceState;
                         break;
                     }
                 }
             }
         }
-    board->history = realloc(board->history,sizeof(Movement)*(board->noOfMoves[0]+1));
-    board->history[board->noOfMoves[0]] = lastMove;
-    board->noOfMoves[0] +=1;
+    board->historyBack = realloc(board->historyBack, sizeof(Movement) * (board->noOfMovesBack + 1));
+    board->historyBack[board->noOfMovesBack] = lastMove;
+    board->noOfMovesBack +=1;
 }
 
 
