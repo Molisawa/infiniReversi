@@ -1,118 +1,100 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "reversi.h"
+#include "reversi.c"
+#include "raylib.h"
 
-int playReversi()
+void UpdateDrawingState(struct board_struct *pStruct, int size);
+
+void CheckHumanInteraction(Board *board, int SQUARE_SIZE);
+
+int main()
 {
-    int SIZE;
+    struct board_struct board;
+    printf("BIENVENIDO A REVERSI\n");
 
-    printf("Dime el valor del que querras tu tablero, recuerda que debe ser un numero par: \n");
-    scanf("%d", &SIZE);
-    if( (SIZE%2) != 0)
+    const int screenWidth = 1000;
+    const int screenHeight = 800;
+
+    initializeGame(&board);
+    InitWindow(screenWidth, screenHeight, "Reversi");
+
+    static Vector2 offset = { 0 };
+
+    int SQUARE_SIZE = screenHeight/BOARD_SIZE;
+
+    printf("%d",SQUARE_SIZE);
+    offset.x = screenWidth%SQUARE_SIZE;
+    offset.y = screenHeight%SQUARE_SIZE;
+
+
+    while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        printf("Por favor ingresa un valor par\n\n");
-        playReversi();
-    }
-    return SIZE;
-}
+        BeginDrawing();
 
-Movement askMove() {
-    char col;
-    int row;
-    puts("Dame la posicion a donde te quieres mover");
-    scanf("%c%d", &col, &row);
-    Movement m = {.pieceState = WHITE_PIECE, .x =col - 'a', .y = row - 1};
-    return m;
-}
-
-void initializeGame(Board* b){
-
-    b->noOfGames = 0;
-    b->currentPlayer = 0;
-    b->compScore = 0;
-    b->noOfGames = 0;
-    b->invalidMoves = 0;
-    b->userScore = 0;
-    b->Size = BOARD_SIZE;
-    initializeBoard(b);
-}
-
-void initializeBoard(Board* Board){
-
-    int SIZE = Board->Size;
-
-    for(int i=0;i< Board->Size;i++)
-    {
-        for(int j=0;j< Board->Size;j++)
+        ClearBackground(DARKGREEN);
+        for (int i = 0; i < BOARD_SIZE + 1; i++)
         {
-            Board->state[i][j] = malloc(sizeof(Piece));
-            Board->state[i][j]->pieceType = VOID;
+            DrawLineV((Vector2){SQUARE_SIZE*i + offset.x/2, offset.y/2}, (Vector2){SQUARE_SIZE*i + offset.x/2, BOARD_SIZE * SQUARE_SIZE}, BLACK);
         }
-    }
-    Board->state[SIZE/2 - 1][SIZE/2 - 1]->pieceType = WHITE_PIECE;
-    Board->state[SIZE/2][SIZE/2]->pieceType = WHITE_PIECE;
-    Board->state[SIZE/2 - 1][SIZE/2]->pieceType = BLACK_PIECE;
-    Board->state[SIZE/2][SIZE/2 - 1]->pieceType = BLACK_PIECE;
 
-}
-
-int isValidMove(Board currentState, int player){
-
-}
-
-
-
-void make_move(Board* board, Movement lastMove){
-    int SIZE = board->Size;
-    int rowchange = 0;
-    int colchange = 0;
-    int x = 0;
-    int y = 0;
-
-    char opponent = (lastMove.pieceState == WHITE_PIECE) ? BLACK_PIECE : WHITE_PIECE;
-
-    board->state[lastMove.x][lastMove.y]->pieceType = lastMove.pieceState;
-
-    for(rowchange = -1; rowchange <= 1; rowchange++)
-        for(colchange = -1; colchange <= 1; colchange++)
+        for (int i = 0; i < BOARD_SIZE + 1; i++)
         {
-            if(lastMove.x + rowchange < 0 || lastMove.x + rowchange >= SIZE ||
-               lastMove.y + colchange < 0 || lastMove.y + colchange >= SIZE ||
-               (rowchange==0 && colchange== 0))
-                continue;
+            DrawLineV((Vector2){offset.x/2, SQUARE_SIZE*i + offset.y/2}, (Vector2){BOARD_SIZE * SQUARE_SIZE, SQUARE_SIZE*i + offset.y/2}, BLACK);
+        }
+        UpdateDrawingState(&board, SQUARE_SIZE);
 
-            if(board->state[lastMove.x + rowchange][lastMove.y + colchange]->pieceType == opponent)
-            {
+        CheckHumanInteraction(&board, SQUARE_SIZE);
 
-                x = lastMove.x + rowchange;
-                y = lastMove.y + colchange;
-
-                for(;;)
-                {
-                    x += rowchange;
-                    y += colchange;
+        EndDrawing();
+        //----------------------------------------------------------------------------------
+    }
 
 
-                    if(x < 0 || x >= SIZE || y < 0 || y >= SIZE)
-                        break;
 
+    CloseWindow();
 
-                    if(board->state[x][y]->pieceType == ' ')
-                        break;
+    return 0;
+}
 
-                    if(board->state[x][y]->pieceType == lastMove.pieceState)
-                    {
-                        while(board->state[x-=rowchange][y-=colchange]->pieceType==opponent)
-                            board->state[x][y]->pieceType = lastMove.pieceState;
-                        break;
+void CheckHumanInteraction(Board *board,int SQUARE_SIZE) {
+
+    Vector2 mousePoint = GetMousePosition();
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        for (int j = 0; j < BOARD_SIZE; j++) {
+            Vector2 vector;
+            switch (board->state[i][j]->pieceType) {
+                case HELPER:
+                    vector = (Vector2) {(i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2};
+                    if (CheckCollisionPointCircle(mousePoint, vector, SQUARE_SIZE / 2 - 5)) {
+                        DrawRectangle((i) * SQUARE_SIZE+1,(j) * SQUARE_SIZE+1,SQUARE_SIZE-2, SQUARE_SIZE-2, DARKGREEN);
+                        DrawCircle((i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2,
+                                   SQUARE_SIZE / 2 - 5, Fade(BLACK, 0.4f));
                     }
-                }
+                    break;
+                default:
+                    break;
             }
         }
+    }
 }
 
+void UpdateDrawingState(Board *board, int SQUARE_SIZE) {
 
-
-
-
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        for (int j = 0; j < BOARD_SIZE; j++) {
+            switch (board->state[i][j]->pieceType) {
+                case VOID:
+                    break;
+                case BLACK_PIECE:
+                    DrawCircle((i)*SQUARE_SIZE+SQUARE_SIZE/2,(j)*SQUARE_SIZE+SQUARE_SIZE/2,SQUARE_SIZE/2-5,BLACK);
+                    break;
+                case WHITE_PIECE:
+                    DrawCircle((i)*SQUARE_SIZE+SQUARE_SIZE/2,(j)*SQUARE_SIZE+SQUARE_SIZE/2,SQUARE_SIZE/2-5,WHITE);
+                    break;
+                case HELPER:
+                    DrawCircle((i)*SQUARE_SIZE+SQUARE_SIZE/2,(j)*SQUARE_SIZE+SQUARE_SIZE/2,SQUARE_SIZE/2-5,BLACK);
+                    DrawCircle((i)*SQUARE_SIZE+SQUARE_SIZE/2,(j)*SQUARE_SIZE+SQUARE_SIZE/2,SQUARE_SIZE/2-7,DARKGREEN);
+                    break;
+            }
+        }
+    }
+}
