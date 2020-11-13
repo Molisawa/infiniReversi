@@ -1,7 +1,6 @@
-/*Function prototypes*/
-#define BOARD_SIZE 8
+#define BOARD_SIZE 8 // Must be even number
 
-enum StateFlags {VOID,BLACK_PIECE,WHITE_PIECE,HELPER};// Must be even number
+enum StateFlags {VOID,BLACK_PIECE,WHITE_PIECE,HELPER};
 typedef  struct piece_struct{
     enum StateFlags pieceType;
 }Piece;
@@ -32,7 +31,8 @@ void endGame();
 void saveGame();
 void loadGame();
 void display();
-int isValidMove(Board currentState, int player);
+int isValidMove(Board* board, Movement lastMove);
+void SetHelpers(Board* board);
 void make_move(Board* board, Movement lastMove);
 void computer_move();
 int best_move();
