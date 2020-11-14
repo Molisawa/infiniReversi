@@ -39,6 +39,7 @@ int isGameOver(Board *board);
 int getWinner(Board *board);
 void SetHelpers(Board *board);
 void makeMove(Board *board, Movement lastMove);
+void makeRealMove(Board *board, Movement lastMove);
 void removeHistoryFoward(Board *board);
 void computerMove(Board *board);
 Movement bestMove(Board *board);

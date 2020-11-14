@@ -1,7 +1,6 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "bugprone-integer-division"
 #pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
-#include <stdio.h>
 #include "reversi.c"
 #include "raylib.h"
 
@@ -64,17 +63,17 @@ int main()
         DrawText("Go back",goBackButton.x-MeasureText("Go back",30)/2+goBackButton.width/2,goBackButton.y+goBackButton.height/2-15,30, canGoBack(&board)? BLACK: GRAY);
         DrawText("Go foward",goFowardButton.x-MeasureText("Go foward",30)/2+goFowardButton.width/2,goFowardButton.y+goFowardButton.height/2-15,30, canGoFoward(&board)? BLACK: GRAY);
 
-        DrawText("Your score:",goBackButton.x, goFowardButton.height+goFowardButton.y+30, 20, WHITE);
-        int val = getScore(&board, BLACK_PIECE);
-        char *scoreWhite = malloc(sizeof(char)*val);
-        itoa(val,scoreWhite,10);
-        DrawText(scoreWhite,goBackButton.x, goFowardButton.height+goFowardButton.y+50, 20, WHITE);
+        //DrawText("Your score:",goBackButton.x, goFowardButton.height+goFowardButton.y+30, 20, WHITE);
+        //int val = getScore(&board, BLACK_PIECE);
+        //char *scoreWhite = malloc(sizeof(char)*val);
+        //itoa(val,scoreWhite,10);
+        //DrawText(scoreWhite,goBackButton.x, goFowardButton.height+goFowardButton.y+50, 20, WHITE);
 
-        DrawText("CPU score:",goBackButton.x, goFowardButton.height+goFowardButton.y+100, 20, WHITE);
-        val = getScore(&board, WHITE_PIECE);
-        *scoreWhite = realloc(scoreWhite,sizeof(char)*val);
-        itoa(val,scoreWhite,10);
-        DrawText(scoreWhite,goBackButton.x, goFowardButton.height+goFowardButton.y+120, 20, WHITE);
+        //DrawText("CPU score:",goBackButton.x, goFowardButton.height+goFowardButton.y+100, 20, WHITE);
+        //val = getScore(&board, WHITE_PIECE);
+        //*scoreWhite = realloc(scoreWhite,sizeof(char)*val);
+        //itoa(val,scoreWhite,10);
+        //DrawText(scoreWhite,goBackButton.x, goFowardButton.height+goFowardButton.y+120, 20, WHITE);
 
         SetHelpers(&board);
         UpdateDrawingState(&board, SQUARE_SIZE);
@@ -146,7 +145,7 @@ void CheckPiecePlayed(Board *board, int SQUARE_SIZE, int clicked) {
                                        SQUARE_SIZE / 2 - 5, Fade(BLACK, 0.4f));
                         } else {
                             Movement m = {.pieceState = BLACK_PIECE, .x = i, .y = j};
-                            makeMove(board, m);
+                            makeRealMove(board, m);
                             removeHistoryFoward(board);
                             computerMove(board);
                         }
