@@ -37,22 +37,18 @@ void initializeBoard(Board *board){
 }
 
 int isGameOver(Board *board) {
-    int white_moves = 0;
-    int black_moves = 0;
+    int moves = 0;
+    int Piece = board->noOfMovesBack % 2 == 0? BLACK_PIECE : WHITE_PIECE;
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
             if (board->state[i][j]->pieceType == VOID || board->state[i][j]->pieceType ==HELPER) {
-                Movement m_black = {.pieceState = BLACK_PIECE, .x= i, .y=j};
-                Movement m_white = {.pieceState = WHITE_PIECE, .x= i, .y=j};
+                Movement m_black = {.pieceState = Piece, .x= i, .y=j};
                 if (isValidMove(board, m_black))
-                    black_moves++;
-                if (isValidMove(board, m_white))
-                    white_moves++;
+                    moves++;
             }
         }
     }
-    if (white_moves == 0 && black_moves == 0) return 1;
-
+    if (moves == 0) return 1;
     return 0;
 }
 
@@ -81,6 +77,7 @@ int canGoFoward(Board *board) {
 }
 
 void SetHelpers(Board *board){
+    if (board->noOfMovesBack%2) return;
     for(int i=0;i<board->size; i++){
         for(int j = 0; j < board->size; j++) {
             if(board->state[i][j]->pieceType == VOID) {

@@ -27,12 +27,9 @@ int main()
     initializeGame(&board);
     InitWindow(screenWidth, screenHeight, "Reversi");
 
-    static Vector2 offset = { 0 };
+
 
     int SQUARE_SIZE = screenHeight/board.size;
-
-    offset.x = screenWidth%SQUARE_SIZE;
-    offset.y = screenHeight%SQUARE_SIZE;
 
 
     Rectangle goBackButton = (Rectangle){board.size * SQUARE_SIZE+20, 30, screenWidth-board.size * SQUARE_SIZE-40,150};
@@ -49,12 +46,12 @@ int main()
 
         for (int i = 0; i < board.size + 1; i++)
         {
-            DrawLineV((Vector2){SQUARE_SIZE*i + offset.x/2, offset.y/2}, (Vector2){SQUARE_SIZE*i + offset.x/2, board.size * SQUARE_SIZE}, BLACK);
+            DrawLineV((Vector2){SQUARE_SIZE*i, 0}, (Vector2){SQUARE_SIZE*i , board.size * SQUARE_SIZE}, BLACK);
         }
 
         for (int i = 0; i < board.size + 1; i++)
         {
-            DrawLineV((Vector2){offset.x/2, SQUARE_SIZE*i + offset.y/2}, (Vector2){board.size * SQUARE_SIZE, SQUARE_SIZE * i + offset.y / 2}, BLACK);
+            DrawLineV((Vector2){0, SQUARE_SIZE*i}, (Vector2){board.size * SQUARE_SIZE, SQUARE_SIZE * i}, BLACK);
         }
         DrawRectangle(board.size * SQUARE_SIZE+1, 0,screenWidth-1, screenHeight, WHITE);
         DrawRectangle(board.size * SQUARE_SIZE+1, 0,screenWidth-1, screenHeight, Fade(DARKGREEN, 0.5f));
