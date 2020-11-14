@@ -63,6 +63,7 @@ int main()
         DrawRectangle(goFowardButton.x, goFowardButton.y, goFowardButton.width, goFowardButton.height, WHITE);
         DrawText("Go back",goBackButton.x-MeasureText("Go back",30)/2+goBackButton.width/2,goBackButton.y+goBackButton.height/2-15,30, canGoBack(&board)? BLACK: GRAY);
         DrawText("Go foward",goFowardButton.x-MeasureText("Go foward",30)/2+goFowardButton.width/2,goFowardButton.y+goFowardButton.height/2-15,30, canGoFoward(&board)? BLACK: GRAY);
+
         DrawText("Your score:",goBackButton.x, goFowardButton.height+goFowardButton.y+30, 20, WHITE);
         int val = getScore(&board, BLACK_PIECE);
         char *scoreWhite = malloc(sizeof(char)*val);
@@ -145,7 +146,8 @@ void CheckPiecePlayed(Board *board, int SQUARE_SIZE, int clicked) {
                                        SQUARE_SIZE / 2 - 5, Fade(BLACK, 0.4f));
                         } else {
                             Movement m = {.pieceState = BLACK_PIECE, .x = i, .y = j};
-                            makeMove(board, m,1);
+                            makeMove(board, m);
+                            removeHistoryFoward(board);
                             computerMove(board);
                         }
                     }
