@@ -1,23 +1,23 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "bugprone-integer-division"
 #pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
+
 #include "reversi.c"
 #include "raylib.h"
 
 
 typedef struct menu {
     Rectangle goBackButton, goFowardButton;
-}Menu;
+} Menu;
 
 
 void UpdateDrawingState(Board *board, int size);
 
 void CheckPiecePlayed(Board *board, int SQUARE_SIZE, int clicked);
 
-void CheckButtonPressed(Menu *menu,Board *board);
+void CheckButtonPressed(Menu *menu, Board *board);
 
-int main()
-{
+int main() {
     Board board;
 
     const int screenWidth = 1000;
@@ -28,15 +28,16 @@ int main()
     InitWindow(screenWidth, screenHeight, "Reversi");
 
 
+    int SQUARE_SIZE = screenHeight / board.size;
 
-    int SQUARE_SIZE = screenHeight/board.size;
 
+    Rectangle goBackButton = (Rectangle) {board.size * SQUARE_SIZE + 20, 30,
+                                          screenWidth - board.size * SQUARE_SIZE - 40, 150};
 
-    Rectangle goBackButton = (Rectangle){board.size * SQUARE_SIZE+20, 30, screenWidth-board.size * SQUARE_SIZE-40,150};
+    Rectangle goFowardButton = (Rectangle) {goBackButton.x, goBackButton.height + goBackButton.y + 10,
+                                            screenWidth - board.size * SQUARE_SIZE - 40, 150};
 
-    Rectangle goFowardButton = (Rectangle){goBackButton.x, goBackButton.height + goBackButton.y + 10, screenWidth - board.size * SQUARE_SIZE - 40, 150};
-
-    Menu menu = (Menu){goBackButton, goFowardButton};
+    Menu menu = (Menu) {goBackButton, goFowardButton};
 
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
@@ -44,21 +45,25 @@ int main()
 
         ClearBackground(DARKGREEN);
 
-        for (int i = 0; i < board.size + 1; i++)
-        {
-            DrawLineV((Vector2){SQUARE_SIZE*i, 0}, (Vector2){SQUARE_SIZE*i , board.size * SQUARE_SIZE}, BLACK);
+        if (!canMove(&board, BLACK_PIECE) && board.lastPiecetypeMoved == WHITE_PIECE && board.noOfMovesFoward == 0) {
+            computerMove(&board);
         }
 
-        for (int i = 0; i < board.size + 1; i++)
-        {
-            DrawLineV((Vector2){0, SQUARE_SIZE*i}, (Vector2){board.size * SQUARE_SIZE, SQUARE_SIZE * i}, BLACK);
+        for (int i = 0; i < board.size + 1; i++) {
+            DrawLineV((Vector2) {SQUARE_SIZE * i, 0}, (Vector2) {SQUARE_SIZE * i, board.size * SQUARE_SIZE}, BLACK);
         }
-        DrawRectangle(board.size * SQUARE_SIZE+1, 0,screenWidth-1, screenHeight, WHITE);
-        DrawRectangle(board.size * SQUARE_SIZE+1, 0,screenWidth-1, screenHeight, Fade(DARKGREEN, 0.5f));
+
+        for (int i = 0; i < board.size + 1; i++) {
+            DrawLineV((Vector2) {0, SQUARE_SIZE * i}, (Vector2) {board.size * SQUARE_SIZE, SQUARE_SIZE * i}, BLACK);
+        }
+        DrawRectangle(board.size * SQUARE_SIZE + 1, 0, screenWidth - 1, screenHeight, WHITE);
+        DrawRectangle(board.size * SQUARE_SIZE + 1, 0, screenWidth - 1, screenHeight, Fade(DARKGREEN, 0.5f));
         DrawRectangle(goBackButton.x, goBackButton.y, goBackButton.width, goBackButton.height, WHITE);
         DrawRectangle(goFowardButton.x, goFowardButton.y, goFowardButton.width, goFowardButton.height, WHITE);
-        DrawText("Go back",goBackButton.x-MeasureText("Go back",30)/2+goBackButton.width/2,goBackButton.y+goBackButton.height/2-15,30, canGoBack(&board)? BLACK: GRAY);
-        DrawText("Go foward",goFowardButton.x-MeasureText("Go foward",30)/2+goFowardButton.width/2,goFowardButton.y+goFowardButton.height/2-15,30, canGoFoward(&board)? BLACK: GRAY);
+        DrawText("Go back", goBackButton.x - MeasureText("Go back", 30) / 2 + goBackButton.width / 2,
+                 goBackButton.y + goBackButton.height / 2 - 15, 30, canGoBack(&board) ? BLACK : GRAY);
+        DrawText("Go foward", goFowardButton.x - MeasureText("Go foward", 30) / 2 + goFowardButton.width / 2,
+                 goFowardButton.y + goFowardButton.height / 2 - 15, 30, canGoFoward(&board) ? BLACK : GRAY);
 
         //DrawText("Your score:",goBackButton.x, goFowardButton.height+goFowardButton.y+30, 20, WHITE);
         //int val = getScore(&board, BLACK_PIECE);
@@ -90,25 +95,24 @@ int main()
             switch (getWinner(&board)) {
                 case WINNER:
                     text = "You win!";
-                    color =  GREEN;
+                    color = GREEN;
                     break;
                 case LOSER:
                     text = "You lose!";
-                    color= RED;
+                    color = RED;
                     break;
                 case TIE:
-                    text =  "It's a tie!";
-                    color=GRAY;
+                    text = "It's a tie!";
+                    color = GRAY;
                     break;
             }
             DrawText(text, (SQUARE_SIZE * board.size) / 2 - MeasureText(text, 60) / 2,
-                     screenHeight / 2 - 30+80+10, 60, color);
+                     screenHeight / 2 - 30 + 80 + 10, 60, color);
         }
 
         EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
 
 
     CloseWindow();
@@ -117,10 +121,10 @@ int main()
 }
 
 void CheckButtonPressed(Menu *menu, Board *board) {
-    if(CheckCollisionPointRec(GetMousePosition(),menu->goBackButton)) {
+    if (CheckCollisionPointRec(GetMousePosition(), menu->goBackButton)) {
         goBack(board);
         SetHelpers(board);
-    } else if(CheckCollisionPointRec(GetMousePosition(),menu->goFowardButton)) {
+    } else if (CheckCollisionPointRec(GetMousePosition(), menu->goFowardButton)) {
         goForward(board);
     }
 }
@@ -131,8 +135,7 @@ void CheckPiecePlayed(Board *board, int SQUARE_SIZE, int clicked) {
         for (int j = 0; j < board->size; j++) {
             Vector2 vector;
             switch (board->state[i][j]->pieceType) {
-                case HELPER:
-                {
+                case HELPER: {
                     vector = (Vector2) {(i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2};
                     if (CheckCollisionPointCircle(mousePoint, vector, SQUARE_SIZE / 2 - 5)) {
                         if (!clicked) {
@@ -141,7 +144,7 @@ void CheckPiecePlayed(Board *board, int SQUARE_SIZE, int clicked) {
                             DrawCircle((i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2,
                                        SQUARE_SIZE / 2 - 5, Fade(BLACK, 0.4f));
                         } else {
-                            Movement m = {.pieceState = BLACK_PIECE, .x = i, .y = j};
+                            Movement m = {.pieceType = BLACK_PIECE, .x = i, .y = j};
                             makeRealMove(board, m);
                             removeHistoryFoward(board);
                             computerMove(board);
@@ -164,14 +167,18 @@ void UpdateDrawingState(Board *board, int SQUARE_SIZE) {
                 case VOID:
                     break;
                 case BLACK_PIECE:
-                    DrawCircle((i)*SQUARE_SIZE+SQUARE_SIZE/2,(j)*SQUARE_SIZE+SQUARE_SIZE/2,SQUARE_SIZE/2-5,BLACK);
+                    DrawCircle((i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2,
+                               SQUARE_SIZE / 2 - 5, BLACK);
                     break;
                 case WHITE_PIECE:
-                    DrawCircle((i)*SQUARE_SIZE+SQUARE_SIZE/2,(j)*SQUARE_SIZE+SQUARE_SIZE/2,SQUARE_SIZE/2-5,WHITE);
+                    DrawCircle((i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2,
+                               SQUARE_SIZE / 2 - 5, WHITE);
                     break;
                 case HELPER:
-                    DrawCircle((i)*SQUARE_SIZE+SQUARE_SIZE/2,(j)*SQUARE_SIZE+SQUARE_SIZE/2,SQUARE_SIZE/2-5,DARKGRAY);
-                    DrawCircle((i)*SQUARE_SIZE+SQUARE_SIZE/2,(j)*SQUARE_SIZE+SQUARE_SIZE/2,SQUARE_SIZE/2-7,DARKGREEN);
+                    DrawCircle((i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2,
+                               SQUARE_SIZE / 2 - 5, DARKGRAY);
+                    DrawCircle((i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2,
+                               SQUARE_SIZE / 2 - 7, DARKGREEN);
                     break;
             }
         }
