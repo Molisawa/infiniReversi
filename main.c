@@ -2,6 +2,7 @@
 #pragma ide diagnostic ignored "bugprone-integer-division"
 #pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
 
+#include <math.h>
 #include "reversi.c"
 #include "raylib.h"
 
@@ -45,7 +46,8 @@ int main() {
 
         ClearBackground(DARKGREEN);
 
-        if (!canMove(&board, BLACK_PIECE) && board.lastPiecetypeMoved == WHITE_PIECE && board.noOfMovesFoward == 0) {
+        if (!isGameOver(&board) && !canMove(&board, BLACK_PIECE) && board.lastPiecetypeMoved == WHITE_PIECE &&
+            board.noOfMovesFoward == 0) {
             computerMove(&board);
         }
 
@@ -65,17 +67,17 @@ int main() {
         DrawText("Go foward", goFowardButton.x - MeasureText("Go foward", 30) / 2 + goFowardButton.width / 2,
                  goFowardButton.y + goFowardButton.height / 2 - 15, 30, canGoFoward(&board) ? BLACK : GRAY);
 
-        //DrawText("Your score:",goBackButton.x, goFowardButton.height+goFowardButton.y+30, 20, WHITE);
-        //int val = getScore(&board, BLACK_PIECE);
-        //char *scoreWhite = malloc(sizeof(char)*val);
-        //itoa(val,scoreWhite,10);
-        //DrawText(scoreWhite,goBackButton.x, goFowardButton.height+goFowardButton.y+50, 20, WHITE);
+        DrawText("Your score:", goBackButton.x, goFowardButton.height + goFowardButton.y + 30, 20, WHITE);
+        int val = getScore(&board, BLACK_PIECE);
+        char *scoreWhite = malloc(sizeof(char) * (floor(log10(abs(val))) + 1) + 1);
+        itoa(val, scoreWhite, 10);
+        DrawText(scoreWhite, goBackButton.x, goFowardButton.height + goFowardButton.y + 50, 20, WHITE);
 
-        //DrawText("CPU score:",goBackButton.x, goFowardButton.height+goFowardButton.y+100, 20, WHITE);
-        //val = getScore(&board, WHITE_PIECE);
-        //*scoreWhite = realloc(scoreWhite,sizeof(char)*val);
-        //itoa(val,scoreWhite,10);
-        //DrawText(scoreWhite,goBackButton.x, goFowardButton.height+goFowardButton.y+120, 20, WHITE);
+        DrawText("CPU score:", goBackButton.x, goFowardButton.height + goFowardButton.y + 100, 20, WHITE);
+        val = getScore(&board, WHITE_PIECE);
+        scoreWhite = malloc(sizeof(char) * (floor(log10(abs(val))) + 1) + 1);
+        itoa(val, scoreWhite, 10);
+        DrawText(scoreWhite, goBackButton.x, goFowardButton.height + goFowardButton.y + 120, 20, WHITE);
 
         SetHelpers(&board);
         UpdateDrawingState(&board, SQUARE_SIZE);
