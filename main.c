@@ -8,7 +8,7 @@
 
 
 typedef struct menu {
-    Rectangle goBackButton, goFowardButton;
+    Rectangle goBackButton, goFowardButton, saveGame, loadGame;
 } Menu;
 
 
@@ -34,12 +34,16 @@ int main() {
 
 
     Rectangle goBackButton = (Rectangle) {board.size * SQUARE_SIZE + 20, 30,
-                                          screenWidth - board.size * SQUARE_SIZE - 40, 150};
+                                          screenWidth - board.size * SQUARE_SIZE - 40, 75};
 
     Rectangle goFowardButton = (Rectangle) {goBackButton.x, goBackButton.height + goBackButton.y + 10,
-                                            screenWidth - board.size * SQUARE_SIZE - 40, 150};
+                                            screenWidth - board.size * SQUARE_SIZE - 40, 75};
+    Rectangle saveGame = (Rectangle) {goFowardButton.x, goFowardButton.height + goFowardButton.y + 10,
+                                      screenWidth - board.size * SQUARE_SIZE - 40, 75};
+    Rectangle loadGame = (Rectangle) {saveGame.x, saveGame.height + saveGame.y + 10,
+                                      screenWidth - board.size * SQUARE_SIZE - 40, 75};
 
-    Menu menu = (Menu) {goBackButton, goFowardButton};
+    Menu menu = (Menu) {goBackButton, goFowardButton, saveGame, loadGame};
 
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
@@ -63,22 +67,28 @@ int main() {
         DrawRectangle(board.size * SQUARE_SIZE + 1, 0, screenWidth - 1, screenHeight, Fade(DARKGREEN, 0.5f));
         DrawRectangle(goBackButton.x, goBackButton.y, goBackButton.width, goBackButton.height, WHITE);
         DrawRectangle(goFowardButton.x, goFowardButton.y, goFowardButton.width, goFowardButton.height, WHITE);
+        DrawRectangle(saveGame.x, saveGame.y, saveGame.width, saveGame.height, WHITE);
+        DrawRectangle(loadGame.x, loadGame.y, loadGame.width, loadGame.height, WHITE);
         DrawText("Go back", goBackButton.x - MeasureText("Go back", 30) / 2 + goBackButton.width / 2,
                  goBackButton.y + goBackButton.height / 2 - 15, 30, canGoBack(&board) ? BLACK : GRAY);
         DrawText("Go foward", goFowardButton.x - MeasureText("Go foward", 30) / 2 + goFowardButton.width / 2,
                  goFowardButton.y + goFowardButton.height / 2 - 15, 30, canGoFoward(&board) ? BLACK : GRAY);
+        DrawText("Save game", saveGame.x - MeasureText("Save game", 30) / 2 + saveGame.width / 2,
+                 saveGame.y + saveGame.height / 2 - 15, 30, BLACK);
+        DrawText("Load game", loadGame.x - MeasureText("Load game", 30) / 2 + loadGame.width / 2,
+                 loadGame.y + loadGame.height / 2 - 15, 30, BLACK);
 
-        DrawText("Your score:", goBackButton.x, goFowardButton.height + goFowardButton.y + 30, 20, WHITE);
+        DrawText("Your score:", saveGame.x, loadGame.height + loadGame.y + 30, 20, WHITE);
         int val = getScore(&board, BLACK_PIECE);
         char *scoreWhite = malloc(sizeof(char) * (floor(log10(abs(val))) + 1) + 1);
         itoa(val, scoreWhite, 10);
-        DrawText(scoreWhite, goBackButton.x, goFowardButton.height + goFowardButton.y + 50, 20, WHITE);
+        DrawText(scoreWhite, saveGame.x, loadGame.height + loadGame.y + 50, 20, WHITE);
 
-        DrawText("CPU score:", goBackButton.x, goFowardButton.height + goFowardButton.y + 100, 20, WHITE);
+        DrawText("CPU score:", saveGame.x, loadGame.height + loadGame.y + 100, 20, WHITE);
         val = getScore(&board, WHITE_PIECE);
         scoreWhite = malloc(sizeof(char) * (floor(log10(abs(val))) + 1) + 1);
         itoa(val, scoreWhite, 10);
-        DrawText(scoreWhite, goBackButton.x, goFowardButton.height + goFowardButton.y + 120, 20, WHITE);
+        DrawText(scoreWhite, saveGame.x, loadGame.height + loadGame.y + 120, 20, WHITE);
 
         SetHelpers(&board);
         UpdateDrawingState(&board, SQUARE_SIZE);

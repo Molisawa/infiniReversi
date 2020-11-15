@@ -1,7 +1,11 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "reversi.h"
 
-
+/**
+ * Initialize the game
+ * @param board Receives a Board type structure
+ */
 void initializeGame(Board *board) {
     board->compScore = 0;
     board->userScore = 0;
@@ -12,11 +16,17 @@ void initializeGame(Board *board) {
     board->size = BOARD_SIZE;
     initializeBoard(board);
 }
-
+/**
+ * Make a computer move
+ * @param board Receives a Board type structure
+ */
 void computerMove(Board *board) {
     makeRealMove(board, bestMove(board));
 }
-
+/**
+ * Initialize a board
+ * @param board Receives a Board type structure
+ */
 void initializeBoard(Board *board) {
 
     int SIZE = board->size;
@@ -34,11 +44,19 @@ void initializeBoard(Board *board) {
     board->state[SIZE / 2][SIZE / 2 - 1]->pieceType = BLACK_PIECE;
 
 }
-
+/**
+ * Check if the game is finished
+ * @param board Receives a Board type structure
+ * @return The result of the function ´canMove()´
+ */
 int isGameOver(Board *board) {
     return !canMove(board, BLACK_PIECE) && !canMove(board, WHITE_PIECE);
 }
-
+/**
+ * Determine who was the winner or if it was a tie.
+ * @param board Receives a Board type structure
+ * @return If it was a winner, a loser or a tie
+ */
 int getWinner(Board *board) {
     int white_moves = 0, black_moves = 0;
     for (int i = 0; i < board->size; i++) {
@@ -54,15 +72,26 @@ int getWinner(Board *board) {
         return WINNER;
     }
 }
-
+/**
+ * Determine if I can go back a move
+ * @param board Receives a Board type structure
+ * @return The number of moves I can go back
+ */
 int canGoBack(Board *board) {
     return board->noOfMovesBack > 0;
 }
-
+/**
+ * Determine if I can go foward a move
+ * @param board Receives a Board type structure
+ * @return The number of moves I can go foward
+ */
 int canGoFoward(Board *board) {
     return board->noOfMovesFoward > 0;
 }
-
+/**
+ * Determine the possible moves that the player can make
+ * @param board Receives a Board type structure
+ */
 void SetHelpers(Board *board) {
     int possibleMoves = 0;
     if (board->lastPiecetypeMoved == BLACK_PIECE && canMove(board, WHITE_PIECE)) return;
@@ -78,7 +107,12 @@ void SetHelpers(Board *board) {
         }
     }
 }
-
+/**
+ * Get the game score
+ * @param board Receives a Board type structure
+ * @param piece Receives an integer Pice
+ * @return The game score
+ */
 int getScore(Board *board, int piece) {
     int score = 0;
     for (int i = 0; i < board->size; i++) {
@@ -89,7 +123,11 @@ int getScore(Board *board, int piece) {
     }
     return score;
 }
-
+/**
+ * Evaluate the best possible movement for the CPU
+ * @param board Receives a Board type structure
+ * @return A structure with the coordinates of the best movement
+ */
 Movement bestMove(Board *board) {
     int bestScore = 0, x, y;
     for (int i = 0; i < board->size; i++) {
@@ -125,7 +163,12 @@ Movement bestMove(Board *board) {
 
     return m;
 }
-
+/**
+ * Evaluate if current movement is valid
+ * @param board Receives a Board type structure
+ * @param lastMove a Movement type structure
+ * @return 1 if it is a valid move, 0 when all hopes fade away
+ */
 int isValidMove(Board *board, Movement lastMove) {
     char opponent = (lastMove.pieceType == WHITE_PIECE) ? BLACK_PIECE : WHITE_PIECE;
 
@@ -231,7 +274,12 @@ int isValidMove(Board *board, Movement lastMove) {
     //when all hopes fade away
     return 0;
 }
-
+/**
+ * Determine if I can make a move
+ * @param board Receives a Board type structure
+ * @param Piece Receives an integer Pice
+ * @return 1 if I can make a move, 0 when all hopes fade away
+ */
 int canMove(Board *board, int Piece) {
     int moves = 0;
     for (int i = 0; i < board->size; i++) {
@@ -246,7 +294,10 @@ int canMove(Board *board, int Piece) {
     if (moves == 0) return 0;
     return 1;
 }
-
+/**
+ * Go back one movement
+ * @param board Receives a Board type structure
+ */
 void goBack(Board *board) {
     if (canGoBack(board)) {
         Movement *m = malloc(sizeof(Movement) * (board->noOfMovesBack - 1));
@@ -265,7 +316,10 @@ void goBack(Board *board) {
         }
     }
 }
-
+/**
+ * Go foward one movement
+ * @param board Receives a Board type structure
+ */
 void goForward(Board *board) {
     if (canGoFoward(board)) {
         Movement *m = malloc(sizeof(Movement) * (board->noOfMovesFoward - 1));
@@ -289,14 +343,21 @@ void goForward(Board *board) {
         }
     }
 }
-
+/**
+ * Delete history of forward movements
+ * @param board Receives a Board type structure
+ */
 void removeHistoryFoward(Board *board) {
     free(board->historyForward);
     board->historyForward = malloc(sizeof(Movement));
     board->noOfMovesFoward = 0;
 }
 
-
+/**
+ * Make a real move on the board
+ * @param board Receives a Board type structure
+ * @param lastMove
+ */
 void makeRealMove(Board *board, Movement lastMove) {
     board->lastPiecetypeMoved = lastMove.pieceType;
     if (lastMove.x < 0 || lastMove.x > board->size - 1 || lastMove.y < 0 || lastMove.y > board->size - 1)return;
@@ -306,7 +367,11 @@ void makeRealMove(Board *board, Movement lastMove) {
     makeMove(board, lastMove);
 }
 
-
+/**
+ * Make a temporary move on the board
+ * @param board Receives a Board type structure
+ * @param lastMove a Movement type structure
+ */
 void makeMove(Board *board, Movement lastMove) {
     char opponent = (lastMove.pieceType == WHITE_PIECE) ? BLACK_PIECE : WHITE_PIECE;
 
@@ -489,8 +554,22 @@ void makeMove(Board *board, Movement lastMove) {
 }
 
 
-
-
+/**
+ * Save current game
+ * @param board Receives a Board type structure
+ */
+void saveGame(Board *board){
+    FILE *outfile;
+    outfile = fopen ("gameState.txt", "wb");
+    if (outfile == NULL)
+    {
+        fprintf(stderr, "\nError opend file\n");
+        exit (1);
+    }
+    fwrite(&board->state,sizeof(Board),1,outfile);
+    // close file
+    fclose (outfile);
+}
 
 
 

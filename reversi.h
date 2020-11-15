@@ -44,7 +44,7 @@ int canGoFoward(Board *board);
 
 void endGame();
 
-void saveGame();
+void saveGame(Board *board);
 
 void loadGame();
 
