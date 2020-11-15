@@ -26,6 +26,7 @@ int main() {
 
 
     initializeGame(&board);
+    SetConfigFlags(FLAG_VSYNC_HINT);
     InitWindow(screenWidth, screenHeight, "Reversi");
 
 
