@@ -3,9 +3,10 @@
 #pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
 
 #include <math.h>
+#include "reversi.h"
+#include <raylib.h>
+#include <stdlib.h>
 #include "reversi.c"
-#include "raylib.h"
-
 
 typedef struct menu {
     Rectangle goBackButton, goFowardButton, saveGame, loadGame;

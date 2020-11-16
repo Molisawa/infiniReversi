@@ -47,7 +47,7 @@ void initializeBoard(Board *board) {
 /**
  * Check if the game is finished
  * @param board Receives a Board type structure
- * @return The result of the function ´canMove()´
+ * @return 1 if the game is finished, 0 game still running
  */
 int isGameOver(Board *board) {
     return !canMove(board, BLACK_PIECE) && !canMove(board, WHITE_PIECE);
@@ -122,6 +122,11 @@ int getScore(Board *board, int piece) {
         }
     }
     return score;
+}
+
+int canSkipBlackPiece(Board *board) {
+    return !isGameOver(board) && !canMove(board, BLACK_PIECE) && board->lastPiecetypeMoved == WHITE_PIECE &&
+           board->noOfMovesFoward == 0;
 }
 /**
  * Evaluate the best possible movement for the CPU
@@ -275,9 +280,9 @@ int isValidMove(Board *board, Movement lastMove) {
     return 0;
 }
 /**
- * Determine if I can make a move
+ * Determine if current piece can make a move
  * @param board Receives a Board type structure
- * @param Piece Receives an integer Pice
+ * @param Piece Receives a Piece type int
  * @return 1 if I can make a move, 0 when all hopes fade away
  */
 int canMove(Board *board, int Piece) {

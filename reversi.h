@@ -1,5 +1,6 @@
 #define BOARD_SIZE 8 // Must be even number
-
+#ifndef REVERSI_LIBRARY_H
+#define REVERSI_LIBRARY_H
 enum StateFlags {
     VOID, BLACK_PIECE, WHITE_PIECE, HELPER
 };
@@ -68,4 +69,8 @@ int canMove(Board *board, int Piece);
 
 Movement bestMove(Board *board);
 
+int canSkipBlackPiece(Board *board);
+
 int getScore(Board *board, int pieceType);
+
+#endif
