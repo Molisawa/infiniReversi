@@ -45,9 +45,9 @@ int canGoFoward(Board *board);
 
 void endGame();
 
-void saveGame(Board *board);
+char *saveGame(Board *board);
 
-void loadGame();
+Board loadGame(char *filename);
 
 int isValidMove(Board *board, Movement lastMove);
 

@@ -7,11 +7,10 @@
 #include <raylib.h>
 #include <stdlib.h>
 
-
-typedef struct menu {
+typedef struct menu
+{
     Rectangle goBackButton, goFowardButton, saveGame, loadGame;
 } Menu;
-
 
 void UpdateDrawingState(Board *board, float size);
 
@@ -19,50 +18,51 @@ void CheckPiecePlayed(Board *board, float SQUARE_SIZE, int clicked);
 
 void CheckButtonPressed(Menu *menu, Board *board);
 
-int main() {
+int main()
+{
     Board board;
 
-    const int screenWidth = 1920;
-    const int screenHeight = 1080;
+    const int screenWidth = 1000;
+    const int screenHeight = 800;
 
-
-    initializeGame(&board,8);
+    initializeGame(&board, 8);
     SetConfigFlags(FLAG_VSYNC_HINT);
     InitWindow(screenWidth, screenHeight, "Reversi");
 
+    float SQUARE_SIZE = (float)screenHeight / (float)board.size;
 
-    float SQUARE_SIZE = (float) screenHeight / (float)board.size;
+    Rectangle goBackButton = (Rectangle){board.size * SQUARE_SIZE + 20, 30,
+                                         screenWidth - board.size * SQUARE_SIZE - 40, 75};
 
+    Rectangle goFowardButton = (Rectangle){goBackButton.x, goBackButton.height + goBackButton.y + 10,
+                                           screenWidth - board.size * SQUARE_SIZE - 40, 75};
+    Rectangle saveGame = (Rectangle){goFowardButton.x, goFowardButton.height + goFowardButton.y + 10,
+                                     screenWidth - board.size * SQUARE_SIZE - 40, 75};
+    Rectangle loadGame = (Rectangle){saveGame.x, saveGame.height + saveGame.y + 10,
+                                     screenWidth - board.size * SQUARE_SIZE - 40, 75};
 
-    Rectangle goBackButton = (Rectangle) {board.size * SQUARE_SIZE + 20, 30,
-                                          screenWidth - board.size * SQUARE_SIZE - 40, 75};
+    Menu menu = (Menu){goBackButton, goFowardButton, saveGame, loadGame};
 
-    Rectangle goFowardButton = (Rectangle) {goBackButton.x, goBackButton.height + goBackButton.y + 10,
-                                            screenWidth - board.size * SQUARE_SIZE - 40, 75};
-    Rectangle saveGame = (Rectangle) {goFowardButton.x, goFowardButton.height + goFowardButton.y + 10,
-                                      screenWidth - board.size * SQUARE_SIZE - 40, 75};
-    Rectangle loadGame = (Rectangle) {saveGame.x, saveGame.height + saveGame.y + 10,
-                                      screenWidth - board.size * SQUARE_SIZE - 40, 75};
-
-    Menu menu = (Menu) {goBackButton, goFowardButton, saveGame, loadGame};
-
-    while (!WindowShouldClose())    // Detect window close button or ESC key
+    while (!WindowShouldClose()) // Detect window close button or ESC key
     {
         BeginDrawing();
 
         ClearBackground(DARKGREEN);
 
         if (!isGameOver(&board) && !canMove(&board, BLACK_PIECE) && board.lastPiecetypeMoved == WHITE_PIECE &&
-            board.noOfMovesFoward == 0) {
+            board.noOfMovesFoward == 0)
+        {
             computerMove(&board);
         }
 
-        for (int i = 0; i < board.size + 1; i++) {
-            DrawLineV((Vector2) {SQUARE_SIZE * i, 0}, (Vector2) {SQUARE_SIZE * i, board.size * SQUARE_SIZE}, BLACK);
+        for (int i = 0; i < board.size + 1; i++)
+        {
+            DrawLineV((Vector2){SQUARE_SIZE * i, 0}, (Vector2){SQUARE_SIZE * i, board.size * SQUARE_SIZE}, BLACK);
         }
 
-        for (int i = 0; i < board.size + 1; i++) {
-            DrawLineV((Vector2) {0, SQUARE_SIZE * i}, (Vector2) {board.size * SQUARE_SIZE, SQUARE_SIZE * i}, BLACK);
+        for (int i = 0; i < board.size + 1; i++)
+        {
+            DrawLineV((Vector2){0, SQUARE_SIZE * i}, (Vector2){board.size * SQUARE_SIZE, SQUARE_SIZE * i}, BLACK);
         }
         DrawRectangle(board.size * SQUARE_SIZE + 1, 0, screenWidth - 1, screenHeight, WHITE);
         DrawRectangle(board.size * SQUARE_SIZE + 1, 0, screenWidth - 1, screenHeight, Fade(DARKGREEN, 0.5f));
@@ -95,105 +95,135 @@ int main() {
         UpdateDrawingState(&board, SQUARE_SIZE);
 
         int clicked = 0;
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        {
             clicked = 1;
             CheckButtonPressed(&menu, &board);
         }
         CheckPiecePlayed(&board, SQUARE_SIZE, clicked);
 
-        if (isGameOver(&board)) {
+        if (isGameOver(&board))
+        {
             DrawText("Game Over", (SQUARE_SIZE * board.size) / 2 - MeasureText("Game Over", 80) / 2,
                      screenHeight / 2 - 40, 80, GRAY);
             char *text;
             Color color;
-            switch (getWinner(&board)) {
-                case WINNER:
-                    text = "You win!";
-                    color = GREEN;
-                    break;
-                case LOSER:
-                    text = "You lose!";
-                    color = RED;
-                    break;
-                case TIE:
-                    text = "It's a tie!";
-                    color = GRAY;
-                    break;
+            switch (getWinner(&board))
+            {
+            case WINNER:
+                text = "You win!";
+                color = GREEN;
+                break;
+            case LOSER:
+                text = "You lose!";
+                color = RED;
+                break;
+            case TIE:
+                text = "It's a tie!";
+                color = GRAY;
+                break;
             }
             DrawText(text, (SQUARE_SIZE * board.size) / 2 - MeasureText(text, 60) / 2,
                      screenHeight / 2 - 30 + 80 + 10, 60, color);
         }
 
+        DrawFPS(10, 10);
         EndDrawing();
         //----------------------------------------------------------------------------------
     }
-
 
     CloseWindow();
 
     return 0;
 }
 
-void CheckButtonPressed(Menu *menu, Board *board) {
-    if (CheckCollisionPointRec(GetMousePosition(), menu->goBackButton)) {
+void CheckButtonPressed(Menu *menu, Board *board)
+{
+    if (CheckCollisionPointRec(GetMousePosition(), menu->goBackButton))
+    {
         goBack(board);
         SetHelpers(board);
-    } else if (CheckCollisionPointRec(GetMousePosition(), menu->goFowardButton)) {
+    }
+    else if (CheckCollisionPointRec(GetMousePosition(), menu->goFowardButton))
+    {
         goForward(board);
+    }
+    else if (CheckCollisionPointRec(GetMousePosition(), menu->saveGame))
+    {
+        char *game =saveGame(board);
+        SaveFileText("game.txt", game);
+    }
+    else if (CheckCollisionPointRec(GetMousePosition(), menu->loadGame))
+    {
+        Board boardTemp = loadGame(LoadFileText("game.txt"));
+        *board = boardTemp;
     }
 }
 
-void CheckPiecePlayed(Board *board, float SQUARE_SIZE, int clicked) {
+void CheckPiecePlayed(Board *board, float SQUARE_SIZE, int clicked)
+{
     Vector2 mousePoint = GetMousePosition();
-    for (int i = 0; i < board->size; i++) {
-        for (int j = 0; j < board->size; j++) {
+    for (int i = 0; i < board->size; i++)
+    {
+        for (int j = 0; j < board->size; j++)
+        {
             Vector2 vector;
-            switch (board->state[i][j].pieceType) {
-                case HELPER: {
-                    vector = (Vector2) {(i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2};
-                    if (CheckCollisionPointCircle(mousePoint, vector, SQUARE_SIZE / 2 - 5)) {
-                        if (!clicked) {
-                            DrawRectangle((i) * SQUARE_SIZE + 1, (j) * SQUARE_SIZE + 1, SQUARE_SIZE - 2,
-                                          SQUARE_SIZE - 2, DARKGREEN);
-                            DrawCircle((i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2,
-                                       SQUARE_SIZE / 2 - 5, Fade(BLACK, 0.4f));
-                        } else {
-                            Movement m = {.pieceType = BLACK_PIECE, .x = i, .y = j};
-                            makeRealMove(board, m);
-                            removeHistoryFoward(board);
-                            computerMove(board);
-                        }
+            switch (board->state[i][j].pieceType)
+            {
+            case HELPER:
+            {
+                vector = (Vector2){(i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2};
+                if (CheckCollisionPointCircle(mousePoint, vector, SQUARE_SIZE / 2 - 5))
+                {
+                    if (!clicked)
+                    {
+                        DrawRectangle((i)*SQUARE_SIZE + 1, (j)*SQUARE_SIZE + 1, SQUARE_SIZE - 2,
+                                      SQUARE_SIZE - 2, DARKGREEN);
+                        DrawCircle((i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2,
+                                   SQUARE_SIZE / 2 - 5, Fade(BLACK, 0.4f));
+                    }
+                    else
+                    {
+                        Movement m = {.pieceType = BLACK_PIECE, .x = i, .y = j};
+                        makeRealMove(board, m);
+                        removeHistoryFoward(board);
+                        computerMove(board);
                     }
                 }
-                    break;
-                default:
-                    break;
+            }
+            break;
+            default:
+                break;
             }
         }
     }
 }
 
-void UpdateDrawingState(Board *board, float SQUARE_SIZE) {
+void UpdateDrawingState(Board *board, float SQUARE_SIZE)
+{
 
-    for (int i = 0; i < board->size; i++) {
-        for (int j = 0; j < board->size; j++) {
-            switch (board->state[i][j].pieceType) {
-                case VOID:
-                    break;
-                case BLACK_PIECE:
-                    DrawCircle((i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2,
-                               SQUARE_SIZE / 2 - 5, BLACK);
-                    break;
-                case WHITE_PIECE:
-                    DrawCircle((i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2,
-                               SQUARE_SIZE / 2 - 5, WHITE);
-                    break;
-                case HELPER:
-                    DrawCircle((i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2,
-                               SQUARE_SIZE / 2 - 5, DARKGRAY);
-                    DrawCircle((i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2,
-                               SQUARE_SIZE / 2 - 7, DARKGREEN);
-                    break;
+    for (int i = 0; i < board->size; i++)
+    {
+        for (int j = 0; j < board->size; j++)
+        {
+            switch (board->state[i][j].pieceType)
+            {
+            case VOID:
+                break;
+            case BLACK_PIECE:
+                DrawCircle((i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2,
+                           SQUARE_SIZE / 2 - 5, BLACK);
+                break;
+            case WHITE_PIECE:
+                DrawCircle((i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2,
+                           SQUARE_SIZE / 2 - 5, WHITE);
+                break;
+            case HELPER:
+                DrawCircle((i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2,
+                           SQUARE_SIZE / 2 - 5, DARKGRAY);
+                DrawCircle((i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2,
+                           SQUARE_SIZE / 2 - 7, DARKGREEN);
+                break;
             }
         }
     }

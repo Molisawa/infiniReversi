@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.17)
 project(infinireversi)
 
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_library(reversi_game_engine SHARED reversi_game_engine.c reversi_game_engine.h)
@@ -29,7 +28,7 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
 
         set(BUILD_SHARED_LIBS ON)
         set(SUPPORT_HIGH_DPI ON)
-        set(SUPPORT_CAMERA_SYSTEM OFF)
+        set(BUILD_EXAMPLES OFF)
         set(SUPPORT_CAMERA_SYSTEM OFF)
         set(SUPPORT_VR_SIMULATOR OFF)
         set(SUPPORT_DISTORTION_SHADER OFF)
@@ -51,6 +50,7 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
     endif()
 
 endif()
-
+add_subdirectory(cjson)
+target_link_libraries(reversi_game_engine cjson)
 target_link_libraries(infinireversi reversi_game_engine)
 target_link_libraries(infinireversi raylib)
