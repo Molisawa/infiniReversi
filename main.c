@@ -6,7 +6,7 @@
 #include "reversi.h"
 #include <raylib.h>
 #include <stdlib.h>
-#include "reversi.c"
+
 
 typedef struct menu {
     Rectangle goBackButton, goFowardButton, saveGame, loadGame;
