@@ -3,7 +3,7 @@
 #pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
 
 #include <math.h>
-#include "reversi.h"
+#include "reversi_game_engine.h"
 #include <raylib.h>
 #include <stdlib.h>
 
@@ -13,25 +13,25 @@ typedef struct menu {
 } Menu;
 
 
-void UpdateDrawingState(Board *board, int size);
+void UpdateDrawingState(Board *board, float size);
 
-void CheckPiecePlayed(Board *board, int SQUARE_SIZE, int clicked);
+void CheckPiecePlayed(Board *board, float SQUARE_SIZE, int clicked);
 
 void CheckButtonPressed(Menu *menu, Board *board);
 
 int main() {
     Board board;
 
-    const int screenWidth = 1000;
-    const int screenHeight = 800;
+    const int screenWidth = 1920;
+    const int screenHeight = 1080;
 
 
-    initializeGame(&board);
+    initializeGame(&board,8);
     SetConfigFlags(FLAG_VSYNC_HINT);
     InitWindow(screenWidth, screenHeight, "Reversi");
 
 
-    int SQUARE_SIZE = screenHeight / board.size;
+    float SQUARE_SIZE = (float) screenHeight / (float)board.size;
 
 
     Rectangle goBackButton = (Rectangle) {board.size * SQUARE_SIZE + 20, 30,
@@ -143,12 +143,12 @@ void CheckButtonPressed(Menu *menu, Board *board) {
     }
 }
 
-void CheckPiecePlayed(Board *board, int SQUARE_SIZE, int clicked) {
+void CheckPiecePlayed(Board *board, float SQUARE_SIZE, int clicked) {
     Vector2 mousePoint = GetMousePosition();
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
             Vector2 vector;
-            switch (board->state[i][j]->pieceType) {
+            switch (board->state[i][j].pieceType) {
                 case HELPER: {
                     vector = (Vector2) {(i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2};
                     if (CheckCollisionPointCircle(mousePoint, vector, SQUARE_SIZE / 2 - 5)) {
@@ -173,11 +173,11 @@ void CheckPiecePlayed(Board *board, int SQUARE_SIZE, int clicked) {
     }
 }
 
-void UpdateDrawingState(Board *board, int SQUARE_SIZE) {
+void UpdateDrawingState(Board *board, float SQUARE_SIZE) {
 
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
-            switch (board->state[i][j]->pieceType) {
+            switch (board->state[i][j].pieceType) {
                 case VOID:
                     break;
                 case BLACK_PIECE:

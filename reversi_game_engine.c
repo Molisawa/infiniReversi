@@ -1,19 +1,19 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "reversi.h"
+#include "reversi_game_engine.h"
 
 /**
  * Initialize the game
  * @param board Receives a Board type structure
  */
-void initializeGame(Board *board) {
+void initializeGame(Board *board, int size) {
     board->compScore = 0;
     board->userScore = 0;
     board->noOfMovesBack = 0;
     board->historyBack = malloc(sizeof(Movement));
     board->noOfMovesFoward = 0;
     board->historyForward = malloc(sizeof(Movement));
-    board->size = BOARD_SIZE;
+    board->size = size;
     initializeBoard(board);
 }
 /**
@@ -32,16 +32,19 @@ void initializeBoard(Board *board) {
     int SIZE = board->size;
     board->lastPiecetypeMoved = WHITE_PIECE;
 
+    board->state = (Piece**) malloc(board->size * sizeof(Piece*));
+    for (int i = 0; i < board->size; i++){
+        board->state[i]=(Piece*) malloc(board->size * sizeof(Piece));
+    }
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
-            board->state[i][j] = malloc(sizeof(Piece));
-            board->state[i][j]->pieceType = VOID;
+            board->state[i][j].pieceType = VOID;
         }
     }
-    board->state[SIZE / 2 - 1][SIZE / 2 - 1]->pieceType = WHITE_PIECE;
-    board->state[SIZE / 2][SIZE / 2]->pieceType = WHITE_PIECE;
-    board->state[SIZE / 2 - 1][SIZE / 2]->pieceType = BLACK_PIECE;
-    board->state[SIZE / 2][SIZE / 2 - 1]->pieceType = BLACK_PIECE;
+    board->state[SIZE / 2 - 1][SIZE / 2 - 1].pieceType = WHITE_PIECE;
+    board->state[SIZE / 2][SIZE / 2].pieceType = WHITE_PIECE;
+    board->state[SIZE / 2 - 1][SIZE / 2].pieceType = BLACK_PIECE;
+    board->state[SIZE / 2][SIZE / 2 - 1].pieceType = BLACK_PIECE;
 
 }
 /**
@@ -61,8 +64,8 @@ int getWinner(Board *board) {
     int white_moves = 0, black_moves = 0;
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
-            if (board->state[i][j]->pieceType == WHITE_PIECE) white_moves++;
-            if (board->state[i][j]->pieceType == BLACK_PIECE) black_moves++;
+            if (board->state[i][j].pieceType == WHITE_PIECE) white_moves++;
+            if (board->state[i][j].pieceType == BLACK_PIECE) black_moves++;
         }
     }
     if (white_moves == black_moves) return TIE;
@@ -97,11 +100,11 @@ void SetHelpers(Board *board) {
     if (board->lastPiecetypeMoved == BLACK_PIECE && canMove(board, WHITE_PIECE)) return;
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
-            if (board->state[i][j]->pieceType == VOID) {
+            if (board->state[i][j].pieceType == VOID) {
                 Movement m = {.pieceType = BLACK_PIECE, .x= i, .y=j};
                 if (isValidMove(board, m)) {
                     possibleMoves++;
-                    board->state[i][j]->pieceType = HELPER;
+                    board->state[i][j].pieceType = HELPER;
                 }
             }
         }
@@ -117,7 +120,7 @@ int getScore(Board *board, int piece) {
     int score = 0;
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
-            if (board->state[i][j]->pieceType == piece)
+            if (board->state[i][j].pieceType == piece)
                 score++;
         }
     }
@@ -137,21 +140,22 @@ Movement bestMove(Board *board) {
     int bestScore = 0, x, y;
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
-            if (board->state[i][j]->pieceType == HELPER) {
-                board->state[i][j]->pieceType = VOID;
+            if (board->state[i][j].pieceType == HELPER) {
+                board->state[i][j].pieceType = VOID;
             }
         }
     }
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
             Board tmp;
-            initializeGame(&tmp);
+            free(&tmp);
+            initializeGame(&tmp,board->size);
             for (int k = 0; k < board->size; k++) {
                 for (int l = 0; l < board->size; l++) {
-                    tmp.state[k][l]->pieceType = board->state[k][l]->pieceType;
+                    tmp.state[k][l].pieceType = board->state[k][l].pieceType ;
                 }
             }
-            if (tmp.state[i][j]->pieceType == VOID) {
+            if (tmp.state[i][j].pieceType == VOID) {
                 Movement m = {.pieceType = WHITE_PIECE, .x= i, .y=j};
                 if (isValidMove(&tmp, m)) {
                     makeMove(&tmp, m);
@@ -182,22 +186,22 @@ int isValidMove(Board *board, Movement lastMove) {
     colIndex = lastMove.x - 1;
     rowIndex = lastMove.y;
     offset = 0;
-    while (colIndex > 0 && board->state[colIndex][rowIndex]->pieceType == opponent) {
+    while (colIndex > 0 && board->state[colIndex][rowIndex].pieceType == opponent) {
         colIndex--;
         offset++;
     }
-    if (colIndex >= 0 && board->state[colIndex][rowIndex]->pieceType == lastMove.pieceType && offset > 0) return 1;
+    if (colIndex >= 0 && board->state[colIndex][rowIndex].pieceType == lastMove.pieceType && offset > 0) return 1;
 
 
     //move down
     colIndex = lastMove.x + 1;
     rowIndex = lastMove.y;
     offset = 0;
-    while (colIndex < board->size - 1 && board->state[colIndex][rowIndex]->pieceType == opponent) {
+    while (colIndex < board->size - 1 && board->state[colIndex][rowIndex].pieceType == opponent) {
         colIndex++;
         offset++;
     }
-    if (colIndex <= board->size - 1 && board->state[colIndex][rowIndex]->pieceType == lastMove.pieceType &&
+    if (colIndex <= board->size - 1 && board->state[colIndex][rowIndex].pieceType == lastMove.pieceType &&
         offset > 0)
         return 1;
 
@@ -205,21 +209,21 @@ int isValidMove(Board *board, Movement lastMove) {
     colIndex = lastMove.x;
     rowIndex = lastMove.y - 1;
     offset = 0;
-    while (rowIndex > 0 && board->state[colIndex][rowIndex]->pieceType == opponent) {
+    while (rowIndex > 0 && board->state[colIndex][rowIndex].pieceType == opponent) {
         rowIndex--;
         offset++;
     }
-    if (rowIndex >= 0 && board->state[colIndex][rowIndex]->pieceType == lastMove.pieceType && offset > 0) return 1;
+    if (rowIndex >= 0 && board->state[colIndex][rowIndex].pieceType == lastMove.pieceType && offset > 0) return 1;
 
     //move right
     colIndex = lastMove.x;
     rowIndex = lastMove.y + 1;
     offset = 0;
-    while (rowIndex < board->size - 1 && board->state[colIndex][rowIndex]->pieceType == opponent) {
+    while (rowIndex < board->size - 1 && board->state[colIndex][rowIndex].pieceType == opponent) {
         rowIndex++;
         offset++;
     }
-    if (rowIndex <= board->size - 1 && board->state[colIndex][rowIndex]->pieceType == lastMove.pieceType &&
+    if (rowIndex <= board->size - 1 && board->state[colIndex][rowIndex].pieceType == lastMove.pieceType &&
         offset > 0)
         return 1;
 
@@ -227,12 +231,12 @@ int isValidMove(Board *board, Movement lastMove) {
     colIndex = lastMove.x - 1;
     rowIndex = lastMove.y - 1;
     offset = 0;
-    while (colIndex > 0 && rowIndex > 0 && board->state[colIndex][rowIndex]->pieceType == opponent) {
+    while (colIndex > 0 && rowIndex > 0 && board->state[colIndex][rowIndex].pieceType == opponent) {
         colIndex--;
         rowIndex--;
         offset++;
     }
-    if (colIndex >= 0 && rowIndex >= 0 && board->state[colIndex][rowIndex]->pieceType == lastMove.pieceType &&
+    if (colIndex >= 0 && rowIndex >= 0 && board->state[colIndex][rowIndex].pieceType == lastMove.pieceType &&
         offset > 0)
         return 1;
 
@@ -240,26 +244,26 @@ int isValidMove(Board *board, Movement lastMove) {
     colIndex = lastMove.x - 1;
     rowIndex = lastMove.y + 1;
     offset = 0;
-    while (colIndex > 0 && rowIndex < board->size - 1 && board->state[colIndex][rowIndex]->pieceType == opponent) {
+    while (colIndex > 0 && rowIndex < board->size - 1 && board->state[colIndex][rowIndex].pieceType == opponent) {
         colIndex--;
         rowIndex++;
         offset++;
     }
     if (colIndex >= 0 && rowIndex <= board->size - 1 &&
-        board->state[colIndex][rowIndex]->pieceType == lastMove.pieceType && offset > 0)
+        board->state[colIndex][rowIndex].pieceType == lastMove.pieceType && offset > 0)
         return 1;
 
     //move down left
     colIndex = lastMove.x + 1;
     rowIndex = lastMove.y - 1;
     offset = 0;
-    while (colIndex < board->size - 1 && rowIndex > 0 && board->state[colIndex][rowIndex]->pieceType == opponent) {
+    while (colIndex < board->size - 1 && rowIndex > 0 && board->state[colIndex][rowIndex].pieceType == opponent) {
         colIndex++;
         rowIndex--;
         offset++;
     }
     if (colIndex <= board->size - 1 && rowIndex >= 0 &&
-        board->state[colIndex][rowIndex]->pieceType == lastMove.pieceType && offset > 0)
+        board->state[colIndex][rowIndex].pieceType == lastMove.pieceType && offset > 0)
         return 1;
 
     //move down right
@@ -267,13 +271,13 @@ int isValidMove(Board *board, Movement lastMove) {
     rowIndex = lastMove.y + 1;
     offset = 0;
     while (colIndex < board->size - 1 && rowIndex < board->size - 1 &&
-           board->state[colIndex][rowIndex]->pieceType == opponent) {
+           board->state[colIndex][rowIndex].pieceType == opponent) {
         colIndex++;
         rowIndex++;
         offset++;
     }
     if (colIndex <= board->size - 1 && rowIndex <= board->size - 1 &&
-        board->state[colIndex][rowIndex]->pieceType == lastMove.pieceType && offset > 0)
+        board->state[colIndex][rowIndex].pieceType == lastMove.pieceType && offset > 0)
         return 1;
 
     //when all hopes fade away
@@ -289,7 +293,7 @@ int canMove(Board *board, int Piece) {
     int moves = 0;
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
-            if (board->state[i][j]->pieceType == VOID || board->state[i][j]->pieceType == HELPER) {
+            if (board->state[i][j].pieceType == VOID || board->state[i][j].pieceType == HELPER) {
                 Movement m_black = {.pieceType = Piece, .x= i, .y=j};
                 if (isValidMove(board, m_black))
                     moves++;
@@ -382,15 +386,15 @@ void makeMove(Board *board, Movement lastMove) {
 
     int rowIndex, colIndex;
     Board tmp;
-    initializeGame(&tmp);
+    initializeGame(&tmp, board->size);
     for (int k = 0; k < board->size; k++) {
         for (int l = 0; l < board->size; l++) {
-            tmp.state[k][l]->pieceType = board->state[k][l]->pieceType;
+            tmp.state[k][l].pieceType = board->state[k][l].pieceType ;
         }
     }
 
 
-    tmp.state[lastMove.x][lastMove.y]->pieceType = lastMove.pieceType;
+    tmp.state[lastMove.x][lastMove.y].pieceType = lastMove.pieceType;
 
     //move down
     Movement *moves;
@@ -398,16 +402,16 @@ void makeMove(Board *board, Movement lastMove) {
     rowIndex = lastMove.x - 1;
     colIndex = lastMove.y;
     int counter = 0;
-    while (rowIndex > 0 && board->state[rowIndex][colIndex]->pieceType == opponent) {
+    while (rowIndex > 0 && board->state[rowIndex][colIndex].pieceType == opponent) {
         moves = realloc(moves, (counter + 1) * sizeof(Movement));
         Movement m = (Movement) {lastMove.pieceType, rowIndex, colIndex};
         moves[counter] = m;
         counter++;
         rowIndex--;
     }
-    if (rowIndex >= 0 && board->state[rowIndex][colIndex]->pieceType == lastMove.pieceType && counter > 0) {
+    if (rowIndex >= 0 && board->state[rowIndex][colIndex].pieceType == lastMove.pieceType && counter > 0) {
         for (int i = 0; i < counter; i++) {
-            tmp.state[moves[i].x][moves[i].y]->pieceType = lastMove.pieceType;
+            tmp.state[moves[i].x][moves[i].y].pieceType = lastMove.pieceType;
         }
     }
 
@@ -417,17 +421,17 @@ void makeMove(Board *board, Movement lastMove) {
     rowIndex = lastMove.x + 1;
     colIndex = lastMove.y;
     counter = 0;
-    while (rowIndex < board->size - 1 && board->state[rowIndex][colIndex]->pieceType == opponent) {
+    while (rowIndex < board->size - 1 && board->state[rowIndex][colIndex].pieceType == opponent) {
         moves = realloc(moves, (counter + 1) * sizeof(Movement));
         Movement m = (Movement) {lastMove.pieceType, rowIndex, colIndex};
         moves[counter] = m;
         counter++;
         rowIndex++;
     }
-    if (rowIndex <= board->size - 1 && board->state[rowIndex][colIndex]->pieceType == lastMove.pieceType &&
+    if (rowIndex <= board->size - 1 && board->state[rowIndex][colIndex].pieceType == lastMove.pieceType &&
         counter > 0) {
         for (int i = 0; i < counter; i++) {
-            tmp.state[moves[i].x][moves[i].y]->pieceType = lastMove.pieceType;
+            tmp.state[moves[i].x][moves[i].y].pieceType = lastMove.pieceType;
         }
     }
 
@@ -436,16 +440,16 @@ void makeMove(Board *board, Movement lastMove) {
     rowIndex = lastMove.x;
     colIndex = lastMove.y - 1;
     counter = 0;
-    while (colIndex > 0 && board->state[rowIndex][colIndex]->pieceType == opponent) {
+    while (colIndex > 0 && board->state[rowIndex][colIndex].pieceType == opponent) {
         moves = realloc(moves, (counter + 1) * sizeof(Movement));
         Movement m = (Movement) {lastMove.pieceType, rowIndex, colIndex};
         moves[counter] = m;
         counter++;
         colIndex--;
     }
-    if (colIndex >= 0 && board->state[rowIndex][colIndex]->pieceType == lastMove.pieceType && counter > 0) {
+    if (colIndex >= 0 && board->state[rowIndex][colIndex].pieceType == lastMove.pieceType && counter > 0) {
         for (int i = 0; i < counter; i++) {
-            tmp.state[moves[i].x][moves[i].y]->pieceType = lastMove.pieceType;
+            tmp.state[moves[i].x][moves[i].y].pieceType = lastMove.pieceType;
         }
     }
 
@@ -455,17 +459,17 @@ void makeMove(Board *board, Movement lastMove) {
     rowIndex = lastMove.x;
     colIndex = lastMove.y + 1;
     counter = 0;
-    while (colIndex < board->size - 1 && board->state[rowIndex][colIndex]->pieceType == opponent) {
+    while (colIndex < board->size - 1 && board->state[rowIndex][colIndex].pieceType == opponent) {
         moves = realloc(moves, (counter + 1) * sizeof(Movement));
         Movement m = (Movement) {lastMove.pieceType, rowIndex, colIndex};
         moves[counter] = m;
         counter++;
         colIndex++;
     }
-    if (colIndex <= board->size - 1 && board->state[rowIndex][colIndex]->pieceType == lastMove.pieceType &&
+    if (colIndex <= board->size - 1 && board->state[rowIndex][colIndex].pieceType == lastMove.pieceType &&
         counter > 0) {
         for (int i = 0; i < counter; i++) {
-            tmp.state[moves[i].x][moves[i].y]->pieceType = lastMove.pieceType;
+            tmp.state[moves[i].x][moves[i].y].pieceType = lastMove.pieceType;
         }
     }
 
@@ -474,7 +478,7 @@ void makeMove(Board *board, Movement lastMove) {
     rowIndex = lastMove.x - 1;
     colIndex = lastMove.y - 1;
     counter = 0;
-    while (rowIndex > 0 && colIndex > 0 && board->state[rowIndex][colIndex]->pieceType == opponent) {
+    while (rowIndex > 0 && colIndex > 0 && board->state[rowIndex][colIndex].pieceType == opponent) {
         moves = realloc(moves, (counter + 1) * sizeof(Movement));
         Movement m = (Movement) {lastMove.pieceType, rowIndex, colIndex};
         moves[counter] = m;
@@ -482,10 +486,10 @@ void makeMove(Board *board, Movement lastMove) {
         rowIndex--;
         colIndex--;
     }
-    if (rowIndex >= 0 && colIndex >= 0 && board->state[rowIndex][colIndex]->pieceType == lastMove.pieceType &&
+    if (rowIndex >= 0 && colIndex >= 0 && board->state[rowIndex][colIndex].pieceType == lastMove.pieceType &&
         counter > 0) {
         for (int i = 0; i < counter; i++) {
-            tmp.state[moves[i].x][moves[i].y]->pieceType = lastMove.pieceType;
+            tmp.state[moves[i].x][moves[i].y].pieceType = lastMove.pieceType;
         }
     }
 
@@ -494,7 +498,7 @@ void makeMove(Board *board, Movement lastMove) {
     rowIndex = lastMove.x - 1;
     colIndex = lastMove.y + 1;
     counter = 0;
-    while (rowIndex > 0 && colIndex < board->size - 1 && board->state[rowIndex][colIndex]->pieceType == opponent) {
+    while (rowIndex > 0 && colIndex < board->size - 1 && board->state[rowIndex][colIndex].pieceType == opponent) {
         moves = realloc(moves, (counter + 1) * sizeof(Movement));
         Movement m = (Movement) {lastMove.pieceType, rowIndex, colIndex};
         moves[counter] = m;
@@ -503,9 +507,9 @@ void makeMove(Board *board, Movement lastMove) {
         colIndex++;
     }
     if (rowIndex >= 0 && colIndex <= board->size - 1 &&
-        board->state[rowIndex][colIndex]->pieceType == lastMove.pieceType && counter > 0) {
+        board->state[rowIndex][colIndex].pieceType == lastMove.pieceType && counter > 0) {
         for (int i = 0; i < counter; i++) {
-            tmp.state[moves[i].x][moves[i].y]->pieceType = lastMove.pieceType;
+            tmp.state[moves[i].x][moves[i].y].pieceType = lastMove.pieceType;
         }
     }
 
@@ -514,7 +518,7 @@ void makeMove(Board *board, Movement lastMove) {
     rowIndex = lastMove.x + 1;
     colIndex = lastMove.y - 1;
     counter = 0;
-    while (rowIndex < board->size - 1 && colIndex > 0 && board->state[rowIndex][colIndex]->pieceType == opponent) {
+    while (rowIndex < board->size - 1 && colIndex > 0 && board->state[rowIndex][colIndex].pieceType == opponent) {
         moves = realloc(moves, (counter + 1) * sizeof(Movement));
         Movement m = (Movement) {lastMove.pieceType, rowIndex, colIndex};
         moves[counter] = m;
@@ -523,9 +527,9 @@ void makeMove(Board *board, Movement lastMove) {
         colIndex--;
     }
     if (rowIndex <= board->size - 1 && colIndex >= 0 &&
-        board->state[rowIndex][colIndex]->pieceType == lastMove.pieceType && counter > 0) {
+        board->state[rowIndex][colIndex].pieceType == lastMove.pieceType && counter > 0) {
         for (int i = 0; i < counter; i++) {
-            tmp.state[moves[i].x][moves[i].y]->pieceType = lastMove.pieceType;
+            tmp.state[moves[i].x][moves[i].y].pieceType = lastMove.pieceType;
         }
     }
 
@@ -535,7 +539,7 @@ void makeMove(Board *board, Movement lastMove) {
     colIndex = lastMove.y + 1;
     counter = 0;
     while (rowIndex < board->size - 1 && colIndex < board->size - 1 &&
-           board->state[rowIndex][colIndex]->pieceType == opponent) {
+           board->state[rowIndex][colIndex].pieceType == opponent) {
         moves = realloc(moves, (counter + 1) * sizeof(Movement));
         Movement m = (Movement) {lastMove.pieceType, rowIndex, colIndex};
         moves[counter] = m;
@@ -544,16 +548,16 @@ void makeMove(Board *board, Movement lastMove) {
         colIndex++;
     }
     if (rowIndex <= board->size - 1 && colIndex <= board->size - 1 &&
-        board->state[rowIndex][colIndex]->pieceType == lastMove.pieceType && counter > 0) {
+        board->state[rowIndex][colIndex].pieceType == lastMove.pieceType && counter > 0) {
         for (int i = 0; i < counter; i++) {
-            tmp.state[moves[i].x][moves[i].y]->pieceType = lastMove.pieceType;
+            tmp.state[moves[i].x][moves[i].y].pieceType = lastMove.pieceType;
         }
     }
 
 
     for (int k = 0; k < board->size; k++) {
         for (int l = 0; l < board->size; l++) {
-            board->state[k][l]->pieceType = tmp.state[k][l]->pieceType;
+            board->state[k][l].pieceType = tmp.state[k][l].pieceType ;
         }
     }
 }

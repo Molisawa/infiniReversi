@@ -1,6 +1,6 @@
-#define BOARD_SIZE 8 // Must be even number
-#ifndef REVERSI_LIBRARY_H
-#define REVERSI_LIBRARY_H
+// Must be even number
+#ifndef REVERSI_GAME_ENGINE_LIBRARY_H
+#define REVERSI_GAME_ENGINE_LIBRARY_H
 enum StateFlags {
     VOID, BLACK_PIECE, WHITE_PIECE, HELPER
 };
@@ -20,7 +20,7 @@ typedef struct movement {
 } Movement;
 
 typedef struct board_struct {
-    Piece *state[BOARD_SIZE][BOARD_SIZE];
+    Piece **state;
     Movement *historyBack;
     Movement *historyForward;
     int noOfMovesBack;
@@ -31,7 +31,7 @@ typedef struct board_struct {
     int size;
 } Board;
 
-void initializeGame(Board *b);
+void initializeGame(Board *b, int size);
 
 void initializeBoard(Board *board);
 

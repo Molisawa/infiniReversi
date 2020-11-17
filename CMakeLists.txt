@@ -2,11 +2,15 @@ cmake_minimum_required(VERSION 3.17)
 project(infinireversi)
 
 set(CMAKE_C_STANDARD 99)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-add_library(reversi SHARED reversi.c reversi.h)
+add_library(reversi_game_engine SHARED reversi_game_engine.c reversi_game_engine.h)
 
 # Set this to the minimal version you want to support
 find_package(raylib 3.0 QUIET) # Let CMake search for a raylib-config.cmake
+
+add_executable(infinireversi main.c)
 
 # You could change the QUIET above to REQUIRED and remove this if() clause
 # This part downloads raylib and builds it if it's not installed on your system
@@ -48,8 +52,5 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
 
 endif()
 
-add_executable(infinireversi main.c)
-target_link_libraries(infinireversi reversi)
-add_custom_command(TARGET infinireversi POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${raylib_BINARY_DIR}/src" ${CMAKE_BINARY_DIR})
+target_link_libraries(infinireversi reversi_game_engine)
 target_link_libraries(infinireversi raylib)
