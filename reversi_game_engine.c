@@ -1,14 +1,16 @@
 #include <stdlib.h>
 #include "reversi_game_engine.h"
 #include "cjson/cJSON.h"
+#include <time.h>
 
 /**
  * Initialize the game
  * @param board Receives a Board type structure
  */
-void initializeGame(Board *board, int size)
+void initializeGame(Board *board, int size, int difficulty)
 {
     board->initialized = 1;
+    board->difficulty = difficulty;
     board->noOfMovesBack = 0;
     board->historyBack = malloc(sizeof(Movement));
     board->noOfMovesFoward = 0;
@@ -22,7 +24,17 @@ void initializeGame(Board *board, int size)
  */
 void computerMove(Board *board)
 {
-    makeRealMove(board, bestMove(board));
+    srand(time(NULL));
+    switch (board->difficulty){
+        case EASY:
+            makeRealMove(board, randomMovement(board));
+            break;
+        case INTERMEDIATE:
+            makeRealMove(board, bestMove(board));
+            break;
+        case HARD:
+            break;
+    }
 }
 /**
  * Initialize a board
@@ -175,39 +187,96 @@ Movement bestMove(Board *board)
             }
         }
     }
-    for (int i = 0; i < board->size; i++)
+
+    Movement *allMoves = getAllPossibleMoves(board, WHITE_PIECE);
+    for (int i = 0; i < getNumberOfMoves(board, WHITE_PIECE); i++)
     {
-        for (int j = 0; j < board->size; j++)
-        {
-            Board tmp;
-            free(&tmp);
-            initializeGame(&tmp, board->size);
-            for (int k = 0; k < board->size; k++)
-            {
-                for (int l = 0; l < board->size; l++)
-                {
-                    tmp.state[k][l].pieceType = board->state[k][l].pieceType;
-                }
-            }
-            if (tmp.state[i][j].pieceType == VOID)
-            {
-                Movement m = {.pieceType = WHITE_PIECE, .x = i, .y = j};
-                if (isValidMove(&tmp, m))
-                {
+            Board tmp = copyBoard(board);
+
+                Movement m = {.pieceType = WHITE_PIECE, .x = allMoves[i].x, .y = allMoves[i].y};
+
                     makeMove(&tmp, m);
                     if (getScore(&tmp, WHITE_PIECE) - getScore(board, WHITE_PIECE) > bestScore)
                     {
                         bestScore = getScore(&tmp, WHITE_PIECE) - getScore(board, WHITE_PIECE);
-                        x = i;
-                        y = j;
-                    }
-                }
-            }
+                        x = m.x;
+                        y = m.y;
+
         }
     }
     Movement m = {.pieceType = WHITE_PIECE, .x = x, .y = y};
 
     return m;
+}
+
+Movement randomMovement(Board *board) {
+    for (int i = 0; i < board->size; i++)
+    {
+        for (int j = 0; j < board->size; j++)
+        {
+            if (board->state[i][j].pieceType == HELPER)
+            {
+                board->state[i][j].pieceType = VOID;
+            }
+        }
+    }
+    int possibleMoves=getNumberOfMoves(board, WHITE_PIECE);
+    Movement * moves = getAllPossibleMoves(board, WHITE_PIECE);
+    if (possibleMoves > 0)
+        return moves[rand() % possibleMoves];
+    else return moves[0];
+}
+
+Movement *getAllPossibleMoves(Board *board, int pieceType) {
+    int possibleMoves=0;
+    Movement * moves = malloc(sizeof(Movement));
+    for (int i = 0; i < board->size; i++)
+    {
+        for (int j = 0; j < board->size; j++)
+        {
+            if (board->state[i][j].pieceType == VOID)
+            {
+                Movement m = {.pieceType = pieceType, .x = i, .y = j};
+                if (isValidMove(board, m))
+                {
+                    moves = realloc(moves, (possibleMoves + 1) * sizeof(Movement));
+                    moves[possibleMoves]=m;
+                    possibleMoves++;
+                }
+            }
+        }
+    }
+    return moves;
+}
+
+int getNumberOfMoves(Board *board, int pieceType) {
+    int possibleMoves=0;
+
+    for (int i = 0; i < board->size; i++)
+    {
+        for (int j = 0; j < board->size; j++)
+        {
+            if (board->state[i][j].pieceType == VOID)
+            {
+                Movement m = {.pieceType = pieceType, .x = i, .y = j};
+                if (isValidMove(board, m))
+                {
+                    possibleMoves++;
+                }
+            }
+        }
+    }
+    return possibleMoves;
+}
+
+Board* buildGameState(Board *board, int moves) {
+    Movement *m = board->historyBack;
+    board->noOfMovesBack = 0;
+    for (int i = 0; i < moves - 1; ++i)
+    {
+        makeRealMove(board, m[i]);
+    }
+    return board;
 }
 /**
  * Evaluate if current movement is valid
@@ -355,6 +424,34 @@ int canMove(Board *board, int Piece)
         return 0;
     return 1;
 }
+
+Board copyBoard(Board *board) {
+    Board tmp;
+    initializeGame(&tmp, board->size, board->difficulty);
+    for (int k = 0; k < board->size; k++)
+    {
+        for (int l = 0; l < board->size; l++)
+        {
+            tmp.state[k][l].pieceType = board->state[k][l].pieceType;
+        }
+    }
+    return tmp;
+}
+
+Minimax MINIMAX_MADISIMA_CON_AB_PRUNNING(Minimax minimax, int depth, int alpha, int beta){
+    makeRealMove(minimax.board, minimax.m);
+    if(depth == 0 || isGameOver(minimax.board)){
+        Minimax mini = {.m = minimax.m, .board = minimax.board, .score = getScore(minimax.board, minimax.m.pieceType)};
+        return mini;
+    }
+    if(minimax.m.pieceType == WHITE_PIECE){
+        int maxVal = 0;
+
+    } else {
+
+    }
+}
+
 /**
  * Go back one movement
  * @param board Receives a Board type structure
@@ -432,7 +529,7 @@ void removeHistoryFoward(Board *board)
 void makeRealMove(Board *board, Movement lastMove)
 {
     board->lastPiecetypeMoved = lastMove.pieceType;
-    if (lastMove.x < 0 || lastMove.x > board->size - 1 || lastMove.y < 0 || lastMove.y > board->size - 1)
+    if (lastMove.x < 0 || lastMove.x > board->size - 1 || lastMove.y < 0 || lastMove.y > board->size - 1 || !(lastMove.pieceType==BLACK_PIECE || lastMove.pieceType==WHITE_PIECE))
         return;
     board->historyBack = realloc(board->historyBack, sizeof(Movement) * (board->noOfMovesBack + 1));
     board->historyBack[board->noOfMovesBack] = lastMove;
@@ -450,15 +547,7 @@ void makeMove(Board *board, Movement lastMove)
     char opponent = (lastMove.pieceType == WHITE_PIECE) ? BLACK_PIECE : WHITE_PIECE;
 
     int rowIndex, colIndex;
-    Board tmp;
-    initializeGame(&tmp, board->size);
-    for (int k = 0; k < board->size; k++)
-    {
-        for (int l = 0; l < board->size; l++)
-        {
-            tmp.state[k][l].pieceType = board->state[k][l].pieceType;
-        }
-    }
+    Board tmp=copyBoard(board);
 
     tmp.state[lastMove.x][lastMove.y].pieceType = lastMove.pieceType;
 
@@ -660,6 +749,7 @@ char *saveGame(Board *board)
 {
     cJSON *json = cJSON_CreateObject();
     cJSON_AddNumberToObject(json, "board_size", board->size);
+    cJSON_AddNumberToObject(json, "game_difficulty", board->difficulty);
     cJSON *movements = cJSON_AddArrayToObject(json, "movements");
     for (int i = 0; i < board->noOfMovesBack; i++)
     {
@@ -678,9 +768,10 @@ Board loadGame(char *data)
     if (json != NULL)
     {
         cJSON *board_size = cJSON_GetObjectItemCaseSensitive(json, "board_size");
-        if (cJSON_IsNumber(board_size) && board_size != NULL)
+        cJSON *game_difficulty = cJSON_GetObjectItemCaseSensitive(json, "game_difficulty");
+        if (cJSON_IsNumber(board_size) && board_size != NULL, cJSON_IsNumber(game_difficulty) && game_difficulty != NULL)
         {
-            initializeGame(&board, board_size->valueint);
+            initializeGame(&board, board_size->valueint,game_difficulty->valueint);
             cJSON *move_obj = NULL;
             cJSON *move_array = cJSON_GetObjectItemCaseSensitive(json, "movements");
             cJSON_ArrayForEach(move_obj, move_array)

@@ -25,7 +25,7 @@ int main()
     const int screenWidth = 1000;
     const int screenHeight = 800;
 
-    initializeGame(&board, 8);
+    initializeGame(&board, 8, INTERMEDIATE);
     SetConfigFlags(FLAG_VSYNC_HINT);
     InitWindow(screenWidth, screenHeight, "Reversi");
 
@@ -49,8 +49,7 @@ int main()
 
         ClearBackground(DARKGREEN);
 
-        if (!isGameOver(&board) && !canMove(&board, BLACK_PIECE) && board.lastPiecetypeMoved == WHITE_PIECE &&
-            board.noOfMovesFoward == 0)
+        if (canSkipBlackPiece(&board))
         {
             computerMove(&board);
         }
