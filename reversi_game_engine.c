@@ -5,6 +5,8 @@
 #include <math.h>
 #include <stdio.h>
 
+int nodes = 0;
+
 /**
  * Initialize the game
  * @param board Receives a Board type structure
@@ -194,25 +196,28 @@ Movement bestMove(Board *board)
     Movement *allMoves = getAllPossibleMoves(board, WHITE_PIECE);
     for (int i = 0; i < getNumberOfMoves(board, WHITE_PIECE); i++)
     {
-            Board *tmp = copyBoard(*board);
+            Board tmp = copyBoard(*board);
 
                 Movement m = {.pieceType = WHITE_PIECE, .x = allMoves[i].x, .y = allMoves[i].y};
 
-                    makeMove(tmp, m);
-                    if (getScore(tmp, WHITE_PIECE) - getScore(board, WHITE_PIECE) > bestScore)
+                    makeMove(&tmp, m);
+                    if (getScore(&tmp, WHITE_PIECE) - getScore(board, WHITE_PIECE) > bestScore)
                     {
-                        bestScore = getScore(tmp, WHITE_PIECE) - getScore(board, WHITE_PIECE);
+                        bestScore = getScore(&tmp, WHITE_PIECE) - getScore(board, WHITE_PIECE);
                         x = m.x;
                         y = m.y;
 
         }
+                    destructBoard(&tmp);
     }
+    allMoves= realloc(allMoves, 0);
     Movement m = {.pieceType = WHITE_PIECE, .x = x, .y = y};
 
     return m;
 }
 
 Movement bestMinimaxMove(Board *board) {
+    nodes = 0;
         for (int i = 0; i < board->size; i++)
         {
             for (int j = 0; j < board->size; j++)
@@ -230,9 +235,7 @@ Movement bestMinimaxMove(Board *board) {
 
         for (int i = 0; i < getNumberOfMoves(board, WHITE_PIECE); i++)
         {
-            Board tmp;
-            initializeGame(&tmp, board->size, board->difficulty);
-            tmp = buildGameState(tmp, board->historyBack, board->noOfMovesBack);
+            Board tmp = copyBoard(*board);
 
             Movement m = {.pieceType = WHITE_PIECE, .x = allMoves[i].x, .y = allMoves[i].y};
 
@@ -243,10 +246,10 @@ Movement bestMinimaxMove(Board *board) {
                 score = minimaxGet.score;
                 bestMove =m;
             }
-
-            puts("hola");
+            destructBoard(&tmp);
         }
-
+        allMoves = realloc(allMoves,0);
+        printf("Nodes searched = %d\n", nodes);
         return bestMove;
 
 }
@@ -264,9 +267,11 @@ Movement randomMovement(Board *board) {
     }
     int possibleMoves=getNumberOfMoves(board, WHITE_PIECE);
     Movement * moves = getAllPossibleMoves(board, WHITE_PIECE);
+    Movement move;
     if (possibleMoves > 0)
-        return moves[rand() % possibleMoves];
-    else return moves[0];
+        move = moves[rand() % possibleMoves];
+    moves=realloc(moves,0);
+    return move;
 }
 
 Movement *getAllPossibleMoves(Board *board, int pieceType) {
@@ -466,61 +471,86 @@ int canMove(Board *board, int Piece)
     return 1;
 }
 
-Board* copyBoard(Board board) {
-    Board *tmp = malloc(sizeof(Board));
-    initializeGame(tmp, board.size, board.difficulty);
+Board copyBoard(Board board) {
+    Board tmp;
+    initializeGame(&tmp, board.size, board.difficulty);
     for (int k = 0; k < board.size; k++)
     {
         for (int l = 0; l < board.size; l++)
         {
-            tmp->state[k][l].pieceType = board.state[k][l].pieceType;
+            tmp.state[k][l].pieceType = board.state[k][l].pieceType;
         }
     }
     return tmp;
 }
 
 Minimax MinimaxSolver(Minimax minimax, int depth, int alpha, int beta){
+    nodes++;
     makeRealMove(minimax.board, minimax.m);
     if(depth == 0 || isGameOver(minimax.board)){
         Minimax mini = {.m = minimax.m, .board = minimax.board, .score = getScore(minimax.board, minimax.m.pieceType)};
         return mini;
     }
 
+    Board board = copyBoard(*minimax.board);
     if(minimax.m.pieceType == BLACK_PIECE){
         int maxVal = 0;
         Minimax maxMinimax;
-        for(int i = 0; i < getNumberOfMoves(minimax.board, WHITE_PIECE);++i){
-           Minimax send= {.m = getAllPossibleMoves(minimax.board, WHITE_PIECE)[i],.board = minimax.board, .score = getScore(minimax.board, WHITE_PIECE)};
+        Movement *all = getAllPossibleMoves(&board, WHITE_PIECE);
+        for(int i = 0; i < getNumberOfMoves(&board, WHITE_PIECE);++i){
+
+            Movement move= all[i];
+
+           Minimax send= {.m = move,.board = &board, .score = getScore(&board, WHITE_PIECE)};
            Minimax mini= MinimaxSolver(send, depth - 1, alpha, beta);
            if (mini.score>maxVal){
                maxVal = mini.score;
                maxMinimax = mini;
            }
            alpha = (int) fmax(alpha, mini.score);
-            free(minimax.board);
            if (beta<=alpha){
                break;
            }
         }
+        all = realloc(all,0);
+        destructBoard(&board);
         return maxMinimax;
     } else {
-        int min = minimax.board->size*minimax.board->size;
+        int min = minimax.board->size*board.size;
         Minimax minMinimax;
-        for(int i = 0; i < getNumberOfMoves(minimax.board, BLACK_PIECE);++i){
-            Minimax send= {.m = getAllPossibleMoves(minimax.board, BLACK_PIECE)[i],.board = minimax.board, .score = getScore(minimax.board, BLACK_PIECE)};
+        Movement *all = getAllPossibleMoves(&board, BLACK_PIECE);
+        for(int i = 0; i < getNumberOfMoves(&board, BLACK_PIECE);++i){
+            Movement move= all[i];
+            Minimax send= {.m =move,.board = &board, .score = getScore(&board, BLACK_PIECE)};
             Minimax mini= MinimaxSolver(send, depth - 1, alpha, beta);
             if (mini.score < min){
                 min = mini.score;
                 minMinimax = mini;
             }
             alpha = (int) fmin(alpha, mini.score);
-            free(minimax.board);
             if (beta<=alpha){
                 break;
             }
         }
+        all = realloc(all,0);
+        destructBoard(&board);
         return minMinimax;
     }
+}
+
+void destructBoard(Board* board){
+    //free(&board->noOfMovesBack);
+    free(&board->noOfMovesFoward);
+    free(&board->size);
+    free(&board->initialized);
+    free(&board->lastPiecetypeMoved);
+    board->state=realloc(board->state, 0);
+    free(&board->state);
+    board->state= NULL;
+    board->historyBack=realloc(board->historyBack, 0);
+    board->historyForward=realloc(board->historyForward, 0);
+    free(board);
+    board=NULL;
 }
 
 /**
@@ -547,6 +577,7 @@ void goBack(Board *board)
         {
             makeRealMove(board, m[i]);
         }
+        m=realloc(m, 0);
     }
 }
 /**
@@ -579,6 +610,8 @@ void goForward(Board *board)
         {
             makeRealMove(board, historyRebuild[i]);
         }
+        m = realloc(m,0);
+        historyRebuild = realloc(historyRebuild,0);
     }
 }
 /**
@@ -618,7 +651,7 @@ void makeMove(Board *board, Movement lastMove)
     char opponent = (lastMove.pieceType == WHITE_PIECE) ? BLACK_PIECE : WHITE_PIECE;
 
     int rowIndex, colIndex;
-    Board tmp=*copyBoard(*board);
+    Board tmp=copyBoard(*board);
 
     tmp.state[lastMove.x][lastMove.y].pieceType = lastMove.pieceType;
 
@@ -809,6 +842,8 @@ void makeMove(Board *board, Movement lastMove)
             board->state[k][l].pieceType = tmp.state[k][l].pieceType;
         }
     }
+    moves=realloc(moves,0);
+    destructBoard(&tmp);
 }
 
 /**

@@ -95,7 +95,9 @@ Movement randomMovement(Board *board);
 
 Board buildGameState(Board board, Movement* moves,int movesCount);
 
-Board *copyBoard(Board board);
+Board copyBoard(Board board);
+
+void destructBoard(Board* board);
 
 Minimax MinimaxSolver(Minimax minimax, int depth, int alpha, int beta);
 
