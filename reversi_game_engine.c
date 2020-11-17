@@ -8,8 +8,7 @@
  */
 void initializeGame(Board *board, int size)
 {
-    board->compScore = 0;
-    board->userScore = 0;
+    board->initialized = 1;
     board->noOfMovesBack = 0;
     board->historyBack = malloc(sizeof(Movement));
     board->noOfMovesFoward = 0;
@@ -657,11 +656,13 @@ void makeMove(Board *board, Movement lastMove)
  * @param board Receives a Board type structure
  */
 
-char* saveGame(Board *board) {
+char *saveGame(Board *board)
+{
     cJSON *json = cJSON_CreateObject();
     cJSON_AddNumberToObject(json, "board_size", board->size);
     cJSON *movements = cJSON_AddArrayToObject(json, "movements");
-    for (int i = 0; i < board->noOfMovesBack; i++) {
+    for (int i = 0; i < board->noOfMovesBack; i++)
+    {
         cJSON *object = cJSON_CreateObject();
         cJSON_AddNumberToObject(object, "pieceType", board->historyBack[i].pieceType);
         cJSON_AddNumberToObject(object, "x", board->historyBack[i].x);
@@ -670,26 +671,27 @@ char* saveGame(Board *board) {
     }
     return cJSON_PrintUnformatted(json);
 }
-Board loadGame(char* data) {
+Board loadGame(char *data)
+{
     Board board;
     cJSON *json = cJSON_Parse(data);
     if (json != NULL)
     {
         cJSON *board_size = cJSON_GetObjectItemCaseSensitive(json, "board_size");
-        if (cJSON_IsNumber(board_size) && board_size != NULL) {
-            initializeGame(&board,board_size->valueint);
+        if (cJSON_IsNumber(board_size) && board_size != NULL)
+        {
+            initializeGame(&board, board_size->valueint);
             cJSON *move_obj = NULL;
-            cJSON *move_array = cJSON_GetObjectItemCaseSensitive(json,"movements");
-            cJSON_ArrayForEach(move_obj, move_array){
+            cJSON *move_array = cJSON_GetObjectItemCaseSensitive(json, "movements");
+            cJSON_ArrayForEach(move_obj, move_array)
+            {
                 cJSON *pieceType = cJSON_GetObjectItemCaseSensitive(move_obj, "pieceType");
                 cJSON *x = cJSON_GetObjectItemCaseSensitive(move_obj, "x");
                 cJSON *y = cJSON_GetObjectItemCaseSensitive(move_obj, "y");
                 Movement m = {pieceType->valueint, x->valueint, y->valueint};
-                makeRealMove(&board,m);
+                makeRealMove(&board, m);
             }
-
         }
     }
     return board;
 }
-

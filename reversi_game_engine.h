@@ -1,33 +1,41 @@
 // Must be even number
 #ifndef REVERSI_GAME_ENGINE_LIBRARY_H
 #define REVERSI_GAME_ENGINE_LIBRARY_H
-enum StateFlags {
-    VOID, BLACK_PIECE, WHITE_PIECE, HELPER
+enum StateFlags
+{
+    VOID,
+    BLACK_PIECE,
+    WHITE_PIECE,
+    HELPER
 };
 
-enum winners {
-    WINNER, LOSER, TIE
+enum winners
+{
+    WINNER,
+    LOSER,
+    TIE
 };
 
-typedef struct piece_struct {
+typedef struct piece_struct
+{
     enum StateFlags pieceType;
 } Piece;
 
-
-typedef struct movement {
+typedef struct movement
+{
     enum StateFlags pieceType;
     int x, y;
 } Movement;
 
-typedef struct board_struct {
+typedef struct board_struct
+{
     Piece **state;
     Movement *historyBack;
     Movement *historyForward;
     int noOfMovesBack;
     int lastPiecetypeMoved;
     int noOfMovesFoward;
-    int compScore;
-    int userScore;
+    int initialized;
     int size;
 } Board;
 
