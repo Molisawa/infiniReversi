@@ -16,7 +16,7 @@ void UpdateDrawingState(Board *board, float size);
 
 void CheckPiecePlayed(Board *board, float SQUARE_SIZE, int clicked);
 
-void CheckButtonPressed(Menu *menu, Board *board);
+void CheckButtonPressed(Menu *menu, Board *board, int screenHeight, float *SQUARE_SIZE);
 
 int main()
 {
@@ -98,7 +98,7 @@ int main()
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
         {
             clicked = 1;
-            CheckButtonPressed(&menu, &board);
+            CheckButtonPressed(&menu, &board, screenHeight, &SQUARE_SIZE);
         }
         CheckPiecePlayed(&board, SQUARE_SIZE, clicked);
 
@@ -110,18 +110,18 @@ int main()
             Color color;
             switch (getWinner(&board))
             {
-            case WINNER:
-                text = "You win!";
-                color = GREEN;
-                break;
-            case LOSER:
-                text = "You lose!";
-                color = RED;
-                break;
-            case TIE:
-                text = "It's a tie!";
-                color = GRAY;
-                break;
+                case WINNER:
+                    text = "You win!";
+                    color = GREEN;
+                    break;
+                case LOSER:
+                    text = "You lose!";
+                    color = RED;
+                    break;
+                case TIE:
+                    text = "It's a tie!";
+                    color = GRAY;
+                    break;
             }
             DrawText(text, (SQUARE_SIZE * board.size) / 2 - MeasureText(text, 60) / 2,
                      screenHeight / 2 - 30 + 80 + 10, 60, color);
@@ -137,7 +137,7 @@ int main()
     return 0;
 }
 
-void CheckButtonPressed(Menu *menu, Board *board)
+void CheckButtonPressed(Menu *menu, Board *board, int screenHeight, float *SQUARE_SIZE)
 {
     if (CheckCollisionPointRec(GetMousePosition(), menu->goBackButton))
     {
@@ -150,13 +150,14 @@ void CheckButtonPressed(Menu *menu, Board *board)
     }
     else if (CheckCollisionPointRec(GetMousePosition(), menu->saveGame))
     {
-        char *game =saveGame(board);
+        char *game = saveGame(board);
         SaveFileText("game.txt", game);
     }
     else if (CheckCollisionPointRec(GetMousePosition(), menu->loadGame))
     {
         Board boardTemp = loadGame(LoadFileText("game.txt"));
         *board = boardTemp;
+        *SQUARE_SIZE = (float)screenHeight / (float)board->size;
     }
 }
 
@@ -170,30 +171,30 @@ void CheckPiecePlayed(Board *board, float SQUARE_SIZE, int clicked)
             Vector2 vector;
             switch (board->state[i][j].pieceType)
             {
-            case HELPER:
-            {
-                vector = (Vector2){(i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2};
-                if (CheckCollisionPointCircle(mousePoint, vector, SQUARE_SIZE / 2 - 5))
+                case HELPER:
                 {
-                    if (!clicked)
+                    vector = (Vector2){(i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2};
+                    if (CheckCollisionPointCircle(mousePoint, vector, SQUARE_SIZE / 2 - 5))
                     {
-                        DrawRectangle((i)*SQUARE_SIZE + 1, (j)*SQUARE_SIZE + 1, SQUARE_SIZE - 2,
-                                      SQUARE_SIZE - 2, DARKGREEN);
-                        DrawCircle((i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2,
-                                   SQUARE_SIZE / 2 - 5, Fade(BLACK, 0.4f));
-                    }
-                    else
-                    {
-                        Movement m = {.pieceType = BLACK_PIECE, .x = i, .y = j};
-                        makeRealMove(board, m);
-                        removeHistoryFoward(board);
-                        computerMove(board);
+                        if (!clicked)
+                        {
+                            DrawRectangle((i)*SQUARE_SIZE + 1, (j)*SQUARE_SIZE + 1, SQUARE_SIZE - 2,
+                                          SQUARE_SIZE - 2, DARKGREEN);
+                            DrawCircle((i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2,
+                                       SQUARE_SIZE / 2 - 5, Fade(BLACK, 0.4f));
+                        }
+                        else
+                        {
+                            Movement m = {.pieceType = BLACK_PIECE, .x = i, .y = j};
+                            makeRealMove(board, m);
+                            removeHistoryFoward(board);
+                            computerMove(board);
+                        }
                     }
                 }
-            }
-            break;
-            default:
-                break;
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -208,22 +209,22 @@ void UpdateDrawingState(Board *board, float SQUARE_SIZE)
         {
             switch (board->state[i][j].pieceType)
             {
-            case VOID:
-                break;
-            case BLACK_PIECE:
-                DrawCircle((i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2,
-                           SQUARE_SIZE / 2 - 5, BLACK);
-                break;
-            case WHITE_PIECE:
-                DrawCircle((i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2,
-                           SQUARE_SIZE / 2 - 5, WHITE);
-                break;
-            case HELPER:
-                DrawCircle((i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2,
-                           SQUARE_SIZE / 2 - 5, DARKGRAY);
-                DrawCircle((i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2,
-                           SQUARE_SIZE / 2 - 7, DARKGREEN);
-                break;
+                case VOID:
+                    break;
+                case BLACK_PIECE:
+                    DrawCircle((i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2,
+                               SQUARE_SIZE / 2 - 5, BLACK);
+                    break;
+                case WHITE_PIECE:
+                    DrawCircle((i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2,
+                               SQUARE_SIZE / 2 - 5, WHITE);
+                    break;
+                case HELPER:
+                    DrawCircle((i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2,
+                               SQUARE_SIZE / 2 - 5, DARKGRAY);
+                    DrawCircle((i)*SQUARE_SIZE + SQUARE_SIZE / 2, (j)*SQUARE_SIZE + SQUARE_SIZE / 2,
+                               SQUARE_SIZE / 2 - 7, DARKGREEN);
+                    break;
             }
         }
     }
