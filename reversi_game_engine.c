@@ -236,7 +236,7 @@ Movement bestMinimaxMove(Board *board) {
 
             Movement m = {.pieceType = WHITE_PIECE, .x = allMoves[i].x, .y = allMoves[i].y};
 
-            Minimax minimax = {.m = m, .board = board, .score = getScore(board,WHITE_PIECE)};
+            Minimax minimax = {.m = m, .board = &tmp, .score = getScore(&tmp,WHITE_PIECE)};
 
             Minimax minimaxGet = MinimaxSolver(minimax, 6, 0, board->size * board->size);
             if (minimaxGet.score>score) {
