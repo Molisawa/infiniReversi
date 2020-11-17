@@ -2,6 +2,8 @@
 #include "reversi_game_engine.h"
 #include "cjson/cJSON.h"
 #include <time.h>
+#include <math.h>
+#include <stdio.h>
 
 /**
  * Initialize the game
@@ -25,7 +27,7 @@ void initializeGame(Board *board, int size, int difficulty)
 void computerMove(Board *board)
 {
     srand(time(NULL));
-    switch (board->difficulty){
+    switch (board->difficulty) {
         case EASY:
             makeRealMove(board, randomMovement(board));
             break;
@@ -33,6 +35,7 @@ void computerMove(Board *board)
             makeRealMove(board, bestMove(board));
             break;
         case HARD:
+            makeRealMove(board, bestMinimaxMove(board));
             break;
     }
 }
@@ -191,14 +194,14 @@ Movement bestMove(Board *board)
     Movement *allMoves = getAllPossibleMoves(board, WHITE_PIECE);
     for (int i = 0; i < getNumberOfMoves(board, WHITE_PIECE); i++)
     {
-            Board tmp = copyBoard(board);
+            Board *tmp = copyBoard(*board);
 
                 Movement m = {.pieceType = WHITE_PIECE, .x = allMoves[i].x, .y = allMoves[i].y};
 
-                    makeMove(&tmp, m);
-                    if (getScore(&tmp, WHITE_PIECE) - getScore(board, WHITE_PIECE) > bestScore)
+                    makeMove(tmp, m);
+                    if (getScore(tmp, WHITE_PIECE) - getScore(board, WHITE_PIECE) > bestScore)
                     {
-                        bestScore = getScore(&tmp, WHITE_PIECE) - getScore(board, WHITE_PIECE);
+                        bestScore = getScore(tmp, WHITE_PIECE) - getScore(board, WHITE_PIECE);
                         x = m.x;
                         y = m.y;
 
@@ -207,6 +210,45 @@ Movement bestMove(Board *board)
     Movement m = {.pieceType = WHITE_PIECE, .x = x, .y = y};
 
     return m;
+}
+
+Movement bestMinimaxMove(Board *board) {
+        for (int i = 0; i < board->size; i++)
+        {
+            for (int j = 0; j < board->size; j++)
+            {
+                if (board->state[i][j].pieceType == HELPER)
+                {
+                    board->state[i][j].pieceType = VOID;
+                }
+            }
+        }
+
+        Movement *allMoves = getAllPossibleMoves(board, WHITE_PIECE);
+        Movement bestMove;
+        int score = 0;
+
+        for (int i = 0; i < getNumberOfMoves(board, WHITE_PIECE); i++)
+        {
+            Board tmp;
+            initializeGame(&tmp, board->size, board->difficulty);
+            tmp = buildGameState(tmp, board->historyBack, board->noOfMovesBack);
+
+            Movement m = {.pieceType = WHITE_PIECE, .x = allMoves[i].x, .y = allMoves[i].y};
+
+            Minimax minimax = {.m = m, .board = board, .score = getScore(board,WHITE_PIECE)};
+
+            Minimax minimaxGet = MinimaxSolver(minimax, 6, 0, board->size * board->size);
+            if (minimaxGet.score>score) {
+                score = minimaxGet.score;
+                bestMove =m;
+            }
+
+            puts("hola");
+        }
+
+        return bestMove;
+
 }
 
 Movement randomMovement(Board *board) {
@@ -258,6 +300,7 @@ int getNumberOfMoves(Board *board, int pieceType) {
         {
             if (board->state[i][j].pieceType == VOID)
             {
+
                 Movement m = {.pieceType = pieceType, .x = i, .y = j};
                 if (isValidMove(board, m))
                 {
@@ -269,12 +312,10 @@ int getNumberOfMoves(Board *board, int pieceType) {
     return possibleMoves;
 }
 
-Board* buildGameState(Board *board, int moves) {
-    Movement *m = board->historyBack;
-    board->noOfMovesBack = 0;
-    for (int i = 0; i < moves - 1; ++i)
+Board buildGameState(Board board, Movement* moves,int movesCount) {
+    for (int i = 0; i < movesCount; ++i)
     {
-        makeRealMove(board, m[i]);
+        makeRealMove(&board, moves[i]);
     }
     return board;
 }
@@ -425,30 +466,60 @@ int canMove(Board *board, int Piece)
     return 1;
 }
 
-Board copyBoard(Board *board) {
-    Board tmp;
-    initializeGame(&tmp, board->size, board->difficulty);
-    for (int k = 0; k < board->size; k++)
+Board* copyBoard(Board board) {
+    Board *tmp = malloc(sizeof(Board));
+    initializeGame(tmp, board.size, board.difficulty);
+    for (int k = 0; k < board.size; k++)
     {
-        for (int l = 0; l < board->size; l++)
+        for (int l = 0; l < board.size; l++)
         {
-            tmp.state[k][l].pieceType = board->state[k][l].pieceType;
+            tmp->state[k][l].pieceType = board.state[k][l].pieceType;
         }
     }
     return tmp;
 }
 
-Minimax MINIMAX_MADISIMA_CON_AB_PRUNNING(Minimax minimax, int depth, int alpha, int beta){
+Minimax MinimaxSolver(Minimax minimax, int depth, int alpha, int beta){
     makeRealMove(minimax.board, minimax.m);
     if(depth == 0 || isGameOver(minimax.board)){
         Minimax mini = {.m = minimax.m, .board = minimax.board, .score = getScore(minimax.board, minimax.m.pieceType)};
         return mini;
     }
-    if(minimax.m.pieceType == WHITE_PIECE){
+
+    if(minimax.m.pieceType == BLACK_PIECE){
         int maxVal = 0;
-
+        Minimax maxMinimax;
+        for(int i = 0; i < getNumberOfMoves(minimax.board, WHITE_PIECE);++i){
+           Minimax send= {.m = getAllPossibleMoves(minimax.board, WHITE_PIECE)[i],.board = minimax.board, .score = getScore(minimax.board, WHITE_PIECE)};
+           Minimax mini= MinimaxSolver(send, depth - 1, alpha, beta);
+           if (mini.score>maxVal){
+               maxVal = mini.score;
+               maxMinimax = mini;
+           }
+           alpha = (int) fmax(alpha, mini.score);
+            free(minimax.board);
+           if (beta<=alpha){
+               break;
+           }
+        }
+        return maxMinimax;
     } else {
-
+        int min = minimax.board->size*minimax.board->size;
+        Minimax minMinimax;
+        for(int i = 0; i < getNumberOfMoves(minimax.board, BLACK_PIECE);++i){
+            Minimax send= {.m = getAllPossibleMoves(minimax.board, BLACK_PIECE)[i],.board = minimax.board, .score = getScore(minimax.board, BLACK_PIECE)};
+            Minimax mini= MinimaxSolver(send, depth - 1, alpha, beta);
+            if (mini.score < min){
+                min = mini.score;
+                minMinimax = mini;
+            }
+            alpha = (int) fmin(alpha, mini.score);
+            free(minimax.board);
+            if (beta<=alpha){
+                break;
+            }
+        }
+        return minMinimax;
     }
 }
 
@@ -547,7 +618,7 @@ void makeMove(Board *board, Movement lastMove)
     char opponent = (lastMove.pieceType == WHITE_PIECE) ? BLACK_PIECE : WHITE_PIECE;
 
     int rowIndex, colIndex;
-    Board tmp=copyBoard(board);
+    Board tmp=*copyBoard(*board);
 
     tmp.state[lastMove.x][lastMove.y].pieceType = lastMove.pieceType;
 

@@ -25,7 +25,7 @@ int main()
     const int screenWidth = 1000;
     const int screenHeight = 800;
 
-    initializeGame(&board, 8, INTERMEDIATE);
+    initializeGame(&board, 8, HARD);
     SetConfigFlags(FLAG_VSYNC_HINT);
     InitWindow(screenWidth, screenHeight, "Reversi");
 

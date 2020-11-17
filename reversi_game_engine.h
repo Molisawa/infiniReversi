@@ -93,11 +93,13 @@ void removeHistoryFoward(Board *board);
 
 Movement randomMovement(Board *board);
 
-Board* buildGameState(Board *board, int moves);
+Board buildGameState(Board board, Movement* moves,int movesCount);
 
-Board copyBoard(Board *board);
+Board *copyBoard(Board board);
 
-Minimax MINIMAX_MADISIMA_CON_AB_PRUNNING(Minimax minimax, int depth, int alpha, int beta);
+Minimax MinimaxSolver(Minimax minimax, int depth, int alpha, int beta);
+
+Movement bestMinimaxMove(Board *board);
 
 void computerMove(Board *board);
 
