@@ -1,9 +1,10 @@
-#include <stdlib.h>
 #include "reversi_game_engine.h"
 #include "cjson/cJSON.h"
 #include <time.h>
 #include <math.h>
 #include <stdio.h>
+#include <malloc.h>
+#include <stdlib.h>
 
 int nodes = 0;
 
@@ -492,16 +493,21 @@ Minimax MinimaxSolver(Minimax minimax, int depth, int alpha, int beta){
         return mini;
     }
 
+    int max = minimax.m.pieceType == BLACK_PIECE;
+    char opponent = (minimax.m.pieceType == WHITE_PIECE) ? BLACK_PIECE : WHITE_PIECE;
+
+    if((max && !canMove(minimax.board,minimax.m.pieceType)) || (!max && !canMove(minimax.board,opponent))){
+        return MinimaxSolver(minimax,depth-1,alpha,beta);
+    }
+
     Board board = copyBoard(*minimax.board);
-    if(minimax.m.pieceType == BLACK_PIECE){
-        int maxVal = 0;
+    if(max){
+        int maxVal = -INFINITY;
         Minimax maxMinimax;
         Movement *all = getAllPossibleMoves(&board, WHITE_PIECE);
         for(int i = 0; i < getNumberOfMoves(&board, WHITE_PIECE);++i){
-
             Movement move= all[i];
-
-           Minimax send= {.m = move,.board = &board, .score = getScore(&board, WHITE_PIECE)};
+           Minimax send= {.m = move,.initialized = 1 ,.board = &board, .score = getScore(&board, WHITE_PIECE)};
            Minimax mini= MinimaxSolver(send, depth - 1, alpha, beta);
            if (mini.score>maxVal){
                maxVal = mini.score;
@@ -514,14 +520,15 @@ Minimax MinimaxSolver(Minimax minimax, int depth, int alpha, int beta){
         }
         all = realloc(all,0);
         destructBoard(&board);
-        return maxMinimax;
+        if (maxMinimax.initialized == 1)
+            return maxMinimax;
     } else {
-        int min = minimax.board->size*board.size;
+        int min = INFINITY;
         Minimax minMinimax;
         Movement *all = getAllPossibleMoves(&board, BLACK_PIECE);
         for(int i = 0; i < getNumberOfMoves(&board, BLACK_PIECE);++i){
             Movement move= all[i];
-            Minimax send= {.m =move,.board = &board, .score = getScore(&board, BLACK_PIECE)};
+            Minimax send= {.m =move,.initialized=1, .board = &board, .score = getScore(&board, BLACK_PIECE)};
             Minimax mini= MinimaxSolver(send, depth - 1, alpha, beta);
             if (mini.score < min){
                 min = mini.score;
@@ -534,23 +541,35 @@ Minimax MinimaxSolver(Minimax minimax, int depth, int alpha, int beta){
         }
         all = realloc(all,0);
         destructBoard(&board);
-        return minMinimax;
+        if (minMinimax.initialized == 1)
+            return minMinimax;
     }
 }
 
 void destructBoard(Board* board){
     //free(&board->noOfMovesBack);
-    free(&board->noOfMovesFoward);
-    free(&board->size);
-    free(&board->initialized);
-    free(&board->lastPiecetypeMoved);
+    //free(&board->noOfMovesFoward);
+    //free(&board->size);
+    //free(&board->initialized);
+    //free(&board->lastPiecetypeMoved);
+
+    for (int i = 0; i < board->size; i++)
+    {
+
+        board->state[i]= realloc(board->state[i], 0);
+
+    }
     board->state=realloc(board->state, 0);
-    free(&board->state);
+    //free(&board->state);
     board->state= NULL;
     board->historyBack=realloc(board->historyBack, 0);
     board->historyForward=realloc(board->historyForward, 0);
-    free(board);
+    //free(board);
     board=NULL;
+}
+
+Minimax initializeMinimax() {
+    return  (Minimax) { .m = {0,0,0}, .initialized = 1, .board = NULL, .score = 0 };
 }
 
 /**
@@ -678,7 +697,6 @@ void makeMove(Board *board, Movement lastMove)
     }
 
     //move up
-    calloc(1, sizeof(Movement));
     rowIndex = lastMove.x + 1;
     colIndex = lastMove.y;
     counter = 0;
@@ -700,7 +718,6 @@ void makeMove(Board *board, Movement lastMove)
     }
 
     //move right
-    calloc(1, sizeof(Movement));
     rowIndex = lastMove.x;
     colIndex = lastMove.y - 1;
     counter = 0;
@@ -721,7 +738,6 @@ void makeMove(Board *board, Movement lastMove)
     }
 
     //move left
-    calloc(1, sizeof(Movement));
     rowIndex = lastMove.x;
     colIndex = lastMove.y + 1;
     counter = 0;
@@ -743,7 +759,6 @@ void makeMove(Board *board, Movement lastMove)
     }
 
     //move down right
-    calloc(1, sizeof(Movement));
     rowIndex = lastMove.x - 1;
     colIndex = lastMove.y - 1;
     counter = 0;
@@ -766,7 +781,6 @@ void makeMove(Board *board, Movement lastMove)
     }
 
     //move up right
-    calloc(1, sizeof(Movement));
     rowIndex = lastMove.x - 1;
     colIndex = lastMove.y + 1;
     counter = 0;
@@ -789,7 +803,6 @@ void makeMove(Board *board, Movement lastMove)
     }
 
     //move down left
-    calloc(1, sizeof(Movement));
     rowIndex = lastMove.x + 1;
     colIndex = lastMove.y - 1;
     counter = 0;
@@ -812,7 +825,6 @@ void makeMove(Board *board, Movement lastMove)
     }
 
     //move up left
-    calloc(1, sizeof(Movement));
     rowIndex = lastMove.x + 1;
     colIndex = lastMove.y + 1;
     counter = 0;

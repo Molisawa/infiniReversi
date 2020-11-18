@@ -50,6 +50,7 @@ typedef struct board_struct
 typedef struct minimax
 {
     Movement m;
+    int initialized;
     Board *board;
     int score;
 }Minimax;
@@ -58,6 +59,8 @@ typedef struct minimax
 void initializeGame(Board *b, int size, int difficulty);
 
 void initializeBoard(Board *board);
+
+Minimax initializeMinimax();
 
 int getNumberOfMoves(Board *board, int pieceType);
 

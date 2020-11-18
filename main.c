@@ -89,6 +89,7 @@ int main()
         scoreWhite = malloc(sizeof(char) * (floor(log10(abs(val))) + 1) + 1);
         itoa(val, scoreWhite, 10);
         DrawText(scoreWhite, saveGame.x, loadGame.height + loadGame.y + 120, 20, WHITE);
+        scoreWhite = realloc(scoreWhite,0);
 
         SetHelpers(&board);
         UpdateDrawingState(&board, SQUARE_SIZE);
