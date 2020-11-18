@@ -1,41 +1,40 @@
 // Must be even number
 #ifndef REVERSI_GAME_ENGINE_LIBRARY_H
 #define REVERSI_GAME_ENGINE_LIBRARY_H
-enum StateFlags
-{
+enum StateFlags {
     VOID,
     BLACK_PIECE,
     WHITE_PIECE,
     HELPER
 };
 
-enum winners
-{
+enum EvaluatorsFlags {
+    NUMBER_OF_PIECES,
+    HEURIST_POINTS
+};
+
+enum winners {
     WINNER,
     LOSER,
     TIE
 };
 
-enum difficulty
-{
+enum difficulty {
     EASY,
     INTERMEDIATE,
     HARD
 };
 
-typedef struct piece_struct
-{
+typedef struct piece_struct {
     enum StateFlags pieceType;
 } Piece;
 
-typedef struct movement
-{
+typedef struct movement {
     enum StateFlags pieceType;
     int x, y;
 } Movement;
 
-typedef struct board_struct
-{
+typedef struct board_struct {
     Piece **state;
     enum difficulty difficulty;
     Movement *historyBack;
@@ -47,22 +46,16 @@ typedef struct board_struct
     int size;
 } Board;
 
-typedef struct minimax
-{
-    Movement m;
-    int initialized;
-    Board *board;
-    int score;
-}Minimax;
-
 
 void initializeGame(Board *b, int size, int difficulty);
 
 void initializeBoard(Board *board);
 
-Minimax initializeMinimax();
-
 int getNumberOfMoves(Board *board, int pieceType);
+
+int getPointEvaluator(Board *board, int pieceType);
+
+int getScorePosition(Board *board, int pieceType);
 
 Movement *getAllPossibleMoves(Board *board, int pieceType);
 
@@ -96,19 +89,19 @@ void removeHistoryFoward(Board *board);
 
 Movement randomMovement(Board *board);
 
-Board buildGameState(Board board, Movement* moves,int movesCount);
+Board buildGameState(Board board, Movement *moves, int movesCount);
 
 Board copyBoard(Board board);
 
-void destructBoard(Board* board);
+void destructBoard(Board *board);
 
-Minimax MinimaxSolver(Minimax minimax, int depth, int alpha, int beta);
+int MinimaxSolver(int depth, int alpha, int beta, Board *board, Movement move);
 
 Movement bestMinimaxMove(Board *board);
 
 void computerMove(Board *board);
 
-int canMove(Board *board, int Piece);
+int canMove(Board *board, int pieceType);
 
 Movement bestMove(Board *board);
 
