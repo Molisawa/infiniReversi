@@ -4,7 +4,7 @@ project(infinireversi)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-add_library(reversi_game_engine SHARED reversi_game_engine.c reversi_game_engine.h)
+add_library(reversi_game_engine STATIC reversi_game_engine.c reversi_game_engine.h)
 
 # Set this to the minimal version you want to support
 find_package(raylib 3.0 QUIET) # Let CMake search for a raylib-config.cmake
