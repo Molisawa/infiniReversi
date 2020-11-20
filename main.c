@@ -21,8 +21,8 @@ int main() {
     const int screenWidth = 1000;
     const int screenHeight = 800;
 
-    initializeGame(&board, 8, HARD);
-    SetConfigFlags(FLAG_VSYNC_HINT);
+    initializeGame(&board, 6, HARD);
+    SetTargetFPS(60);
     InitWindow(screenWidth, screenHeight, "Reversi");
 
     float SQUARE_SIZE = (float) screenHeight / (float) board.size;
@@ -175,8 +175,8 @@ void UpdateDrawingState(Board *board, float SQUARE_SIZE) {
                                SQUARE_SIZE / 2 - 5, BLACK);
                     break;
                 case WHITE_PIECE:
-                    DrawCircle((i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2,
-                               SQUARE_SIZE / 2 - 5, WHITE);
+                    DrawCircleGradient((i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2,
+                               SQUARE_SIZE / 2 - 5, LIGHTGRAY, WHITE);
                     break;
                 case HELPER:
                     DrawCircle((i) * SQUARE_SIZE + SQUARE_SIZE / 2, (j) * SQUARE_SIZE + SQUARE_SIZE / 2,
