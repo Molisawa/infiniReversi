@@ -51,8 +51,6 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
 
 endif()
 
-set(CMAKE_C_FLAGS -pthread)
-set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--export-all-symbols")
 add_subdirectory(cjson)
 target_link_libraries(reversi_game_engine cjson)
 target_link_libraries(infinireversi reversi_game_engine)

@@ -1,13 +1,14 @@
 #include <stdlib.h>
 #include "reversi_game_engine.h"
 #include "cjson/cJSON.h"
-#include "time.h"
+
+#define HAVE_STRUCT_TIMESPEC
+
 #include <math.h>
 #include <stdio.h>
-#include <pthread.h>
+#include <time.h>
 
 int nodes = 0;
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /**
  * Initialize the game
@@ -271,41 +272,27 @@ Movement bestMinimaxMove(Board *board) {
     Movement bestMove = (Movement) {.pieceType = 0, .x = -1, .y=1};
     int score = INT_MIN;
     int numberOfMoves = getNumberOfMoves(board, WHITE_PIECE);
-    pthread_t *threads = malloc(sizeof(pthread_t) * numberOfMoves);
-    Board *boards = malloc(sizeof(Board)*numberOfMoves);
+
+    Board *boards = malloc(sizeof(Board) * numberOfMoves);
     for (int i = 0; i < numberOfMoves; i++) {
         Board tmp = copyBoard(*board);
 
         Movement m = {.pieceType = WHITE_PIECE, .x = allMoves[i].x, .y = allMoves[i].y};
 
-        int tr = pthread_create(&threads[i], NULL, MinimaxThread,
-                                (void *) &(Minimax) {11, (int) INT_MIN, INT_MAX, &tmp, m});
-        printf("Thread %d created %s\n", i, tr == 0 ? "successfully" : "unsuccessfully");
-    }
-    for (int i = 0; i < numberOfMoves; i++) {
-        int *scoreTemp;
-        int tr = pthread_join(threads[i], (void *) &scoreTemp);
-        if (*scoreTemp>score){
-            score=*scoreTemp;
-            bestMove=allMoves[i];
+        int scoreTemp = MinimaxSolver(11, (int) INT_MIN, INT_MAX, &tmp, m);
+        if (scoreTemp > score) {
+            score = scoreTemp;
+            bestMove = m;
         }
-        free(scoreTemp);
-        destructBoard(&boards[i]);
+        destructBoard(&tmp);
     }
+
     allMoves = realloc(allMoves, 0);
     printf("Nodes searched = %d\n", nodes);
     return bestMove;
 
 }
 
-void *MinimaxThread(void *args) {
-    Minimax *minimax = (Minimax *) args;
-    int score = MinimaxSolver(minimax->depth, minimax->alpha, minimax->beta, minimax->board, minimax->move);
-    int *ponterScore = malloc(sizeof(int));
-    *ponterScore=score;
-    printf("Thread got score %d with x %d y %d\n", score, minimax->move.x, minimax->move.y);
-    pthread_exit(ponterScore);
-}
 
 Movement randomMovement(Board *board) {
     for (int i = 0; i < board->size; i++) {
@@ -498,10 +485,7 @@ Board copyBoard(Board board) {
 }
 
 int MinimaxSolver(int depth, int alpha, int beta, Board *board1, Movement moveEval) {
-
-    pthread_mutex_lock(&mutex);
     nodes++;
-    pthread_mutex_unlock(&mutex);
 
     makeMove(board1, moveEval);
     if (depth == 0 || isGameOver(board1)) {

@@ -46,12 +46,6 @@ typedef struct board_struct {
     int size;
 } Board;
 
-typedef struct minimax_struct {
-    int depth, alpha, beta;
-    Board *board;
-    Movement move;
-} Minimax;
-
 
 void initializeGame(Board *b, int size, int difficulty);
 
@@ -102,8 +96,6 @@ Board copyBoard(Board board);
 void destructBoard(Board *board);
 
 int MinimaxSolver(int depth, int alpha, int beta, Board *board, Movement move);
-
-void *MinimaxThread(void *args);
 
 Movement bestMinimaxMove(Board *board);
 
