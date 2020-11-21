@@ -7,7 +7,6 @@
 #include <malloc.h>
 #include <math.h>
 #include <dirent.h>
-#include <stdio.h>
 
 typedef struct menu {
     Rectangle goBackButton, goFowardButton, saveGameButton, loadGameButton;
@@ -17,11 +16,19 @@ typedef enum {
     MENU, GAME, SAVE, LOAD, EDITOR
 } ScreenFlag;
 
+typedef struct directory {
+    char **directories;
+    int NumberOfDirectories;
+} DirectoryEntry;
+
 void UpdateDrawingState(Board *board, float size);
 
 void DrawBoardGrid(Board *board, float SQUARE_SIZE);
 
-void LoadFile(Board *board, int screenHeight, ScreenFlag *screen, float *SQUARE_SIZE, char **pDirent, int i);
+void LoadFile(Board *board, int screenHeight, int screenWidth, ScreenFlag *screen, float *SQUARE_SIZE, bool *collision,
+              float *offset, float *position);
+
+void DestroyDirectory(DirectoryEntry directory);
 
 void CheckPiecePlayed(Board *board, float SQUARE_SIZE, int clicked, Vector2 mouse);
 
@@ -47,6 +54,9 @@ int main() {
     int numOfChars = 0;
     int frameCounter = 0;
 
+    float offset = 0.0f;
+    float position = 0.0f;
+    bool collision = false;
     initializeGame(&board, 8, HARD);
     SetTargetFPS(60);
     InitWindow(screenWidth, screenHeight, "Reversi");
@@ -65,38 +75,13 @@ int main() {
 
     Menu menu = (Menu) {goBackButton, goFowardButton, saveGameButton, loadGameButton};
 
-    DIR *d;
-    struct dirent *dir;
-    d = opendir("saved/");
-
-    int count = 0;
-    char **dirs = malloc(sizeof(char *));
-
-    if (d) {
-        while ((dir = readdir(d)) != NULL) {
-            char *tmp = calloc(dir->d_namlen + 1, sizeof(char));
-            for (int i = 0; i < dir->d_namlen; i++) {
-                tmp[i] = dir->d_name[i];
-            }
-            tmp[dir->d_namlen] = '\0';
-            if (IsFileExtension(tmp, ".txt")) {
-                count++;
-                dirs = realloc(dirs, count * sizeof(char *));
-                dirs[count - 1] = tmp;
-            }
-        }
-        closedir(d);
-    }
-
 
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
         frameCounter = (frameCounter + 1) % 60;
         Vector2 mouse = GetMousePosition();
-
         int clicked = 0;
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) clicked = 1;
-
 
         int key = GetKeyPressed();
 
@@ -138,7 +123,7 @@ int main() {
                 ShowFileSaver(&board, screenWidth, screenHeight, filename, frameCounter, mouse, clicked, screen);
                 break;
             case LOAD:
-                LoadFile(&board, screenHeight, screen, &SQUARE_SIZE, dirs, count);
+                LoadFile(&board, screenHeight, screenWidth, screen, &SQUARE_SIZE, &collision, &offset, &position);
                 break;
             case EDITOR:
                 break;
@@ -165,6 +150,41 @@ void CheckButtonPressed(Menu *menu, Board *board, ScreenFlag *screen, Vector2 mo
     } else if (CheckCollisionPointRec(mouse, menu->loadGameButton)) {
         *screen = LOAD;
     }
+}
+
+DirectoryEntry getDirectories() {
+    DIR *d;
+    struct dirent *dir;
+    d = opendir("saved/");
+
+    int count = 0;
+    char **dirs = malloc(sizeof(char *));
+
+    if (d) {
+        while ((dir = readdir(d)) != NULL) {
+            char *tmp = calloc(dir->d_namlen + 1, sizeof(char));
+            for (int i = 0; i < dir->d_namlen; i++) {
+                tmp[i] = dir->d_name[i];
+
+            }
+            tmp[dir->d_namlen] = '\0';
+            if (IsFileExtension(tmp, ".brd")) {
+                count++;
+                dirs = realloc(dirs, count * sizeof(char *));
+                dirs[count - 1] = tmp;
+            }
+        }
+        closedir(d);
+    }
+    return (DirectoryEntry) {dirs, count};
+
+}
+
+void DestroyDirectory(DirectoryEntry directory) {
+    for (int i = 0; i < directory.NumberOfDirectories; i++) {
+        free(directory.directories[i]);
+    }
+    free(directory.directories);
 }
 
 void CheckPiecePlayed(Board *board, float SQUARE_SIZE, int clicked, Vector2 mouse) {
@@ -276,6 +296,7 @@ void ShowFileSaver(Board *board, int screenWidth, int screenHeight, char *filena
     int overSave = CheckCollisionPointRec(mouse, saveRect);
     int overCancel = CheckCollisionPointRec(mouse, cancelRect);
 
+
     DrawRectangleRec(saveRect, overSave ? LIGHTGRAY : GRAY);
     DrawText("Save", saveRect.x + 10, saveRect.y + 5, 20, WHITE);
     DrawRectangleRec(cancelRect, overCancel ? LIGHTGRAY : GRAY);
@@ -288,7 +309,7 @@ void ShowFileSaver(Board *board, int screenWidth, int screenHeight, char *filena
 
     if (clicked && overSave) {
         mkdir("saved");
-        SaveFileText(TextFormat("saved/%s.txt", filename), saveGame(board));
+        SaveFileText(TextFormat("saved/%s.brd", filename), saveGame(board));
         filename[0] = '\0';
         *screen = GAME;
     }
@@ -301,12 +322,67 @@ void ShowFileSaver(Board *board, int screenWidth, int screenHeight, char *filena
 
 }
 
-void LoadFile(Board *board, int screenHeight, ScreenFlag *screen, float *SQUARE_SIZE, char **dirs, int count) {
+void LoadFile(Board *board, int screenHeight, int screenWidth, ScreenFlag *screen, float *SQUARE_SIZE, bool *collision,
+              float *offset, float *position) {
+
+    DirectoryEntry directory = getDirectories();
     ClearBackground(RAYWHITE);
-    for (int i = 0; i < count; i++) {
-        DrawRectangle(0, (i + 1) * 50, MeasureText(dirs[i], 20) + 20, 30, RAYWHITE);
-        DrawText(dirs[i], 10, i * 50, 20, BLACK);
+    bool bar = (50 * directory.NumberOfDirectories + 10) > (screenHeight - 80);
+    float barSize =
+            ((float) (screenHeight - 80) / (float) (50 * directory.NumberOfDirectories + 10)) * (screenHeight - 70);
+
+    Rectangle cancelRect = (Rectangle) {25, screenHeight - 60, screenWidth - 50, 50};
+
+    Rectangle scrollRect = (Rectangle) {screenWidth - 20,
+                                        5 + fmin(fmax(0, *offset + *position), screenHeight - 70 - barSize), 15,
+                                        barSize};
+    if (bar) {
+        DrawRectangle(screenWidth - 20, 5, 15, cancelRect.y - 10, Fade(LIGHTGRAY, 0.6));
+
+        if (*collision) {
+            *offset = GetMousePosition().y;
+            if (!IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+                *collision = false;
+            }
+        }
+        if (CheckCollisionPointRec(GetMousePosition(), scrollRect) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            *offset = GetMousePosition().y;
+            *position = scrollRect.y - *offset;
+            *collision = true;
+        }
+        DrawRectangleRec(scrollRect, *collision ? GRAY : Fade(GRAY, 0.65));
     }
+    float percent = bar?(scrollRect.y-5) / (float) (screenHeight - 70 - barSize):0;
+    for (int i = 0; i < directory.NumberOfDirectories; i++) {
+        Rectangle rec = (Rectangle) {10, i * 50 + 10 -
+                                         (((50 * directory.NumberOfDirectories + 10) - screenHeight + 60) * percent),
+                                     MeasureText(directory.directories[i], 20) + 20, 30};
+        int over = CheckCollisionPointRec(GetMousePosition(), rec);
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && over) {
+            Board boardTemp = loadGame(LoadFileText(TextFormat("saved/%s", directory.directories[i])));
+            if (boardTemp.initialized != 1) {
+                *screen = GAME;
+                DestroyDirectory(directory);
+                return;
+            }
+            *board = boardTemp;
+            *SQUARE_SIZE = (float) screenHeight / (float) board->size;
+            *screen = GAME;
+        }
+        DrawRectangleRec(rec, over ? LIGHTGRAY : RAYWHITE);
+        DrawText(directory.directories[i], 20, rec.y + 5, 20, BLACK);
+        //DestroyDirectory(directory);
+    }
+
+    DrawRectangle(0, screenHeight - 70, screenWidth, 70, RAYWHITE);
+
+
+    int over = CheckCollisionPointRec(GetMousePosition(), cancelRect);
+    DrawRectangleRec(cancelRect, over ? LIGHTGRAY : GRAY);
+    if (over && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) *screen = GAME;
+    DrawText("CANCEL", screenWidth / 2 - MeasureText("CANCEL", 30) / 2 + cancelRect.x / 2, cancelRect.y + 10, 30,
+             WHITE);
+
 }
 
 void UpdateDrawingState(Board *board, float SQUARE_SIZE) {
