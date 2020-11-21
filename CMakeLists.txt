@@ -6,6 +6,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_library(reversi_game_engine SHARED reversi_game_engine.c reversi_game_engine.h)
 
+add_library(graphic_engine STATIC graphic_engine.c graphic_engine.h)
+
 # Set this to the minimal version you want to support
 find_package(raylib 3.0 QUIET) # Let CMake search for a raylib-config.cmake
 
@@ -54,5 +56,5 @@ endif()
 set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--export-all-symbols")
 add_subdirectory(cjson)
 target_link_libraries(reversi_game_engine cjson)
-target_link_libraries(infinireversi reversi_game_engine)
-target_link_libraries(infinireversi raylib)
+target_link_libraries(graphic_engine raylib reversi_game_engine)
+target_link_libraries(infinireversi graphic_engine raylib)

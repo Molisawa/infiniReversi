@@ -1,9 +1,6 @@
 #include <stdlib.h>
 #include "reversi_game_engine.h"
 #include "cjson/cJSON.h"
-
-#define HAVE_STRUCT_TIMESPEC
-
 #include <math.h>
 #include <stdio.h>
 #include <time.h>
