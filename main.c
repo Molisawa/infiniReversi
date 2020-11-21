@@ -38,7 +38,7 @@ void DrawBackground(Board *board, Menu menu, float SQUARE_SIZE, int screenWidth,
                     Vector2 mouse, int clicked);
 
 void ShowFileSaver(Board *board, int screenWidth, int screenHeight, char *filename, int frameCounter, Vector2 mouse,
-                   int clicked, ScreenFlag *screen);
+                   int clicked, ScreenFlag *screen, int * numOfChars);
 
 int main() {
     Board board;
@@ -120,7 +120,7 @@ int main() {
                 DrawFPS(10, 10);
                 break;
             case SAVE:
-                ShowFileSaver(&board, screenWidth, screenHeight, filename, frameCounter, mouse, clicked, screen);
+                ShowFileSaver(&board, screenWidth, screenHeight, filename, frameCounter, mouse, clicked, screen, &numOfChars);
                 break;
             case LOAD:
                 LoadFile(&board, screenHeight, screenWidth, screen, &SQUARE_SIZE, &collision, &offset, &position);
@@ -281,7 +281,7 @@ void DrawBackground(Board *board, Menu menu, float SQUARE_SIZE, int screenWidth,
 }
 
 void ShowFileSaver(Board *board, int screenWidth, int screenHeight, char *filename, int frameCounter, Vector2 mouse,
-                   int clicked, ScreenFlag *screen) {
+                   int clicked, ScreenFlag *screen, int * numOfChars) {
     ClearBackground(RAYWHITE);
 
     int width = fmax(MeasureText(filename, 30), MeasureText("XXXXXXXX", 30)) + 30;
@@ -310,12 +310,14 @@ void ShowFileSaver(Board *board, int screenWidth, int screenHeight, char *filena
     if (clicked && overSave) {
         mkdir("saved");
         SaveFileText(TextFormat("saved/%s.brd", filename), saveGame(board));
-        filename[0] = '\0';
+        memset(filename,0,11);
+        *numOfChars=0;
         *screen = GAME;
     }
 
     if (clicked && overCancel) {
-        filename[0] = '\0';
+        memset(filename,0,11);
+        *numOfChars=0;
         *screen = GAME;
     }
 
