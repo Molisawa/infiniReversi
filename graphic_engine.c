@@ -148,10 +148,16 @@ void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenF
         DrawText(text, (screenFeatures->squareSize * board->size) / 2 - MeasureText(text, 60) / 2,
                  screenFeatures->screenHeight / 2 - 30 + 80 + 10, 60, color);
     }
+    int margin = board->size * screenFeatures->squareSize;
+    int freeSpace = screenFeatures->screenWidth - margin;
+    Rectangle exit = (Rectangle) {margin + 30, screenFeatures->screenHeight - 150, (freeSpace - 60), 100};
+    DrawRectangleRec(exit, WHITE);
+    DrawText("Exit", exit.x + exit.width / 2 - MeasureText("Exit", 30) / 2, exit.y + exit.height / 2 - 15, 30, BLACK);
+    if (clicked && CheckCollisionPointRec(mouse, exit)) *screen = MENU;
 }
 
 void ShowFileSaverScreen(Board *board, ScreenFeatures *screenFeatures, char *filename, int frameCounter, Vector2 mouse,
-                         ScreenFlag *screen, int *numOfChars) {
+                         ScreenFlag *screen, int *numOfChars, ScreenFlag* lastScreen) {
     ClearBackground(RAYWHITE);
 
     int width = fmax(MeasureText(filename, 30), MeasureText("XXXXXXXX", 30)) + 30;
@@ -186,13 +192,13 @@ void ShowFileSaverScreen(Board *board, ScreenFeatures *screenFeatures, char *fil
         SaveFileText(TextFormat("saved/%s.brd", filename), saveGame(board));
         memset(filename, 0, 11);
         *numOfChars = 0;
-        *screen = GAME;
+        *screen = *lastScreen;
     }
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && overCancel) {
         memset(filename, 0, 11);
         *numOfChars = 0;
-        *screen = GAME;
+        *screen = *lastScreen;
     }
 
 
@@ -421,11 +427,19 @@ void EditorScreen(ScreenFeatures *screenFeatures, Board *board, Piece *piece, Sc
             board->state[x][y].pieceType = VOID;
     }
 
-    Rectangle save = (Rectangle) {margin + 30, screenFeatures->screenHeight - 150, (freeSpace - 60), 100};
+    Rectangle exit = (Rectangle) {margin + 30, screenFeatures->screenHeight - 150, (freeSpace - 60), 100};
+    DrawRectangleRec(exit, LIGHTGRAY);
+    DrawText("Exit", exit.x + exit.width / 2 - MeasureText("Exit", 30) / 2, exit.y + exit.height / 2 - 15, 30, WHITE);
+
+    Rectangle save = (Rectangle) {margin + 30, exit.y-exit.height-50, (freeSpace - 60), 100};
+
+
     DrawRectangleRec(save, LIGHTGRAY);
     DrawText("Save", save.x + save.width / 2 - MeasureText("Save", 30) / 2, save.y + save.height / 2 - 15, 30, WHITE);
 
     if (clicked && CheckCollisionPointRec(mouse, save)) *screen = SAVE;
+
+    if (clicked && CheckCollisionPointRec(mouse, exit)) *screen = MENU;
 
 
     if (clicked && CheckCollisionPointCircle(mouse, black, radius)) piece->pieceType = BLACK_PIECE;

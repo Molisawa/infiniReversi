@@ -67,6 +67,7 @@ void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenF
                 Vector2 mouse, int clicked);
 
 void ShowFileSaverScreen(Board *board, ScreenFeatures *screenFeatures, char *filename, int frameCounter, Vector2 mouse,
-                         ScreenFlag *screen, int *numOfChars);
+                         ScreenFlag *screen, int *numOfChars, ScreenFlag*);
+
 void CheckMenuButtonPressed(MenuOptions , ScreenFlag*, Board*);
 #endif //INFINIREVERSI_GRAPHIC_ENGINE_H

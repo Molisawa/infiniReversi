@@ -138,6 +138,11 @@ void initializeBoard(Board *board) {
     board->state[board->size / 2 - 1][board->size / 2].pieceType = BLACK_PIECE;
     board->state[board->size / 2][board->size / 2 - 1].pieceType = BLACK_PIECE;
 
+    board->initialState[board->size / 2 - 1][board->size / 2 - 1].pieceType = WHITE_PIECE;
+    board->initialState[board->size / 2][board->size / 2].pieceType = WHITE_PIECE;
+    board->initialState[board->size / 2 - 1][board->size / 2].pieceType = BLACK_PIECE;
+    board->initialState[board->size / 2][board->size / 2 - 1].pieceType = BLACK_PIECE;
+
 }
 
 void setCustomBoardState(Board *board) {
