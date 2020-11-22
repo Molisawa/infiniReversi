@@ -1,4 +1,3 @@
-// Must be even number
 #ifndef REVERSI_GAME_ENGINE_LIBRARY_H
 #define REVERSI_GAME_ENGINE_LIBRARY_H
 
