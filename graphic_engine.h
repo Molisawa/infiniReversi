@@ -72,4 +72,9 @@ void ShowFileSaverScreen(Board *board, ScreenFeatures *screenFeatures, char *fil
 
 void CheckMenuButtonPressed(MenuOptions, ScreenFlag *, Board *);
 
+void ConfigEditorScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag *screen, int*);
+
+void ConfigGameScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag *screen, int *customBoardSize,
+                      Difficulty *difficulty);
+
 #endif //INFINIREVERSI_GRAPHIC_ENGINE_H

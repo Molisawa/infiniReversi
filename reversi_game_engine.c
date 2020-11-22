@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdbool.h>
+#include <limits.h>
 
 int nodes = 0;
 

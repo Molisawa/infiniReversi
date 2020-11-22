@@ -4,7 +4,6 @@
 
 #include "reversi_game_engine.h"
 #include "graphic_engine.h"
-#include <raylib.h>
 #include <malloc.h>
 
 
@@ -28,12 +27,13 @@ int main() {
     char filename[11] = "";
     int numOfChars = 0;
     int frameCounter = 0;
+    Difficulty difficulty = EASY;
+    int customBoardSize = 0;
 
     Piece pieceSelected = (Piece) {BLACK_PIECE};
 
     Slider slider;
     initSlider(&slider);
-    initializeGame(&board, 8, HARD, false);
 
     SetTargetFPS(60);
     InitWindow(screenWidth, screenHeight, "Reversi");
@@ -49,7 +49,7 @@ int main() {
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
 
-        UpdateMusicStream(music);
+
         frameCounter = (frameCounter + 1) % 60;
         Vector2 mouse = GetMousePosition();
         int clicked = 0;
@@ -76,6 +76,7 @@ int main() {
 
         switch (*screen) {
             case MENU:
+                UpdateMusicStream(music);
                 MenuScreen(&screenF, frameCounter, menuOptions, screen, &board);
                 break;
             case GAME:
@@ -101,6 +102,14 @@ int main() {
                 EditorScreen(&screenF, &board, &pieceSelected, screen);
                 EndDrawing();
                 break;
+            case CONFIG_EDITOR:
+                ConfigEditorScreen(&screenF, &board, screen, &customBoardSize);
+                EndDrawing();
+                break;
+            case CONFIG_GAME:
+                ConfigGameScreen(&screenF, &board, screen, &customBoardSize, &difficulty);
+                EndDrawing();
+                break;
         }
 
         //EndDrawing();
@@ -108,7 +117,6 @@ int main() {
     }
 
     free(screen);
-    destructBoard(&board);
     free(lastScreen);
     UnloadMusicStream(music);
     CloseAudioDevice();

@@ -153,11 +153,14 @@ void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenF
     Rectangle exit = (Rectangle) {margin + 30, screenFeatures->screenHeight - 150, (freeSpace - 60), 100};
     DrawRectangleRec(exit, WHITE);
     DrawText("Exit", exit.x + exit.width / 2 - MeasureText("Exit", 30) / 2, exit.y + exit.height / 2 - 15, 30, BLACK);
-    if (clicked && CheckCollisionPointRec(mouse, exit)) *screen = MENU;
+    if (clicked && CheckCollisionPointRec(mouse, exit)) {
+        destructBoard(board);
+        *screen = MENU;
+    }
 }
 
 void ShowFileSaverScreen(Board *board, ScreenFeatures *screenFeatures, char *filename, int frameCounter, Vector2 mouse,
-                         ScreenFlag *screen, int *numOfChars, ScreenFlag* lastScreen) {
+                         ScreenFlag *screen, int *numOfChars, ScreenFlag *lastScreen) {
     ClearBackground(RAYWHITE);
 
     int width = fmax(MeasureText(filename, 30), MeasureText("XXXXXXXX", 30)) + 30;
@@ -349,12 +352,13 @@ void initScreenFeatures(ScreenFeatures *features, int screenWidth, int screenHei
     features->squareSize = squareSize;
 }
 
-void MenuScreen(ScreenFeatures *screenFeatures, int frameCount, MenuOptions menuOptions, ScreenFlag *screenFlag, Board *board) {
+void MenuScreen(ScreenFeatures *screenFeatures, int frameCount, MenuOptions menuOptions, ScreenFlag *screenFlag,
+                Board *board) {
     ClearBackground(DARKGREEN);
     int frame = floor(frameCount * 0.383);
     bool putZero = frame < 10;
     Image image = LoadImage(
-            TextFormat("resources/frames/frame_%s_delay-0.03s.gif", TextFormat("%s%d", putZero ? "0" : "", frame)));
+            TextFormat("resources/frames/frame_%s%d_delay-0.03s.gif", putZero ? "0" : "", frame));
     Texture2D texture = LoadTextureFromImage(image);
     DrawTexture(texture, screenFeatures->screenWidth / 2 - image.width / 2, screenFeatures->screenHeight * 0.1, WHITE);
     DrawRectangleRec(menuOptions.startGameButton, LIGHTGRAY);
@@ -396,34 +400,41 @@ void EditorScreen(ScreenFeatures *screenFeatures, Board *board, Piece *piece, Sc
 
     UpdateDrawingState(board, screenFeatures);
     if (mouse.x >= 0 && mouse.x < margin && mouse.y >= 0 && mouse.y < screenFeatures->screenHeight) {
+        clicked = IsMouseButtonDown(MOUSE_LEFT_BUTTON);
         int x = floorf(mouse.x / screenFeatures->squareSize);
         int y = floorf(mouse.y / screenFeatures->squareSize);
         Vector2 helper = (Vector2) {x * screenFeatures->squareSize + radius,
                                     y * screenFeatures->squareSize + radius};
-        DrawRectangle(helper.x + 1 - radius, helper.y + 1 - radius, screenFeatures->squareSize - 2,
-                      screenFeatures->squareSize - 2,
-                      DARKGREEN);
+
+        Rectangle helperRect = (Rectangle) {helper.x + 1 - radius, helper.y + 1 - radius,
+                                            screenFeatures->squareSize - 2,
+                                            screenFeatures->squareSize - 2};
+        DrawRectangleRec(helperRect, DARKGREEN);
+
+        Vector2 circle = (Vector2) {x * screenFeatures->squareSize + screenFeatures->squareSize / 2,
+                                    y * screenFeatures->squareSize + screenFeatures->squareSize / 2};
 
         switch (piece->pieceType) {
             case BLACK_PIECE:
-                DrawCircle(helper.x, helper.y,
-                           screenFeatures->squareSize / 2 - 5, Fade(BLACK, 0.5));
+                DrawCircleV(circle,
+                            screenFeatures->squareSize / 2 - 5, Fade(BLACK, 0.5));
 
                 break;
             case WHITE_PIECE:
-                DrawCircle(helper.x, helper.y,
-                           screenFeatures->squareSize / 2 - 5, Fade(WHITE, 0.5));
+                DrawCircleV(circle,
+                            screenFeatures->squareSize / 2 - 5, Fade(WHITE, 0.5));
                 break;
             default:
                 break;
         }
-        if (CheckCollisionPointCircle(mouse, helper, radius) && clicked)
+        if (CheckCollisionPointRec(mouse, helperRect) && clicked)
             board->state[x][y].pieceType = isBlack ? BLACK_PIECE : WHITE_PIECE;
 
-        if (CheckCollisionPointCircle(mouse, helper, radius) && clicked)
+        if (CheckCollisionPointRec(mouse, helperRect) && clicked)
             board->initialState[x][y].pieceType = isBlack ? BLACK_PIECE : WHITE_PIECE;
 
-        if (CheckCollisionPointCircle(mouse, helper, radius) && IsMouseButtonPressed(MOUSE_RIGHT_BUTTON))
+        if (CheckCollisionPointRec(mouse, helperRect) && (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) ||
+            IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
             board->state[x][y].pieceType = VOID;
     }
 
@@ -431,33 +442,179 @@ void EditorScreen(ScreenFeatures *screenFeatures, Board *board, Piece *piece, Sc
     DrawRectangleRec(exit, LIGHTGRAY);
     DrawText("Exit", exit.x + exit.width / 2 - MeasureText("Exit", 30) / 2, exit.y + exit.height / 2 - 15, 30, WHITE);
 
-    Rectangle save = (Rectangle) {margin + 30, exit.y-exit.height-50, (freeSpace - 60), 100};
+    Rectangle save = (Rectangle) {margin + 30, exit.y - exit.height - 50, (freeSpace - 60), 100};
 
 
     DrawRectangleRec(save, LIGHTGRAY);
     DrawText("Save", save.x + save.width / 2 - MeasureText("Save", 30) / 2, save.y + save.height / 2 - 15, 30, WHITE);
 
-    if (clicked && CheckCollisionPointRec(mouse, save)) *screen = SAVE;
-
-    if (clicked && CheckCollisionPointRec(mouse, exit)) *screen = MENU;
-
 
     if (clicked && CheckCollisionPointCircle(mouse, black, radius)) piece->pieceType = BLACK_PIECE;
     if (clicked && CheckCollisionPointCircle(mouse, white, radius)) piece->pieceType = WHITE_PIECE;
 
-}
+    if (clicked && CheckCollisionPointRec(mouse, save)) *screen = SAVE;
 
-void CheckMenuButtonPressed(MenuOptions menuOptions, ScreenFlag *screen, Board*board) {
-    bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
-    Vector2 mouse = GetMousePosition();
-    if (clicked && CheckCollisionPointRec(mouse, menuOptions.startGameButton))
-        *screen = GAME;
-    if (clicked && CheckCollisionPointRec(mouse, menuOptions.loadGameButton))
-        *screen = LOAD;
-    if (clicked && CheckCollisionPointRec(mouse, menuOptions.editorButton)) {
-        *screen = EDITOR;
-        board->custom=true;
+    if (clicked && CheckCollisionPointRec(mouse, exit)) {
+        destructBoard(board);
+        *screen = MENU;
     }
 }
 
-#pragma clang diagnostic pop
+void CheckMenuButtonPressed(MenuOptions menuOptions, ScreenFlag *screen, Board *board) {
+    bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+    Vector2 mouse = GetMousePosition();
+    if (clicked && CheckCollisionPointRec(mouse, menuOptions.startGameButton))
+        *screen = CONFIG_GAME;
+    if (clicked && CheckCollisionPointRec(mouse, menuOptions.loadGameButton))
+        *screen = LOAD;
+    if (clicked && CheckCollisionPointRec(mouse, menuOptions.editorButton)) {
+        *screen = CONFIG_EDITOR;
+        board->custom = true;
+    }
+}
+
+void
+ConfigEditorScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag *screen, int *customBoardSize) {
+    ClearBackground(RAYWHITE);
+    int size = 6 + 2 * *customBoardSize;
+    const char *text = TextFormat("%d", size);
+    DrawText(text, screenFeatures->screenWidth / 2 - MeasureText(text, 120) / 2, screenFeatures->screenHeight / 2 - 180,
+             120, BLACK);
+
+    DrawText("Chose your board size", screenFeatures->screenWidth / 2 - MeasureText("Chose your board size", 70) / 2,
+             screenFeatures->screenHeight / 2 - 300,
+             70, GRAY);
+    int margin = (screenFeatures->screenWidth - 2 * 130) / 3;
+    Rectangle sum = (Rectangle) {margin, screenFeatures->screenHeight / 2 - 15, 130, 130};
+    Rectangle subs = (Rectangle) {margin + sum.x + sum.width, sum.y, sum.width, sum.height};
+
+    Vector2 mouse = GetMousePosition();
+    bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+    bool overSum = CheckCollisionPointRec(mouse, sum);
+    bool overSubs = CheckCollisionPointRec(mouse, subs);
+
+    DrawRectangleRec(sum, overSum ? LIGHTGRAY : RAYWHITE);
+    DrawText("+", sum.x + sum.width / 2 - MeasureText("+", 100) / 2, sum.y + sum.height / 2 - 50, 100, BLACK);
+    DrawRectangleRec(subs, overSubs ? LIGHTGRAY : RAYWHITE);
+    DrawText("-", subs.x + subs.width / 2 - MeasureText("-", 100) / 2, subs.y + subs.height / 2 - 50, 100, BLACK);
+
+    Rectangle acceptButton = (Rectangle) {screenFeatures->screenWidth / 2 - 100, screenFeatures->screenHeight / 2 + 120,
+                                          200, 80};
+    Rectangle cancelButton = (Rectangle) {screenFeatures->screenWidth / 2 - 100,
+                                          acceptButton.y + acceptButton.height + 50, acceptButton.width,
+                                          acceptButton.height};
+
+    DrawRectangleRec(acceptButton, LIGHTGRAY);
+    DrawRectangleRec(cancelButton, LIGHTGRAY);
+
+    DrawText("Accept", acceptButton.x + acceptButton.width / 2 - MeasureText("Accept", 40) / 2,
+             acceptButton.y + acceptButton.height / 2 - 20, 40, WHITE);
+    DrawText("Cancel", cancelButton.x + cancelButton.width / 2 - MeasureText("Cancel", 40) / 2,
+             cancelButton.y + cancelButton.height / 2 - 20, 40, WHITE);
+
+    if (overSum && clicked) (*customBoardSize)++;
+    if (overSubs && clicked && *customBoardSize > 0) (*customBoardSize)--;
+
+    if (CheckCollisionPointRec(mouse, acceptButton) && clicked) {
+        initializeGame(board, size, EASY, true);
+        *screen = EDITOR;
+        *customBoardSize = 0;
+        screenFeatures->squareSize = screenFeatures->screenHeight / size;
+    }
+    if (CheckCollisionPointRec(mouse, cancelButton) && clicked) {
+        *screen = MENU;
+        *customBoardSize = 0;
+    }
+
+}
+
+void ConfigGameScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag *screen, int *customBoardSize,
+                      Difficulty *difficulty) {
+
+    ClearBackground(RAYWHITE);
+    int size = 6 + 2 * *customBoardSize;
+    const char *text = TextFormat("%d", size);
+    DrawText(text, screenFeatures->screenWidth / 3 - MeasureText(text, 100) / 2, screenFeatures->screenHeight / 2 - 180,
+             100, BLACK);
+
+    DrawText("Chose your board size", screenFeatures->screenWidth / 3 - MeasureText("Chose your board size", 30) / 2,
+             screenFeatures->screenHeight / 2 - 300,
+             30, GRAY);
+    int margin = (2 * (screenFeatures->screenWidth / 3) - 2 * 130) / 3;
+    Rectangle sum = (Rectangle) {margin, screenFeatures->screenHeight / 2 - 30, 130, 130};
+    Rectangle subs = (Rectangle) {margin + sum.x + sum.width, sum.y, sum.width, sum.height};
+
+    Vector2 mouse = GetMousePosition();
+    bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+    bool overSum = CheckCollisionPointRec(mouse, sum);
+    bool overSubs = CheckCollisionPointRec(mouse, subs);
+
+    DrawRectangleRec(sum, overSum ? LIGHTGRAY : RAYWHITE);
+    DrawText("+", sum.x + sum.width / 2 - MeasureText("+", 70) / 2, sum.y + sum.height / 2 - 35, 70, BLACK);
+    DrawRectangleRec(subs, overSubs ? LIGHTGRAY : RAYWHITE);
+    DrawText("-", subs.x + subs.width / 2 - MeasureText("-", 70) / 2, subs.y + subs.height / 2 - 35, 70, BLACK);
+
+    Rectangle acceptButton = (Rectangle) {screenFeatures->screenWidth / 2 - 100, screenFeatures->screenHeight / 2 + 120,
+                                          200, 80};
+    Rectangle cancelButton = (Rectangle) {screenFeatures->screenWidth / 2 - 100,
+                                          acceptButton.y + acceptButton.height + 50, acceptButton.width,
+                                          acceptButton.height};
+
+    DrawRectangleRec(acceptButton, LIGHTGRAY);
+    DrawRectangleRec(cancelButton, LIGHTGRAY);
+
+
+    DrawText("Accept", acceptButton.x + acceptButton.width / 2 - MeasureText("Accept", 40) / 2,
+             acceptButton.y + acceptButton.height / 2 - 20, 40, WHITE);
+    DrawText("Cancel", cancelButton.x + cancelButton.width / 2 - MeasureText("Cancel", 40) / 2,
+             cancelButton.y + cancelButton.height / 2 - 20, 40, WHITE);
+
+    float marginDifficulty = (screenFeatures->screenHeight - 340) / 2;
+
+    Rectangle easyButton = (Rectangle) {
+            screenFeatures->screenWidth * 3 / 4 - (screenFeatures->screenWidth / 3 - 80) / 2,
+            marginDifficulty, screenFeatures->screenWidth / 3 - 80, 80};
+
+    Rectangle intermediateButton = (Rectangle) {easyButton.x, easyButton.y + easyButton.height + 50, easyButton.width,
+                                                easyButton.height};
+
+    Rectangle hardButton = (Rectangle) {intermediateButton.x, intermediateButton.y + intermediateButton.height + 50,
+                                        intermediateButton.width,
+                                        intermediateButton.height};
+
+    DrawRectangleRec(easyButton, *difficulty == EASY ? GRAY : LIGHTGRAY);
+    DrawRectangleRec(intermediateButton, *difficulty == INTERMEDIATE ? GRAY : LIGHTGRAY);
+    DrawRectangleRec(hardButton, *difficulty == HARD ? GRAY : LIGHTGRAY);
+
+    DrawText("EASY", easyButton.x + easyButton.width / 2 - MeasureText("EASY", 20) / 2,
+             easyButton.y + easyButton.height / 2 - 10, 20, WHITE);
+    DrawText("INTERMEDIATE", intermediateButton.x + intermediateButton.width / 2 - MeasureText("INTERMEDIATE", 20) / 2,
+             intermediateButton.y + intermediateButton.height / 2 - 10, 20, WHITE);
+    DrawText("HARD", hardButton.x + hardButton.width / 2 - MeasureText("HARD", 20) / 2,
+             hardButton.y + hardButton.height / 2 - 10, 20, WHITE);
+
+    bool overEasy = CheckCollisionPointRec(mouse, easyButton);
+    bool overIntermediate = CheckCollisionPointRec(mouse, intermediateButton);
+    bool overHard = CheckCollisionPointRec(mouse, hardButton);
+
+    if (clicked && overEasy) *difficulty = EASY;
+    if (clicked && overIntermediate) *difficulty = INTERMEDIATE;
+    if (clicked && overHard) *difficulty = HARD;
+
+    if (overSum && clicked) (*customBoardSize)++;
+    if (overSubs && clicked && *customBoardSize > 0) (*customBoardSize)--;
+
+    if (CheckCollisionPointRec(mouse, acceptButton) && clicked) {
+        initializeGame(board, size, *difficulty, true);
+        *screen = GAME;
+        *difficulty = EASY;
+        *customBoardSize = 0;
+        screenFeatures->squareSize = screenFeatures->screenHeight / size;
+    }
+    if (CheckCollisionPointRec(mouse, cancelButton) && clicked) {
+        *screen = MENU;
+        *difficulty = EASY;
+        *customBoardSize = 0;
+    }
+
+}

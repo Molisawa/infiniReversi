@@ -4,37 +4,37 @@
 
 #include <stdbool.h>
 
-enum StateFlags {
+typedef enum {
     VOID,
     BLACK_PIECE,
     WHITE_PIECE,
     HELPER
-};
+} StateFlags;
 
-enum winners {
+typedef enum {
     WINNER,
     LOSER,
     TIE
-};
+} Winners;
 
-enum difficulty {
+typedef enum {
     EASY,
     INTERMEDIATE,
     HARD
-};
+} Difficulty;
 
-typedef struct piece_struct {
-    enum StateFlags pieceType;
+typedef struct {
+    StateFlags pieceType;
 } Piece;
 
-typedef struct movement {
-    enum StateFlags pieceType;
+typedef struct {
+    StateFlags pieceType;
     int x, y;
 } Movement;
 
-typedef struct board_struct {
+typedef struct {
     Piece **state;
-    enum difficulty difficulty;
+    Difficulty difficulty;
     Movement *historyBack;
     Movement *historyForward;
     int noOfMovesBack;

@@ -29,7 +29,7 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
         FetchContent_Populate(raylib)
 
         set(BUILD_SHARED_LIBS ON)
-        set(SUPPORT_HIGH_DPI ON)
+        #set(SUPPORT_HIGH_DPI ON)
         set(BUILD_EXAMPLES OFF)
         set(SUPPORT_CAMERA_SYSTEM OFF)
         set(SUPPORT_VR_SIMULATOR OFF)
