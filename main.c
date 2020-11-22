@@ -42,7 +42,7 @@ int main() {
     initScreenFeatures(&screenF, screenWidth, screenHeight, SQUARE_SIZE);
 
     Menu menu = getMenu(board, &screenF);
-
+    MenuOptions menuOptions = getMenuOptions(&screenF);
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
 
@@ -79,7 +79,7 @@ int main() {
 
         switch (*screen) {
             case MENU:
-                MenuScreen(&screenF, frameCounter);
+                MenuScreen(&screenF, frameCounter, menuOptions, screen);
                 break;
             case GAME:
                 PlayScreen(&board, menu, &screenF, screen, mouse, clicked);

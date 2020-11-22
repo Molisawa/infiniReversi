@@ -314,12 +314,19 @@ Menu getMenu(Board board, ScreenFeatures *screenFeatures) {
     Rectangle saveGameButton = (Rectangle) {goFowardButton.x, goFowardButton.height + goFowardButton.y + 10,
                                             screenFeatures->screenWidth - board.size * screenFeatures->squareSize - 40,
                                             75};
-    Rectangle loadGameButton = (Rectangle) {saveGameButton.x, saveGameButton.height + saveGameButton.y + 10,
-                                            screenFeatures->screenWidth - board.size * screenFeatures->squareSize - 40,
-                                            75};
-
     return (Menu) {goBackButton, goFowardButton, saveGameButton};
 
+}
+
+MenuOptions  getMenuOptions(ScreenFeatures *screenFeatures){
+    int bussyScreen = 400 + screenFeatures->screenHeight * 0.1;
+    int freeScreen = screenFeatures->screenHeight - bussyScreen;
+    int number = (screenFeatures->screenWidth - (3 * 250))/4;
+    Rectangle startGameButton = (Rectangle) {number,bussyScreen+100, 250,freeScreen-200};
+    Rectangle loadGameButton = (Rectangle) {number+startGameButton.x+startGameButton.width,bussyScreen+100, 250,freeScreen-200};
+    Rectangle editorButton = (Rectangle) {number+loadGameButton.x+loadGameButton.width,bussyScreen+100, 250,freeScreen-200};
+
+    return (MenuOptions) {startGameButton, loadGameButton, editorButton};
 }
 
 void initSlider(Slider *slider) {
@@ -334,7 +341,7 @@ void initScreenFeatures(ScreenFeatures *features, int screenWidth, int screenHei
     features->squareSize = squareSize;
 }
 
-void MenuScreen(ScreenFeatures *screenFeatures, int frameCount) {
+void MenuScreen(ScreenFeatures *screenFeatures, int frameCount, MenuOptions menuOptions, ScreenFlag *screenFlag) {
     ClearBackground(DARKGREEN);
     int frame = floor(frameCount * 0.383);
     bool putZero = frame < 10;
@@ -342,6 +349,16 @@ void MenuScreen(ScreenFeatures *screenFeatures, int frameCount) {
             TextFormat("resources/frames/frame_%s_delay-0.03s.gif", TextFormat("%s%d", putZero ? "0" : "", frame)));
     Texture2D texture = LoadTextureFromImage(image);
     DrawTexture(texture, screenFeatures->screenWidth / 2 - image.width / 2, screenFeatures->screenHeight * 0.1, WHITE);
+    DrawRectangleRec(menuOptions.startGameButton, LIGHTGRAY);
+    DrawRectangleRec(menuOptions.loadGameButton, LIGHTGRAY);
+    DrawRectangleRec(menuOptions.editorButton, LIGHTGRAY);
+
+    DrawText("Start",menuOptions.startGameButton.x+menuOptions.startGameButton.width/2-MeasureText("Start",30)/2,menuOptions.startGameButton.y+menuOptions.startGameButton.height/2-15, 30, WHITE);
+    DrawText("Load game",menuOptions.loadGameButton.x+menuOptions.loadGameButton.width/2-MeasureText("Load game",30)/2,menuOptions.loadGameButton.y+menuOptions.loadGameButton.height/2-15, 30, WHITE);
+    DrawText("Game editor",menuOptions.editorButton.x+menuOptions.editorButton.width/2-MeasureText("Game editor",30)/2,menuOptions.editorButton.y+menuOptions.editorButton.height/2-15, 30, WHITE);
+
+    CheckMenuButtonPressed(menuOptions, screenFlag);
+
     EndDrawing();
     UnloadTexture(texture);
     UnloadImage(image);
@@ -350,5 +367,14 @@ void MenuScreen(ScreenFeatures *screenFeatures, int frameCount) {
 void EditorScreen(ScreenFeatures *screenFeatures) {
     ClearBackground(DARKGREEN);
 }
-
+void CheckMenuButtonPressed(MenuOptions menuOptions, ScreenFlag *screen ){
+    bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+    Vector2 mouse = GetMousePosition();
+    if (clicked && CheckCollisionPointRec(mouse,menuOptions.startGameButton))
+        *screen = GAME;
+    if (clicked && CheckCollisionPointRec(mouse,menuOptions.loadGameButton))
+        *screen = LOAD;
+    if (clicked && CheckCollisionPointRec(mouse,menuOptions.editorButton))
+        *screen = EDITOR;
+}
 #pragma clang diagnostic pop

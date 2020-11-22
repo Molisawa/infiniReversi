@@ -14,6 +14,9 @@ typedef struct {
     Rectangle goBackButton, goFowardButton, saveGameButton;
 } Menu;
 
+typedef struct {
+    Rectangle startGameButton, loadGameButton, editorButton;
+} MenuOptions;
 typedef enum {
     MENU, GAME, SAVE, LOAD, EDITOR
 } ScreenFlag;
@@ -44,13 +47,15 @@ void initScreenFeatures(ScreenFeatures *features, int screenWidth, int screenHei
 
 void UpdateDrawingState(Board *board, ScreenFeatures *screenFeatures);
 
-void MenuScreen(ScreenFeatures *, int frameCount);
+void MenuScreen(ScreenFeatures *, int frameCount, MenuOptions, ScreenFlag *);
 
 void DrawBoardGrid(Board *board, ScreenFeatures *screenFeatures);
 
 void LoadFileScreen(Board *board, ScreenFeatures *screenFeatures, ScreenFlag *screen, Slider *slider);
 
 Menu getMenu(Board board, ScreenFeatures *screenFeatures);
+
+MenuOptions getMenuOptions(ScreenFeatures *screenFeatures);
 
 void DestroyDirectory(DirectoryEntry directory);
 
@@ -63,5 +68,5 @@ void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenF
 
 void ShowFileSaverScreen(Board *board, ScreenFeatures *screenFeatures, char *filename, int frameCounter, Vector2 mouse,
                          ScreenFlag *screen, int *numOfChars);
-
+void CheckMenuButtonPressed(MenuOptions , ScreenFlag* );
 #endif //INFINIREVERSI_GRAPHIC_ENGINE_H
