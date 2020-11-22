@@ -21,9 +21,9 @@ int main() {
     const int screenHeight = 800;
 
     ScreenFlag *screen = malloc(sizeof(ScreenFlag));
-
-
     *screen = MENU;
+
+    ScreenFlag *lastScreen = malloc(sizeof(ScreenFlag));
 
     char filename[11] = "";
     int numOfChars = 0;
@@ -79,6 +79,7 @@ int main() {
                 MenuScreen(&screenF, frameCounter, menuOptions, screen, &board);
                 break;
             case GAME:
+                *lastScreen = GAME;
                 if (canSkipBlackPiece(&board)) {
                     computerMove(&board);
                 }
@@ -88,7 +89,7 @@ int main() {
                 break;
             case SAVE:
                 ShowFileSaverScreen(&board, &screenF, filename, frameCounter, mouse, screen,
-                                    &numOfChars);
+                                    &numOfChars, lastScreen);
                 EndDrawing();
                 break;
             case LOAD:
@@ -96,6 +97,7 @@ int main() {
                 EndDrawing();
                 break;
             case EDITOR:
+                *lastScreen = EDITOR;
                 EditorScreen(&screenF, &board, &pieceSelected, screen);
                 EndDrawing();
                 break;
@@ -107,6 +109,7 @@ int main() {
 
     free(screen);
     destructBoard(&board);
+    free(lastScreen);
     UnloadMusicStream(music);
     CloseAudioDevice();
     CloseWindow();
