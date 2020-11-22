@@ -6,7 +6,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_library(reversi_game_engine SHARED reversi_game_engine.c reversi_game_engine.h)
 
-add_library(graphic_engine STATIC graphic_engine.c graphic_engine.h)
+add_library(graphic_engine SHARED graphic_engine.c graphic_engine.h)
 
 # Set this to the minimal version you want to support
 find_package(raylib 3.0 QUIET) # Let CMake search for a raylib-config.cmake
@@ -42,7 +42,8 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
         set(SUPPORT_FILEFORMAT_OBJ OFF)
         set(SUPPORT_FILEFORMAT_MTL OFF)
         set(SUPPORT_MESH_GENERATION OFF)
-        set(USE_AUDIO OFF)
+        set(SUPPORT_FILEFORMAT_GIF ON)
+        set(USE_AUDIO ON)
         set(SUPPORT_SCREEN_CAPTURE OFF)
         set(SUPPORT_GIF_RECORDING OFF)
 

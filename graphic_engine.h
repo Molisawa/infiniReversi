@@ -11,7 +11,7 @@
 
 
 typedef struct {
-    Rectangle goBackButton, goFowardButton, saveGameButton, loadGameButton;
+    Rectangle goBackButton, goFowardButton, saveGameButton;
 } Menu;
 
 typedef enum {
@@ -38,13 +38,17 @@ typedef struct {
 
 void initSlider(Slider *slider);
 
+void EditorScreen(ScreenFeatures *screenFeatures);
+
 void initScreenFeatures(ScreenFeatures *features, int screenWidth, int screenHeight, float squareSize);
 
 void UpdateDrawingState(Board *board, ScreenFeatures *screenFeatures);
 
+void MenuScreen(ScreenFeatures *, int frameCount);
+
 void DrawBoardGrid(Board *board, ScreenFeatures *screenFeatures);
 
-void LoadFile(Board *board, ScreenFeatures *screenFeatures, ScreenFlag *screen, Slider *slider);
+void LoadFileScreen(Board *board, ScreenFeatures *screenFeatures, ScreenFlag *screen, Slider *slider);
 
 Menu getMenu(Board board, ScreenFeatures *screenFeatures);
 
@@ -54,10 +58,10 @@ void CheckPiecePlayed(Board *board, ScreenFeatures *screenFeatures, int clicked,
 
 void CheckButtonPressed(Menu *menu, Board *board, ScreenFlag *screen, Vector2 mouse);
 
-void DrawBackground(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenFlag *screen,
-                    Vector2 mouse, int clicked);
+void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenFlag *screen,
+                Vector2 mouse, int clicked);
 
-void ShowFileSaver(Board *board, ScreenFeatures *screenFeatures, char *filename, int frameCounter, Vector2 mouse,
-                   ScreenFlag *screen, int *numOfChars);
+void ShowFileSaverScreen(Board *board, ScreenFeatures *screenFeatures, char *filename, int frameCounter, Vector2 mouse,
+                         ScreenFlag *screen, int *numOfChars);
 
 #endif //INFINIREVERSI_GRAPHIC_ENGINE_H

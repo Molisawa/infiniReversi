@@ -1,16 +1,14 @@
 // Must be even number
 #ifndef REVERSI_GAME_ENGINE_LIBRARY_H
 #define REVERSI_GAME_ENGINE_LIBRARY_H
+
+#include <stdbool.h>
+
 enum StateFlags {
     VOID,
     BLACK_PIECE,
     WHITE_PIECE,
     HELPER
-};
-
-enum EvaluatorsFlags {
-    NUMBER_OF_PIECES,
-    HEURIST_POINTS
 };
 
 enum winners {
@@ -42,12 +40,18 @@ typedef struct board_struct {
     int noOfMovesBack;
     int lastPiecetypeMoved;
     int noOfMovesFoward;
-    int initialized;
+    bool initialized;
     int size;
+    bool custom;
+    Piece **initialState;
 } Board;
 
 
-void initializeGame(Board *b, int size, int difficulty);
+void setDefaultInitialBoardState(Board *board);
+
+void setCustomBoardState(Board *board);
+
+void initializeGame(Board *b, int size, int difficulty, bool custom);
 
 void initializeBoard(Board *board);
 
@@ -63,9 +67,9 @@ void goBack(Board *board);
 
 void goForward(Board *board);
 
-int canGoBack(Board *board);
+bool canGoBack(Board *board);
 
-int canGoFoward(Board *board);
+bool canGoFoward(Board *board);
 
 void endGame();
 
@@ -73,9 +77,9 @@ char *saveGame(Board *board);
 
 Board loadGame(char *filename);
 
-int isValidMove(Board *board, Movement lastMove);
+bool isValidMove(Board *board, Movement lastMove);
 
-int isGameOver(Board *board);
+bool isGameOver(Board *board);
 
 int getWinner(Board *board);
 
@@ -89,8 +93,6 @@ void removeHistoryFoward(Board *board);
 
 Movement randomMovement(Board *board);
 
-Board buildGameState(Board board, Movement *moves, int movesCount);
-
 Board copyBoard(Board board);
 
 void destructBoard(Board *board);
@@ -101,7 +103,7 @@ Movement bestMinimaxMove(Board *board);
 
 void computerMove(Board *board);
 
-int canMove(Board *board, int pieceType);
+bool canMove(Board *board, int pieceType);
 
 Movement bestMove(Board *board);
 

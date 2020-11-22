@@ -9,14 +9,21 @@
 
 
 int main() {
+
+    InitAudioDevice();
+
+    Music music = LoadMusicStream("resources/background.mp3");
     Board board;
+
+    PlayMusicStream(music);
 
     const int screenWidth = 1000;
     const int screenHeight = 800;
 
     ScreenFlag *screen = malloc(sizeof(ScreenFlag));
 
-    *screen = GAME;
+
+    *screen = MENU;
 
     char filename[11] = "";
     int numOfChars = 0;
@@ -24,7 +31,7 @@ int main() {
 
     Slider slider;
     initSlider(&slider);
-    initializeGame(&board, 8, HARD);
+    initializeGame(&board, 8, HARD, false);
     SetTargetFPS(60);
     InitWindow(screenWidth, screenHeight, "Reversi");
 
@@ -38,6 +45,8 @@ int main() {
 
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
+
+        UpdateMusicStream(music);
         frameCounter = (frameCounter + 1) % 60;
         Vector2 mouse = GetMousePosition();
         int clicked = 0;
@@ -70,29 +79,35 @@ int main() {
 
         switch (*screen) {
             case MENU:
+                MenuScreen(&screenF, frameCounter);
                 break;
             case GAME:
-                DrawBackground(&board, menu, &screenF, screen, mouse, clicked);
+                PlayScreen(&board, menu, &screenF, screen, mouse, clicked);
                 DrawFPS(10, 10);
+                EndDrawing();
                 break;
             case SAVE:
-                ShowFileSaver(&board, &screenF, filename, frameCounter, mouse, screen,
+                ShowFileSaverScreen(&board, &screenF, filename, frameCounter, mouse, screen,
                               &numOfChars);
+                EndDrawing();
                 break;
             case LOAD:
-                LoadFile(&board, &screenF, screen, &slider);
+                LoadFileScreen(&board, &screenF, screen, &slider);
+                EndDrawing();
                 break;
             case EDITOR:
                 break;
         }
 
-        EndDrawing();
+        //EndDrawing();
         //----------------------------------------------------------------------------------
     }
 
-    CloseWindow();
     free(screen);
     destructBoard(&board);
+    UnloadMusicStream(music);
+    CloseAudioDevice();
+    CloseWindow();
     return 0;
 }
 
