@@ -49,7 +49,7 @@ int main() {
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
 
-        //UpdateMusicStream(music);
+        UpdateMusicStream(music);
         frameCounter = (frameCounter + 1) % 60;
         Vector2 mouse = GetMousePosition();
         int clicked = 0;
@@ -114,5 +114,5 @@ int main() {
     CloseAudioDevice();
     CloseWindow();
     return 0;
-}
+}w
 

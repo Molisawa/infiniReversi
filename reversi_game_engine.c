@@ -575,7 +575,14 @@ void destructBoard(Board *board) {
         board->state[i] = realloc(board->state[i], 0);
 
     }
+
+    for (int i = 0; i < board->size; i++) {
+
+        board->initialState[i] = realloc(board->initialState[i], 0);
+
+    }
     board->state = realloc(board->state, 0);
+    board->state = realloc(board->initialState, 0);
     board->state = NULL;
     board->historyBack = realloc(board->historyBack, 0);
     board->historyForward = realloc(board->historyForward, 0);
