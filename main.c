@@ -4,7 +4,7 @@
 
 #include "reversi_game_engine.h"
 #include "graphic_engine.h"
-#include <malloc.h>
+#include <stdlib.h>
 
 
 int main() {

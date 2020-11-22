@@ -473,8 +473,7 @@ void CheckMenuButtonPressed(MenuOptions menuOptions, ScreenFlag *screen, Board *
     }
 }
 
-void
-ConfigEditorScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag *screen, int *customBoardSize) {
+void ConfigEditorScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag *screen, int *customBoardSize) {
     ClearBackground(RAYWHITE);
     int size = 6 + 2 * *customBoardSize;
     const char *text = TextFormat("%d", size);
