@@ -414,6 +414,9 @@ void EditorScreen(ScreenFeatures *screenFeatures, Board *board, Piece *piece, Sc
         if (CheckCollisionPointCircle(mouse, helper, radius) && clicked)
             board->state[x][y].pieceType = isBlack ? BLACK_PIECE : WHITE_PIECE;
 
+        if (CheckCollisionPointCircle(mouse, helper, radius) && clicked)
+            board->initialState[x][y].pieceType = isBlack ? BLACK_PIECE : WHITE_PIECE;
+
         if (CheckCollisionPointCircle(mouse, helper, radius) && IsMouseButtonPressed(MOUSE_RIGHT_BUTTON))
             board->state[x][y].pieceType = VOID;
     }

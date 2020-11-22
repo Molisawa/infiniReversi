@@ -878,7 +878,7 @@ char *saveGame(Board *board) {
         for (int i = 0; i < board->size; i++) {
             for (int j = 0; j < board->size; ++j) {
                 cJSON *object = cJSON_CreateObject();
-                cJSON_AddNumberToObject(object, "piece_type", board->state[i][j].pieceType);
+                cJSON_AddNumberToObject(object, "piece_type", board->initialState[i][j].pieceType);
                 cJSON_AddItemToArray(inital_board, object);
             }
         }
