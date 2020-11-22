@@ -1,6 +1,4 @@
-//
-// Created by Oscar on 21/11/2020.
-//
+
 
 #ifndef INFINIREVERSI_GRAPHIC_ENGINE_H
 #define INFINIREVERSI_GRAPHIC_ENGINE_H
