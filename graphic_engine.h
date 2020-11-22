@@ -41,13 +41,13 @@ typedef struct {
 
 void initSlider(Slider *slider);
 
-void EditorScreen(ScreenFeatures *screenFeatures);
+void EditorScreen(ScreenFeatures *screenFeatures,Board *board, Piece *piece, ScreenFlag*);
 
 void initScreenFeatures(ScreenFeatures *features, int screenWidth, int screenHeight, float squareSize);
 
 void UpdateDrawingState(Board *board, ScreenFeatures *screenFeatures);
 
-void MenuScreen(ScreenFeatures *, int frameCount, MenuOptions, ScreenFlag *);
+void MenuScreen(ScreenFeatures *, int frameCount, MenuOptions, ScreenFlag *, Board*);
 
 void DrawBoardGrid(Board *board, ScreenFeatures *screenFeatures);
 
@@ -68,5 +68,5 @@ void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenF
 
 void ShowFileSaverScreen(Board *board, ScreenFeatures *screenFeatures, char *filename, int frameCounter, Vector2 mouse,
                          ScreenFlag *screen, int *numOfChars);
-void CheckMenuButtonPressed(MenuOptions , ScreenFlag* );
+void CheckMenuButtonPressed(MenuOptions , ScreenFlag*, Board*);
 #endif //INFINIREVERSI_GRAPHIC_ENGINE_H

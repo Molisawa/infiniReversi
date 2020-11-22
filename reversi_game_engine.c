@@ -21,8 +21,7 @@ void initializeGame(Board *board, int size, int difficulty, bool custom) {
     board->historyForward = malloc(sizeof(Movement));
     board->size = size;
     board->custom = custom;
-    if (!custom)
-        initializeBoard(board);
+    initializeBoard(board);
 }
 
 int getPointEvaluator(Board *board, int pieceType) {
@@ -492,12 +491,14 @@ Board copyBoard(Board board) {
     Board tmp;
     initializeGame(&tmp, board.size, board.difficulty, board.custom);
 
-    if (board.custom)
+    if (board.custom) {
         for (int k = 0; k < board.size; k++) {
             for (int l = 0; l < board.size; l++) {
                 tmp.initialState[k][l].pieceType = board.initialState[k][l].pieceType;
             }
         }
+        setCustomBoardState(&tmp);
+    }
     for (int k = 0; k < board.size; k++) {
         for (int l = 0; l < board.size; l++) {
             tmp.state[k][l].pieceType = board.state[k][l].pieceType;
@@ -587,11 +588,24 @@ void goBack(Board *board) {
         for (int i = 0; i < board->noOfMovesBack - 1; ++i) {
             m[i] = board->historyBack[i];
         }
+        Board boardTmp;
+        if (board->custom){
+            boardTmp = copyBoard(*board);
+        }
         board->historyForward = realloc(board->historyForward, sizeof(Movement) * (board->noOfMovesFoward + 1));
         board->historyForward[board->noOfMovesFoward] = board->historyBack[board->noOfMovesBack - 1];
         board->noOfMovesFoward += 1;
         int moves = board->noOfMovesBack;
         initializeBoard(board);
+        if(boardTmp.custom){
+            for(int i=0; i<board->size;i++){
+                for (int j = 0; j < board->size; j++) {
+                    board->initialState[i][j].pieceType= boardTmp.initialState[i][j].pieceType;
+                }
+            }
+            setCustomBoardState(board);
+            destructBoard(&boardTmp);
+        }
         board->historyBack = realloc(board->historyBack, sizeof(Movement) * (moves - 1));
         board->noOfMovesBack = 0;
         for (int i = 0; i < moves - 1; ++i) {
@@ -619,7 +633,20 @@ void goForward(Board *board) {
         for (int i = 0; i < moves; i++) {
             historyRebuild[i] = board->historyBack[i];
         }
+        Board boardTmp;
+        if (board->custom){
+            boardTmp = copyBoard(*board);
+        }
         initializeBoard(board);
+        if(boardTmp.custom){
+            for(int i=0; i<board->size;i++){
+                for (int j = 0; j < board->size; j++) {
+                    board->initialState[i][j].pieceType= boardTmp.initialState[i][j].pieceType;
+                }
+            }
+            setCustomBoardState(board);
+            destructBoard(&boardTmp);
+        }
         board->historyForward = realloc(board->historyForward, sizeof(Movement) * (movesForward));
         board->historyForward = m;
         board->noOfMovesBack = 0;
@@ -851,7 +878,7 @@ char *saveGame(Board *board) {
         for (int i = 0; i < board->size; i++) {
             for (int j = 0; j < board->size; ++j) {
                 cJSON *object = cJSON_CreateObject();
-                cJSON_AddNumberToObject(object, "piece_type", board->historyBack[i].pieceType);
+                cJSON_AddNumberToObject(object, "piece_type", board->state[i][j].pieceType);
                 cJSON_AddItemToArray(inital_board, object);
             }
         }
@@ -870,14 +897,15 @@ Board loadGame(char *data) {
         if (cJSON_IsNumber(board_size) && board_size != NULL, cJSON_IsNumber(game_difficulty) &&
                                                               game_difficulty != NULL) {
             initializeGame(&board, board_size->valueint, game_difficulty->valueint, is_custom->valueint);
-            cJSON *piece = NULL;
             if (is_custom->valueint) {
+                cJSON *piece = NULL;
                 int count = 0;
                 cJSON *inital_board = cJSON_GetObjectItemCaseSensitive(json, "initial_board");
                 cJSON_ArrayForEach(piece, inital_board) {
-                    cJSON *pieceType = cJSON_GetObjectItemCaseSensitive(inital_board, "piece_type");
+                    cJSON *pieceType = cJSON_GetObjectItemCaseSensitive(piece, "piece_type");
                     board.initialState[count / board_size->valueint][count % board_size->valueint] = (Piece) {
                             pieceType->valueint};
+                    count++;
                 }
                 setCustomBoardState(&board);
             }

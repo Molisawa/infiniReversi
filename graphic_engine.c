@@ -95,6 +95,10 @@ void DrawBoardGrid(Board *board, ScreenFeatures *screenFeatures) {
         DrawLineV((Vector2) {0, screenFeatures->squareSize * i},
                   (Vector2) {board->size * screenFeatures->squareSize, screenFeatures->squareSize * i}, BLACK);
     }
+    DrawRectangle(board->size * screenFeatures->squareSize + 1, 0, screenFeatures->screenWidth - 1,
+                  screenFeatures->screenHeight, WHITE);
+    DrawRectangle(board->size * screenFeatures->squareSize + 1, 0, screenFeatures->screenWidth - 1,
+                  screenFeatures->screenHeight, Fade(DARKGREEN, 0.5f));
 }
 
 void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenFlag *screen,
@@ -103,10 +107,6 @@ void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenF
     ClearBackground(DARKGREEN);
     DrawBoardGrid(board, screenFeatures);
 
-    DrawRectangle(board->size * screenFeatures->squareSize + 1, 0, screenFeatures->screenWidth - 1,
-                  screenFeatures->screenHeight, WHITE);
-    DrawRectangle(board->size * screenFeatures->squareSize + 1, 0, screenFeatures->screenWidth - 1,
-                  screenFeatures->screenHeight, Fade(DARKGREEN, 0.5f));
     DrawRectangle(menu.goBackButton.x, menu.goBackButton.y, menu.goBackButton.width, menu.goBackButton.height, WHITE);
     DrawRectangle(menu.goFowardButton.x, menu.goFowardButton.y, menu.goFowardButton.width, menu.goFowardButton.height,
                   WHITE);
@@ -259,7 +259,7 @@ void LoadFileScreen(Board *board, ScreenFeatures *screenFeatures, ScreenFlag *sc
 
     int over = CheckCollisionPointRec(GetMousePosition(), cancelRect);
     DrawRectangleRec(cancelRect, over ? LIGHTGRAY : GRAY);
-    if (over && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) *screen = GAME;
+    if (over && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) *screen = MENU;
     DrawText("CANCEL", screenFeatures->screenWidth / 2 - MeasureText("CANCEL", 30) / 2 + cancelRect.x / 2,
              cancelRect.y + 10, 30,
              WHITE);
@@ -318,13 +318,15 @@ Menu getMenu(Board board, ScreenFeatures *screenFeatures) {
 
 }
 
-MenuOptions  getMenuOptions(ScreenFeatures *screenFeatures){
+MenuOptions getMenuOptions(ScreenFeatures *screenFeatures) {
     int bussyScreen = 400 + screenFeatures->screenHeight * 0.1;
     int freeScreen = screenFeatures->screenHeight - bussyScreen;
-    int number = (screenFeatures->screenWidth - (3 * 250))/4;
-    Rectangle startGameButton = (Rectangle) {number,bussyScreen+100, 250,freeScreen-200};
-    Rectangle loadGameButton = (Rectangle) {number+startGameButton.x+startGameButton.width,bussyScreen+100, 250,freeScreen-200};
-    Rectangle editorButton = (Rectangle) {number+loadGameButton.x+loadGameButton.width,bussyScreen+100, 250,freeScreen-200};
+    int number = (screenFeatures->screenWidth - (3 * 250)) / 4;
+    Rectangle startGameButton = (Rectangle) {number, bussyScreen + 100, 250, freeScreen - 200};
+    Rectangle loadGameButton = (Rectangle) {number + startGameButton.x + startGameButton.width, bussyScreen + 100, 250,
+                                            freeScreen - 200};
+    Rectangle editorButton = (Rectangle) {number + loadGameButton.x + loadGameButton.width, bussyScreen + 100, 250,
+                                          freeScreen - 200};
 
     return (MenuOptions) {startGameButton, loadGameButton, editorButton};
 }
@@ -341,7 +343,7 @@ void initScreenFeatures(ScreenFeatures *features, int screenWidth, int screenHei
     features->squareSize = squareSize;
 }
 
-void MenuScreen(ScreenFeatures *screenFeatures, int frameCount, MenuOptions menuOptions, ScreenFlag *screenFlag) {
+void MenuScreen(ScreenFeatures *screenFeatures, int frameCount, MenuOptions menuOptions, ScreenFlag *screenFlag, Board *board) {
     ClearBackground(DARKGREEN);
     int frame = floor(frameCount * 0.383);
     bool putZero = frame < 10;
@@ -353,28 +355,92 @@ void MenuScreen(ScreenFeatures *screenFeatures, int frameCount, MenuOptions menu
     DrawRectangleRec(menuOptions.loadGameButton, LIGHTGRAY);
     DrawRectangleRec(menuOptions.editorButton, LIGHTGRAY);
 
-    DrawText("Start",menuOptions.startGameButton.x+menuOptions.startGameButton.width/2-MeasureText("Start",30)/2,menuOptions.startGameButton.y+menuOptions.startGameButton.height/2-15, 30, WHITE);
-    DrawText("Load game",menuOptions.loadGameButton.x+menuOptions.loadGameButton.width/2-MeasureText("Load game",30)/2,menuOptions.loadGameButton.y+menuOptions.loadGameButton.height/2-15, 30, WHITE);
-    DrawText("Game editor",menuOptions.editorButton.x+menuOptions.editorButton.width/2-MeasureText("Game editor",30)/2,menuOptions.editorButton.y+menuOptions.editorButton.height/2-15, 30, WHITE);
+    DrawText("Start",
+             menuOptions.startGameButton.x + menuOptions.startGameButton.width / 2 - MeasureText("Start", 30) / 2,
+             menuOptions.startGameButton.y + menuOptions.startGameButton.height / 2 - 15, 30, WHITE);
+    DrawText("Load game",
+             menuOptions.loadGameButton.x + menuOptions.loadGameButton.width / 2 - MeasureText("Load game", 30) / 2,
+             menuOptions.loadGameButton.y + menuOptions.loadGameButton.height / 2 - 15, 30, WHITE);
+    DrawText("Game editor",
+             menuOptions.editorButton.x + menuOptions.editorButton.width / 2 - MeasureText("Game editor", 30) / 2,
+             menuOptions.editorButton.y + menuOptions.editorButton.height / 2 - 15, 30, WHITE);
 
-    CheckMenuButtonPressed(menuOptions, screenFlag);
+    CheckMenuButtonPressed(menuOptions, screenFlag, board);
 
     EndDrawing();
     UnloadTexture(texture);
     UnloadImage(image);
 }
 
-void EditorScreen(ScreenFeatures *screenFeatures) {
+void EditorScreen(ScreenFeatures *screenFeatures, Board *board, Piece *piece, ScreenFlag *screen) {
     ClearBackground(DARKGREEN);
+    DrawBoardGrid(board, screenFeatures);
+    int margin = board->size * screenFeatures->squareSize;
+    int freeSpace = screenFeatures->screenWidth - margin;
+    float radius = freeSpace / 4;
+    Vector2 black = (Vector2) {2 * radius + margin, 50 + radius};
+    Vector2 white = (Vector2) {black.x, 50 + black.y + 2 * radius};
+    DrawCircleV(black, radius, BLACK);
+    DrawCircleV(white, radius, WHITE);
+    bool isBlack = piece->pieceType == BLACK_PIECE;
+    DrawCircleV(isBlack ? black : white, radius / 10, RED);
+
+    Vector2 mouse = GetMousePosition();
+    bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+
+    UpdateDrawingState(board, screenFeatures);
+    if (mouse.x >= 0 && mouse.x < margin && mouse.y >= 0 && mouse.y < screenFeatures->screenHeight) {
+        int x = floorf(mouse.x / screenFeatures->squareSize);
+        int y = floorf(mouse.y / screenFeatures->squareSize);
+        Vector2 helper = (Vector2) {x * screenFeatures->squareSize + radius,
+                                    y * screenFeatures->squareSize + radius};
+        DrawRectangle(helper.x + 1 - radius, helper.y + 1 - radius, screenFeatures->squareSize - 2,
+                      screenFeatures->squareSize - 2,
+                      DARKGREEN);
+
+        switch (piece->pieceType) {
+            case BLACK_PIECE:
+                DrawCircle(helper.x, helper.y,
+                           screenFeatures->squareSize / 2 - 5, Fade(BLACK, 0.5));
+
+                break;
+            case WHITE_PIECE:
+                DrawCircle(helper.x, helper.y,
+                           screenFeatures->squareSize / 2 - 5, Fade(WHITE, 0.5));
+                break;
+            default:
+                break;
+        }
+        if (CheckCollisionPointCircle(mouse, helper, radius) && clicked)
+            board->state[x][y].pieceType = isBlack ? BLACK_PIECE : WHITE_PIECE;
+
+        if (CheckCollisionPointCircle(mouse, helper, radius) && IsMouseButtonPressed(MOUSE_RIGHT_BUTTON))
+            board->state[x][y].pieceType = VOID;
+    }
+
+    Rectangle save = (Rectangle) {margin + 30, screenFeatures->screenHeight - 150, (freeSpace - 60), 100};
+    DrawRectangleRec(save, LIGHTGRAY);
+    DrawText("Save", save.x + save.width / 2 - MeasureText("Save", 30) / 2, save.y + save.height / 2 - 15, 30, WHITE);
+
+    if (clicked && CheckCollisionPointRec(mouse, save)) *screen = SAVE;
+
+
+    if (clicked && CheckCollisionPointCircle(mouse, black, radius)) piece->pieceType = BLACK_PIECE;
+    if (clicked && CheckCollisionPointCircle(mouse, white, radius)) piece->pieceType = WHITE_PIECE;
+
 }
-void CheckMenuButtonPressed(MenuOptions menuOptions, ScreenFlag *screen ){
+
+void CheckMenuButtonPressed(MenuOptions menuOptions, ScreenFlag *screen, Board*board) {
     bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
     Vector2 mouse = GetMousePosition();
-    if (clicked && CheckCollisionPointRec(mouse,menuOptions.startGameButton))
+    if (clicked && CheckCollisionPointRec(mouse, menuOptions.startGameButton))
         *screen = GAME;
-    if (clicked && CheckCollisionPointRec(mouse,menuOptions.loadGameButton))
+    if (clicked && CheckCollisionPointRec(mouse, menuOptions.loadGameButton))
         *screen = LOAD;
-    if (clicked && CheckCollisionPointRec(mouse,menuOptions.editorButton))
+    if (clicked && CheckCollisionPointRec(mouse, menuOptions.editorButton)) {
         *screen = EDITOR;
+        board->custom=true;
+    }
 }
+
 #pragma clang diagnostic pop

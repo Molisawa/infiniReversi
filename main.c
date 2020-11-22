@@ -29,9 +29,12 @@ int main() {
     int numOfChars = 0;
     int frameCounter = 0;
 
+    Piece pieceSelected = (Piece) {BLACK_PIECE};
+
     Slider slider;
     initSlider(&slider);
     initializeGame(&board, 8, HARD, false);
+
     SetTargetFPS(60);
     InitWindow(screenWidth, screenHeight, "Reversi");
 
@@ -46,7 +49,7 @@ int main() {
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
 
-        UpdateMusicStream(music);
+        //UpdateMusicStream(music);
         frameCounter = (frameCounter + 1) % 60;
         Vector2 mouse = GetMousePosition();
         int clicked = 0;
@@ -69,26 +72,23 @@ int main() {
 
         }
 
-
         BeginDrawing();
-
-
-        if (canSkipBlackPiece(&board)) {
-            computerMove(&board);
-        }
 
         switch (*screen) {
             case MENU:
-                MenuScreen(&screenF, frameCounter, menuOptions, screen);
+                MenuScreen(&screenF, frameCounter, menuOptions, screen, &board);
                 break;
             case GAME:
+                if (canSkipBlackPiece(&board)) {
+                    computerMove(&board);
+                }
                 PlayScreen(&board, menu, &screenF, screen, mouse, clicked);
                 DrawFPS(10, 10);
                 EndDrawing();
                 break;
             case SAVE:
                 ShowFileSaverScreen(&board, &screenF, filename, frameCounter, mouse, screen,
-                              &numOfChars);
+                                    &numOfChars);
                 EndDrawing();
                 break;
             case LOAD:
@@ -96,6 +96,8 @@ int main() {
                 EndDrawing();
                 break;
             case EDITOR:
+                EditorScreen(&screenF, &board, &pieceSelected, screen);
+                EndDrawing();
                 break;
         }
 
