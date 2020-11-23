@@ -306,7 +306,7 @@ Movement bestMinimaxMove(Board *board) {
 
         Movement m = {.pieceType = WHITE_PIECE, .x = allMoves[i].x, .y = allMoves[i].y};
 
-        int scoreTemp = MinimaxSolver(11, (int) INT_MIN, INT_MAX, &tmp, m);
+        int scoreTemp = MinimaxSolver(8, (int) INT_MIN, INT_MAX, &tmp, m);
         if (scoreTemp > score) {
             score = scoreTemp;
             bestMove = m;

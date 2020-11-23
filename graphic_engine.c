@@ -126,6 +126,16 @@ void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenF
         CheckButtonPressed(&menu, board, screen, mouse);
     CheckPiecePlayed(board, screenFeatures, clicked, mouse);
 
+    DrawText("Your score:", menu.saveGameButton.x, menu.saveGameButton.height + menu.saveGameButton.y + 30, 20, WHITE);
+    int val = getScore(board, BLACK_PIECE);
+    DrawText(TextFormat("%d", val), menu.saveGameButton.x, menu.saveGameButton.height + menu.saveGameButton.y + 50, 20,
+             WHITE);
+
+    DrawText("CPU score:", menu.saveGameButton.x, menu.saveGameButton.height + menu.saveGameButton.y + 100, 20, WHITE);
+    val = getScore(board, WHITE_PIECE);
+    DrawText(TextFormat("%d", val), menu.saveGameButton.x, menu.saveGameButton.height + menu.saveGameButton.y + 120, 20,
+             WHITE);
+
     if (isGameOver(board)) {
         DrawText("Game Over", (screenFeatures->squareSize * board->size) / 2 - MeasureText("Game Over", 80) / 2,
                  screenFeatures->screenHeight / 2 - 40, 80, GRAY);
