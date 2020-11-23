@@ -365,6 +365,9 @@ void initScreenFeatures(ScreenFeatures *features, int screenWidth, int screenHei
 void MenuScreen(ScreenFeatures *screenFeatures, int frameCount, MenuOptions menuOptions, ScreenFlag *screenFlag,
                 Board *board) {
     ClearBackground(DARKGREEN);
+    DrawText("INFINIREVERSI", screenFeatures->screenWidth / 2 - MeasureText("INFINIREVERSI", 30) / 2,
+             screenFeatures->screenHeight / 2 - 375,
+             30, WHITE);
     int frame = floor(frameCount * 0.383);
     bool putZero = frame < 10;
     Image image = LoadImage(
@@ -384,7 +387,12 @@ void MenuScreen(ScreenFeatures *screenFeatures, int frameCount, MenuOptions menu
     DrawText("Game editor",
              menuOptions.editorButton.x + menuOptions.editorButton.width / 2 - MeasureText("Game editor", 30) / 2,
              menuOptions.editorButton.y + menuOptions.editorButton.height / 2 - 15, 30, WHITE);
-
+    DrawText("v1.0", screenFeatures->screenWidth / 2 - MeasureText("v1.0", 30) / 2,
+             screenFeatures->screenHeight / 2 + 375,
+             15, WHITE);
+    DrawText("Created by Molisawa and VaniaPZS", screenFeatures->screenWidth - MeasureText("Created by Molisawa and VaniaPZS", 30)/2,
+             screenFeatures->screenHeight / 2 + 375,
+             15, WHITE);
     CheckMenuButtonPressed(menuOptions, screenFlag, board);
 
     EndDrawing();
