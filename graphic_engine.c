@@ -7,6 +7,13 @@
 #include <math.h>
 #include "graphic_engine.h"
 
+/**
+ * Checks if the button is pressed
+ * @param menu receives a Menu type structure
+ * @param board receives a Board type structure
+ * @param screen receives a ScreenFlag type structure
+ * @param mouse receives a Vector type structure from raylib
+ */
 void CheckButtonPressed(Menu *menu, Board *board, ScreenFlag *screen, Vector2 mouse) {
     if (CheckCollisionPointRec(mouse, menu->goBackButton)) {
         goBack(board);
@@ -18,6 +25,10 @@ void CheckButtonPressed(Menu *menu, Board *board, ScreenFlag *screen, Vector2 mo
     }
 }
 
+/**
+ * Gets Directory entries
+ * @return
+ */
 DirectoryEntry getDirectories() {
     DIR *d;
     struct dirent *dir;
@@ -46,6 +57,10 @@ DirectoryEntry getDirectories() {
 
 }
 
+/**
+ * Destroys Directories
+ * @param directory receives a DirectoryEntry type structure
+ */
 void DestroyDirectory(DirectoryEntry directory) {
     for (int i = 0; i < directory.NumberOfDirectories; i++) {
         free(directory.directories[i]);
@@ -53,6 +68,13 @@ void DestroyDirectory(DirectoryEntry directory) {
     free(directory.directories);
 }
 
+/**
+ * Check which piece is being played
+ * @param board receives a Board type structure
+ * @param screenFeatures receives a ScreenFeautres type structure
+ * @param clicked receives integer if piece is clicked
+ * @param mouse receives a Vector type structure from raylib
+ */
 void CheckPiecePlayed(Board *board, ScreenFeatures *screenFeatures, int clicked, Vector2 mouse) {
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
@@ -85,6 +107,11 @@ void CheckPiecePlayed(Board *board, ScreenFeatures *screenFeatures, int clicked,
     }
 }
 
+/**
+ * Draws the game board grid
+ * @param board receives a Board type structure
+ * @param screenFeatures receives a ScreenFeatures type structure
+ */
 void DrawBoardGrid(Board *board, ScreenFeatures *screenFeatures) {
     for (int i = 0; i < board->size + 1; i++) {
         DrawLineV((Vector2) {screenFeatures->squareSize * i, 0},
@@ -101,6 +128,15 @@ void DrawBoardGrid(Board *board, ScreenFeatures *screenFeatures) {
                   screenFeatures->screenHeight, Fade(DARKGREEN, 0.5f));
 }
 
+/**
+ * Plays the game screen
+ * @param board receives a Board type structure
+ * @param menu receives a Menu type structure
+ * @param screenFeatures receives a ScreenFeatures type structure
+ * @param screen receives a ScreenFlag type structure
+ * @param mouse receives a Vector type structure from raylib
+ * @param clicked receives an integer if mouse is clicked
+ */
 void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenFlag *screen,
                 Vector2 mouse,
                 int clicked) {
@@ -169,6 +205,17 @@ void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenF
     }
 }
 
+/**
+ * Shows the screen with the Saved Files
+ * @param board receives a Board type structure
+ * @param screenFeatures receives a ScreenFeatures type structure
+ * @param filename receives a char with the file name
+ * @param frameCounter receives an integer with the number of frames
+ * @param mouse receives a Vector type structure from raylib
+ * @param screen receives a ScreenFlag type structure
+ * @param numOfChars receives an integer with the number of chars
+ * @param lastScreen receives a ScreenFlag type structure
+ */
 void ShowFileSaverScreen(Board *board, ScreenFeatures *screenFeatures, char *filename, int frameCounter, Vector2 mouse,
                          ScreenFlag *screen, int *numOfChars, ScreenFlag *lastScreen) {
     ClearBackground(RAYWHITE);
@@ -217,6 +264,13 @@ void ShowFileSaverScreen(Board *board, ScreenFeatures *screenFeatures, char *fil
 
 }
 
+/**
+ * Loads screen with Load Files
+ * @param board receives a Board type structure
+ * @param screenFeatures receives a ScreenFeatures type structure
+ * @param screen receives a ScreenFlag type structure
+ * @param slider receives a Slider type structure
+ */
 void LoadFileScreen(Board *board, ScreenFeatures *screenFeatures, ScreenFlag *screen, Slider *slider) {
 
     DirectoryEntry directory = getDirectories();
@@ -285,6 +339,11 @@ void LoadFileScreen(Board *board, ScreenFeatures *screenFeatures, ScreenFlag *sc
 
 }
 
+/**
+ *
+ * @param board
+ * @param screenFeatures
+ */
 void UpdateDrawingState(Board *board, ScreenFeatures *screenFeatures) {
 
     int offset = (screenFeatures->squareSize / 2 - 5) * 0.25;
@@ -322,6 +381,12 @@ void UpdateDrawingState(Board *board, ScreenFeatures *screenFeatures) {
     }
 }
 
+/**
+ * Gets the menu
+ * @param board receives a Board type structure
+ * @param screenFeatures receives a ScreenFeatures type structure
+ * @return a Menu type structure with the parameters needed
+ */
 Menu getMenu(Board board, ScreenFeatures *screenFeatures) {
     Rectangle goBackButton = (Rectangle) {board.size * screenFeatures->squareSize + 20, 30,
                                           screenFeatures->screenWidth - board.size * screenFeatures->squareSize - 40,
@@ -337,6 +402,11 @@ Menu getMenu(Board board, ScreenFeatures *screenFeatures) {
 
 }
 
+/**
+ * Gets the menu options
+ * @param screenFeatures receives a ScreenFeatures type structures
+ * @return a MenuOptions type structure
+ */
 MenuOptions getMenuOptions(ScreenFeatures *screenFeatures) {
     int bussyScreen = 400 + screenFeatures->screenHeight * 0.1;
     int freeScreen = screenFeatures->screenHeight - bussyScreen;
@@ -350,18 +420,37 @@ MenuOptions getMenuOptions(ScreenFeatures *screenFeatures) {
     return (MenuOptions) {startGameButton, loadGameButton, editorButton};
 }
 
+/**
+ * Inits the creen slider (scroll)
+ * @param slider receives a Slides type structure
+ */
 void initSlider(Slider *slider) {
     slider->collision = false;
     slider->offset = 0.0f;
     slider->difference = 0.0f;
 }
 
+/**
+ * Initializes the screen features
+ * @param features receives a ScreenFatures type structures
+ * @param screenWidth receives an integer with screenWidth
+ * @param screenHeight receives an integer with screenHight
+ * @param squareSize receives an integer with screenSize
+ */
 void initScreenFeatures(ScreenFeatures *features, int screenWidth, int screenHeight, float squareSize) {
     features->screenWidth = screenWidth;
     features->screenHeight = screenHeight;
     features->squareSize = squareSize;
 }
 
+/**
+ * Creates the Menu Screen
+ * @param screenFeatures receives a ScreenFatures type structures
+ * @param frameCount receives an integer with the frame count
+ * @param menuOptions receives a MenuOptions type structure
+ * @param screenFlag recives a ScreenFlag type structure
+ * @param board receives a Board type structure
+ */
 void MenuScreen(ScreenFeatures *screenFeatures, int frameCount, MenuOptions menuOptions, ScreenFlag *screenFlag,
                 Board *board) {
     ClearBackground(DARKGREEN);
@@ -400,6 +489,13 @@ void MenuScreen(ScreenFeatures *screenFeatures, int frameCount, MenuOptions menu
     UnloadImage(image);
 }
 
+/**
+ * Creates the Editor Game screen
+ * @param screenFeatures receives a ScreenFeatures type structures
+ * @param board receives a Board type structure
+ * @param piece receives a Piece type structure
+ * @param screen receives a ScreenFlag type structure
+ */
 void EditorScreen(ScreenFeatures *screenFeatures, Board *board, Piece *piece, ScreenFlag *screen) {
     ClearBackground(DARKGREEN);
     DrawBoardGrid(board, screenFeatures);
@@ -478,6 +574,12 @@ void EditorScreen(ScreenFeatures *screenFeatures, Board *board, Piece *piece, Sc
     }
 }
 
+/**
+ * Checks if the menu button is pressed
+ * @param menuOptions receives a MenuOption type structure
+ * @param screen receives a ScreenFlag type structure
+ * @param board receives a Board type structure
+ */
 void CheckMenuButtonPressed(MenuOptions menuOptions, ScreenFlag *screen, Board *board) {
     bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
     Vector2 mouse = GetMousePosition();
@@ -491,6 +593,13 @@ void CheckMenuButtonPressed(MenuOptions menuOptions, ScreenFlag *screen, Board *
     }
 }
 
+/**
+ * Creates the Config Editor Screen
+ * @param screenFeatures receives a ScreenFeatures type structure
+ * @param board receives a Board type structure
+ * @param screen receives a ScreenFlag type structure
+ * @param customBoardSize receives an integer with the custom board size
+ */
 void ConfigEditorScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag *screen, int *customBoardSize) {
     ClearBackground(RAYWHITE);
     int size = 6 + 2 * *customBoardSize;
@@ -545,6 +654,14 @@ void ConfigEditorScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag
 
 }
 
+/**
+ * Creates the Config Game Screen
+ * @param screenFeatures receives a ScreenFeatures type structure
+ * @param board receives a Board type structure
+ * @param screen receives a ScreenFlag type structure
+ * @param customBoardSize receives an integer with the custom board size
+ * @param difficulty receives a Difficulty type structure
+ */
 void ConfigGameScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag *screen, int *customBoardSize,
                       Difficulty *difficulty) {
 
