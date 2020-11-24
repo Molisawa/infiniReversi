@@ -25,6 +25,11 @@ void initializeGame(Board *board, int size, int difficulty, bool custom) {
     initializeBoard(board);
 }
 
+/**
+ * Evaluates the movements backward, if bigger than 25, returns the score, otherwise, returns the score of the position.
+ * @param board receives a Board type structure
+ * @param pieceType receives
+ */
 int getPointEvaluator(Board *board, int pieceType) {
     if (board->noOfMovesBack > 25) {
         return getScore(board, pieceType);
@@ -33,6 +38,12 @@ int getPointEvaluator(Board *board, int pieceType) {
     }
 }
 
+/**
+ * Gets the score according to the position
+ * @param board receives a Board type structure
+ * @param pieceType receives an integer pieceType
+ * @return the score
+ */
 int getScorePosition(Board *board, int pieceType) {
     int **valores = (int **) calloc(board->size, sizeof(int *));
 
@@ -108,8 +119,6 @@ void computerMove(Board *board) {
  * Initialize a board
  * @param board Receives a Board type structure
  */
-
-
 void initializeBoard(Board *board) {
 
     board->lastPiecetypeMoved = WHITE_PIECE;
@@ -146,6 +155,10 @@ void initializeBoard(Board *board) {
 
 }
 
+/**
+ * Initialize Custom Board
+ * @param board receives a Board type structure
+ */
 void setCustomBoardState(Board *board) {
     for (int k = 0; k < board->size; k++) {
         for (int l = 0; l < board->size; l++) {
@@ -244,6 +257,11 @@ int getScore(Board *board, int piece) {
     return score;
 }
 
+/**
+ * Evaluates if there are not more possible moves for Black Piece, if the White Piece
+ * @param board receives a Board type structure
+ * @return 1 if the game is over, the last moved piece is White and there is no forward moves, otherwise, returns 0
+ */
 int canSkipBlackPiece(Board *board) {
     return !isGameOver(board) && !canMove(board, BLACK_PIECE) && board->lastPiecetypeMoved == WHITE_PIECE &&
            board->noOfMovesFoward == 0;
@@ -285,6 +303,11 @@ Movement bestMove(Board *board) {
     return m;
 }
 
+/**
+ * Evaluates the best possible movement for the CPU using MiniMax algorithm
+ * @param board Receives a Board type structure
+ * @return A structure with the coordinates of the best movement using MiniMax
+ */
 Movement bestMinimaxMove(Board *board) {
     nodes = 0;
     for (int i = 0; i < board->size; i++) {
@@ -320,7 +343,11 @@ Movement bestMinimaxMove(Board *board) {
 
 }
 
-
+/**
+ * Evaluates a random movement for the CPU
+ * @param board Receives a Board type structure
+ * @return A structure with the coordinates of a random movement.
+ */
 Movement randomMovement(Board *board) {
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
@@ -338,6 +365,12 @@ Movement randomMovement(Board *board) {
     return move;
 }
 
+/**
+ * Evaluates all the Possible Movements for CPU and player.
+ * @param board Receives a Board type structure
+ * @param
+ * @return A structure with the coordinates of a random movement.
+ */
 Movement *getAllPossibleMoves(Board *board, int pieceType) {
     int possibleMoves = 0;
     Movement *moves = malloc(sizeof(Movement));
@@ -356,6 +389,12 @@ Movement *getAllPossibleMoves(Board *board, int pieceType) {
     return moves;
 }
 
+/**
+ *
+ * @param board Receives a Board type structure
+ * @param pieceType Receives an integer PieceType
+ * @return The number of moves
+ */
 int getNumberOfMoves(Board *board, int pieceType) {
     int moves = 0;
     for (int i = 0; i < board->size; i++) {
@@ -493,6 +532,11 @@ bool canMove(Board *board, int pieceType) {
     return getNumberOfMoves(board, pieceType);
 }
 
+/**
+ * Makes a copy of the current Board.
+ * @param board Receives a Board type structure
+ * @return the copy of the Board type structure
+ */
 Board copyBoard(Board board) {
     Board tmp;
     initializeGame(&tmp, board.size, board.difficulty, board.custom);
@@ -513,6 +557,9 @@ Board copyBoard(Board board) {
     return tmp;
 }
 
+/**
+ *
+ */
 int MinimaxSolver(int depth, int alpha, int beta, Board *board1, Movement moveEval) {
     nodes++;
 
@@ -570,6 +617,10 @@ int MinimaxSolver(int depth, int alpha, int beta, Board *board1, Movement moveEv
     return totalScore;
 }
 
+/**
+ * Destroys the current board
+ * @param board Receives a Board type structure
+ */
 void destructBoard(Board *board) {
     for (int i = 0; i < board->size; i++) {
 
@@ -900,6 +951,10 @@ char *saveGame(Board *board) {
     return cJSON_PrintUnformatted(json);
 }
 
+/**
+ * Load a saved game
+ * @param data receives a char pointer to data
+ */
 Board loadGame(char *data) {
     Board board;
     cJSON *json = cJSON_Parse(data);
