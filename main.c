@@ -81,9 +81,6 @@ int main() {
                 break;
             case GAME:
                 *lastScreen = GAME;
-                if (canSkipBlackPiece(&board)) {
-                    computerMove(&board);
-                }
                 PlayScreen(&board, menu, &screenF, screen, mouse, clicked);
                 DrawFPS(10, 10);
                 EndDrawing();

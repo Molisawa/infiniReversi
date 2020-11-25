@@ -4,10 +4,16 @@
 #include <stdbool.h>
 
 typedef enum {
+    BLACK_PLAYER = 1,
+    WHITE_PLAYER = 2,
+    NONE = 6
+} PlayerType;
+
+typedef enum {
     VOID,
-    BLACK_PIECE,
-    WHITE_PIECE,
-    HELPER
+    BLACK_PIECE = BLACK_PLAYER,
+    WHITE_PIECE = WHITE_PLAYER,
+    HELPER,
 } StateFlags;
 
 typedef enum {
@@ -27,9 +33,15 @@ typedef struct {
 } Piece;
 
 typedef struct {
-    StateFlags pieceType;
+    PlayerType pieceType;
     int x, y;
 } Movement;
+
+typedef struct {
+    PlayerType pieceType;
+    bool isHuman;
+    Difficulty difficulty;
+} Player;
 
 typedef struct {
     Piece **state;
@@ -37,7 +49,7 @@ typedef struct {
     Movement *historyBack;
     Movement *historyForward;
     int noOfMovesBack;
-    int lastPiecetypeMoved;
+    PlayerType lastPiecetypeMoved;
     int noOfMovesFoward;
     bool initialized;
     int size;
@@ -70,6 +82,8 @@ bool canGoBack(Board *board);
 
 bool canGoFoward(Board *board);
 
+PlayerType nextTurn(Board *board);
+
 void endGame();
 
 char *saveGame(Board *board);
@@ -82,7 +96,7 @@ bool isGameOver(Board *board);
 
 int getWinner(Board *board);
 
-void SetHelpers(Board *board);
+void SetHelpers(Board *board, PlayerType player);
 
 void makeMove(Board *board, Movement lastMove);
 
@@ -90,21 +104,21 @@ void makeRealMove(Board *board, Movement lastMove);
 
 void removeHistoryFoward(Board *board);
 
-Movement randomMovement(Board *board);
+Movement randomMovement(Board *board, PlayerType);
 
 Board copyBoard(Board board);
 
 void destructBoard(Board *board);
 
-int MinimaxSolver(int depth, int alpha, int beta, Board *board, Movement move);
+int MinimaxSolver(int depth, int alpha, int beta, Board *board, Movement move, PlayerType);
 
-Movement bestMinimaxMove(Board *board);
+Movement bestMinimaxMove(Board *board, PlayerType);
 
-void computerMove(Board *board);
+void computerMove(Board *board, PlayerType player);
 
 bool canMove(Board *board, int pieceType);
 
-Movement bestMove(Board *board);
+Movement bestMove(Board *board, PlayerType player);
 
 int canSkipBlackPiece(Board *board);
 

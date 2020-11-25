@@ -17,7 +17,7 @@
 void CheckButtonPressed(Menu *menu, Board *board, ScreenFlag *screen, Vector2 mouse) {
     if (CheckCollisionPointRec(mouse, menu->goBackButton)) {
         goBack(board);
-        SetHelpers(board);
+        SetHelpers(board, BLACK_PLAYER);
     } else if (CheckCollisionPointRec(mouse, menu->goFowardButton)) {
         goForward(board);
     } else if (CheckCollisionPointRec(mouse, menu->saveGameButton)) {
@@ -92,10 +92,10 @@ void CheckPiecePlayed(Board *board, ScreenFeatures *screenFeatures, int clicked,
                                        (j) * screenFeatures->squareSize + screenFeatures->squareSize / 2,
                                        screenFeatures->squareSize / 2 - 5, Fade(BLACK, 0.4f));
                         } else {
-                            Movement m = {.pieceType = BLACK_PIECE, .x = i, .y = j};
+                            Movement m = {.pieceType = BLACK_PLAYER, .x = i, .y = j};
                             makeRealMove(board, m);
                             removeHistoryFoward(board);
-                            computerMove(board);
+                            UpdateDrawingState(board, screenFeatures);
                         }
                     }
                 }
@@ -155,20 +155,32 @@ void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenF
              menu.goFowardButton.y + menu.goFowardButton.height / 2 - 15, 30, canGoFoward(board) ? BLACK : GRAY);
     DrawText("Save game", menu.saveGameButton.x - MeasureText("Save game", 30) / 2 + menu.saveGameButton.width / 2,
              menu.saveGameButton.y + menu.saveGameButton.height / 2 - 15, 30, BLACK);
-    SetHelpers(board);
-    UpdateDrawingState(board, screenFeatures);
+    SetHelpers(board, BLACK_PLAYER);
 
-    if (clicked)
+    if (clicked) {
         CheckButtonPressed(&menu, board, screen, mouse);
-    CheckPiecePlayed(board, screenFeatures, clicked, mouse);
+    }
+    UpdateDrawingState(board, screenFeatures);
+    switch (nextTurn(board)){
+
+         case BLACK_PLAYER:
+             CheckPiecePlayed(board, screenFeatures, clicked, mouse);
+             SetHelpers(board, BLACK_PLAYER);
+             break;
+         case WHITE_PLAYER:
+             computerMove(board, WHITE_PLAYER);
+             break;
+         case NONE:
+             break;
+     }
 
     DrawText("Your score:", menu.saveGameButton.x, menu.saveGameButton.height + menu.saveGameButton.y + 30, 20, WHITE);
-    int val = getScore(board, BLACK_PIECE);
+    int val = getScore(board, BLACK_PLAYER);
     DrawText(TextFormat("%d", val), menu.saveGameButton.x, menu.saveGameButton.height + menu.saveGameButton.y + 50, 20,
              WHITE);
 
     DrawText("CPU score:", menu.saveGameButton.x, menu.saveGameButton.height + menu.saveGameButton.y + 100, 20, WHITE);
-    val = getScore(board, WHITE_PIECE);
+    val = getScore(board, WHITE_PLAYER);
     DrawText(TextFormat("%d", val), menu.saveGameButton.x, menu.saveGameButton.height + menu.saveGameButton.y + 120, 20,
              WHITE);
 
@@ -506,7 +518,7 @@ void EditorScreen(ScreenFeatures *screenFeatures, Board *board, Piece *piece, Sc
     Vector2 white = (Vector2) {black.x, 50 + black.y + 2 * radius};
     DrawCircleV(black, radius, BLACK);
     DrawCircleV(white, radius, WHITE);
-    bool isBlack = piece->pieceType == BLACK_PIECE;
+    bool isBlack = piece->pieceType == BLACK_PLAYER;
     DrawCircleV(isBlack ? black : white, radius / 10, RED);
 
     Vector2 mouse = GetMousePosition();
@@ -529,12 +541,12 @@ void EditorScreen(ScreenFeatures *screenFeatures, Board *board, Piece *piece, Sc
                                     y * screenFeatures->squareSize + screenFeatures->squareSize / 2};
 
         switch (piece->pieceType) {
-            case BLACK_PIECE:
+            case BLACK_PLAYER:
                 DrawCircleV(circle,
                             screenFeatures->squareSize / 2 - 5, Fade(BLACK, 0.5));
 
                 break;
-            case WHITE_PIECE:
+            case WHITE_PLAYER:
                 DrawCircleV(circle,
                             screenFeatures->squareSize / 2 - 5, Fade(WHITE, 0.5));
                 break;
@@ -542,10 +554,10 @@ void EditorScreen(ScreenFeatures *screenFeatures, Board *board, Piece *piece, Sc
                 break;
         }
         if (CheckCollisionPointRec(mouse, helperRect) && clicked)
-            board->state[x][y].pieceType = isBlack ? BLACK_PIECE : WHITE_PIECE;
+            board->state[x][y].pieceType = isBlack ? BLACK_PLAYER : WHITE_PLAYER;
 
         if (CheckCollisionPointRec(mouse, helperRect) && clicked)
-            board->initialState[x][y].pieceType = isBlack ? BLACK_PIECE : WHITE_PIECE;
+            board->initialState[x][y].pieceType = isBlack ? BLACK_PLAYER : WHITE_PLAYER;
 
         if (CheckCollisionPointRec(mouse, helperRect) && (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) ||
             IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
@@ -563,8 +575,8 @@ void EditorScreen(ScreenFeatures *screenFeatures, Board *board, Piece *piece, Sc
     DrawText("Save", save.x + save.width / 2 - MeasureText("Save", 30) / 2, save.y + save.height / 2 - 15, 30, WHITE);
 
 
-    if (clicked && CheckCollisionPointCircle(mouse, black, radius)) piece->pieceType = BLACK_PIECE;
-    if (clicked && CheckCollisionPointCircle(mouse, white, radius)) piece->pieceType = WHITE_PIECE;
+    if (clicked && CheckCollisionPointCircle(mouse, black, radius)) piece->pieceType = BLACK_PLAYER;
+    if (clicked && CheckCollisionPointCircle(mouse, white, radius)) piece->pieceType = WHITE_PLAYER;
 
     if (clicked && CheckCollisionPointRec(mouse, save)) *screen = SAVE;
 

@@ -100,17 +100,17 @@ int getScorePosition(Board *board, int pieceType) {
  * Make a computer move
  * @param board Receives a Board type structure
  */
-void computerMove(Board *board) {
+void computerMove(Board *board, PlayerType player) {
     srand(time(NULL));
     switch (board->difficulty) {
         case EASY:
-            makeRealMove(board, randomMovement(board));
+            makeRealMove(board, randomMovement(board, player));
             break;
         case INTERMEDIATE:
-            makeRealMove(board, bestMove(board));
+            makeRealMove(board, bestMove(board, player));
             break;
         case HARD:
-            makeRealMove(board, bestMinimaxMove(board));
+            makeRealMove(board, bestMinimaxMove(board, player));
             break;
     }
 }
@@ -121,7 +121,7 @@ void computerMove(Board *board) {
  */
 void initializeBoard(Board *board) {
 
-    board->lastPiecetypeMoved = WHITE_PIECE;
+    board->lastPiecetypeMoved = WHITE_PLAYER;
 
     board->state = (Piece **) malloc(board->size * sizeof(Piece *));
     for (int i = 0; i < board->size; i++) {
@@ -174,7 +174,7 @@ void setCustomBoardState(Board *board) {
  * @return 1 if the game is finished, 0 game still running
  */
 bool isGameOver(Board *board) {
-    return !canMove(board, BLACK_PIECE) && !canMove(board, WHITE_PIECE);
+    return !canMove(board, BLACK_PLAYER) && !canMove(board, WHITE_PLAYER);
 }
 
 /**
@@ -186,9 +186,9 @@ int getWinner(Board *board) {
     int white_moves = 0, black_moves = 0;
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
-            if (board->state[i][j].pieceType == WHITE_PIECE)
+            if (board->state[i][j].pieceType == WHITE_PLAYER)
                 white_moves++;
-            if (board->state[i][j].pieceType == BLACK_PIECE)
+            if (board->state[i][j].pieceType == BLACK_PLAYER)
                 black_moves++;
         }
     }
@@ -223,14 +223,15 @@ bool canGoFoward(Board *board) {
  * Determine the possible moves that the player can make
  * @param board Receives a Board type structure
  */
-void SetHelpers(Board *board) {
+void SetHelpers(Board *board, PlayerType player) {
     int possibleMoves = 0;
-    if (board->lastPiecetypeMoved == BLACK_PIECE && canMove(board, WHITE_PIECE))
+    PlayerType opponent = player == BLACK_PLAYER ? WHITE_PLAYER : BLACK_PLAYER;
+    if (board->lastPiecetypeMoved == player && canMove(board, opponent))
         return;
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
             if (board->state[i][j].pieceType == VOID) {
-                Movement m = {.pieceType = BLACK_PIECE, .x = i, .y = j};
+                Movement m = {.pieceType = player, .x = i, .y = j};
                 if (isValidMove(board, m)) {
                     possibleMoves++;
                     board->state[i][j].pieceType = HELPER;
@@ -263,7 +264,7 @@ int getScore(Board *board, int piece) {
  * @return 1 if the game is over, the last moved piece is White and there is no forward moves, otherwise, returns 0
  */
 int canSkipBlackPiece(Board *board) {
-    return !isGameOver(board) && !canMove(board, BLACK_PIECE) && board->lastPiecetypeMoved == WHITE_PIECE &&
+    return !isGameOver(board) && !canMove(board, BLACK_PLAYER) && board->lastPiecetypeMoved == WHITE_PLAYER &&
            board->noOfMovesFoward == 0;
 }
 
@@ -272,7 +273,7 @@ int canSkipBlackPiece(Board *board) {
  * @param board Receives a Board type structure
  * @return A structure with the coordinates of the best movement
  */
-Movement bestMove(Board *board) {
+Movement bestMove(Board *board, PlayerType player) {
     int bestScore = 0, x, y;
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
@@ -282,15 +283,15 @@ Movement bestMove(Board *board) {
         }
     }
 
-    Movement *allMoves = getAllPossibleMoves(board, WHITE_PIECE);
-    for (int i = 0; i < getNumberOfMoves(board, WHITE_PIECE); i++) {
+    Movement *allMoves = getAllPossibleMoves(board, player);
+    for (int i = 0; i < getNumberOfMoves(board, player); i++) {
         Board tmp = copyBoard(*board);
 
-        Movement m = {.pieceType = WHITE_PIECE, .x = allMoves[i].x, .y = allMoves[i].y};
+        Movement m = {.pieceType = player, .x = allMoves[i].x, .y = allMoves[i].y};
 
         makeMove(&tmp, m);
-        if (getScore(&tmp, WHITE_PIECE) - getScore(board, WHITE_PIECE) > bestScore) {
-            bestScore = getScore(&tmp, WHITE_PIECE) - getScore(board, WHITE_PIECE);
+        if (getScore(&tmp, player) - getScore(board, player) > bestScore) {
+            bestScore = getScore(&tmp, player) - getScore(board, player);
             x = m.x;
             y = m.y;
 
@@ -298,7 +299,7 @@ Movement bestMove(Board *board) {
         destructBoard(&tmp);
     }
     allMoves = realloc(allMoves, 0);
-    Movement m = {.pieceType = WHITE_PIECE, .x = x, .y = y};
+    Movement m = {.pieceType = player, .x = x, .y = y};
 
     return m;
 }
@@ -308,7 +309,7 @@ Movement bestMove(Board *board) {
  * @param board Receives a Board type structure
  * @return A structure with the coordinates of the best movement using MiniMax
  */
-Movement bestMinimaxMove(Board *board) {
+Movement bestMinimaxMove(Board *board, PlayerType player) {
     nodes = 0;
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
@@ -318,18 +319,18 @@ Movement bestMinimaxMove(Board *board) {
         }
     }
 
-    Movement *allMoves = getAllPossibleMoves(board, WHITE_PIECE);
+    Movement *allMoves = getAllPossibleMoves(board, WHITE_PLAYER);
     Movement bestMove = (Movement) {.pieceType = 0, .x = -1, .y=1};
     int score = INT_MIN;
-    int numberOfMoves = getNumberOfMoves(board, WHITE_PIECE);
+    int numberOfMoves = getNumberOfMoves(board, WHITE_PLAYER);
 
     Board *boards = malloc(sizeof(Board) * numberOfMoves);
     for (int i = 0; i < numberOfMoves; i++) {
         Board tmp = copyBoard(*board);
 
-        Movement m = {.pieceType = WHITE_PIECE, .x = allMoves[i].x, .y = allMoves[i].y};
+        Movement m = {.pieceType = WHITE_PLAYER, .x = allMoves[i].x, .y = allMoves[i].y};
 
-        int scoreTemp = MinimaxSolver(8, (int) INT_MIN, INT_MAX, &tmp, m);
+        int scoreTemp = MinimaxSolver(8, (int) INT_MIN, INT_MAX, &tmp, m, player);
         if (scoreTemp > score) {
             score = scoreTemp;
             bestMove = m;
@@ -348,7 +349,7 @@ Movement bestMinimaxMove(Board *board) {
  * @param board Receives a Board type structure
  * @return A structure with the coordinates of a random movement.
  */
-Movement randomMovement(Board *board) {
+Movement randomMovement(Board *board, PlayerType player) {
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
             if (board->state[i][j].pieceType == HELPER) {
@@ -356,8 +357,8 @@ Movement randomMovement(Board *board) {
             }
         }
     }
-    int possibleMoves = getNumberOfMoves(board, WHITE_PIECE);
-    Movement *moves = getAllPossibleMoves(board, WHITE_PIECE);
+    int possibleMoves = getNumberOfMoves(board, player);
+    Movement *moves = getAllPossibleMoves(board, player);
     Movement move;
     if (possibleMoves > 0)
         move = moves[rand() % possibleMoves];
@@ -416,7 +417,7 @@ int getNumberOfMoves(Board *board, int pieceType) {
  * @return 1 if it is a valid move, 0 when all hopes fade away
  */
 bool isValidMove(Board *board, Movement lastMove) {
-    char opponent = (lastMove.pieceType == WHITE_PIECE) ? BLACK_PIECE : WHITE_PIECE;
+    char opponent = (lastMove.pieceType == WHITE_PLAYER) ? BLACK_PLAYER : WHITE_PLAYER;
 
     int colIndex, rowIndex, offset;
 
@@ -557,10 +558,21 @@ Board copyBoard(Board board) {
     return tmp;
 }
 
+PlayerType nextTurn(Board *board) {
+    if (!isGameOver(board)) {
+        PlayerType next = board->lastPiecetypeMoved == BLACK_PLAYER ? WHITE_PLAYER : BLACK_PLAYER;
+        if (board->noOfMovesFoward <= 0) {
+            if (canMove(board, next)) {
+                return next;
+            } else return board->lastPiecetypeMoved;
+        } else return NONE;
+    } else return NONE;
+}
+
 /**
  *
  */
-int MinimaxSolver(int depth, int alpha, int beta, Board *board1, Movement moveEval) {
+int MinimaxSolver(int depth, int alpha, int beta, Board *board1, Movement moveEval, PlayerType player) {
     nodes++;
 
     makeMove(board1, moveEval);
@@ -568,24 +580,24 @@ int MinimaxSolver(int depth, int alpha, int beta, Board *board1, Movement moveEv
         return getPointEvaluator(board1, moveEval.pieceType);
     }
 
-    int max = moveEval.pieceType == BLACK_PIECE;
+    int max = moveEval.pieceType == player;
 
-    char opponent = (moveEval.pieceType == WHITE_PIECE) ? BLACK_PIECE : WHITE_PIECE;
+    char opponent = (moveEval.pieceType == WHITE_PLAYER) ? BLACK_PLAYER : WHITE_PLAYER;
 
-    if ((max && !canMove(board1, WHITE_PIECE)) || (!max && !canMove(board1, opponent))) {
+    if ((max && !canMove(board1, WHITE_PLAYER)) || (!max && !canMove(board1, opponent))) {
         return MinimaxSolver(
-                depth - 1, alpha, beta, board1, moveEval);
+                depth - 1, alpha, beta, board1, moveEval, player);
     }
 
     Board board = copyBoard(*board1);
     int totalScore;
     if (max) {
         totalScore = INT_MIN;
-        Movement *all = getAllPossibleMoves(&board, WHITE_PIECE);
-        int numberOfMoves = getNumberOfMoves(&board, WHITE_PIECE);
+        Movement *all = getAllPossibleMoves(&board, WHITE_PLAYER);
+        int numberOfMoves = getNumberOfMoves(&board, WHITE_PLAYER);
         for (int i = 0; i < numberOfMoves; ++i) {
             Movement move = all[i];
-            int score = MinimaxSolver(depth - 1, alpha, beta, &board, move);
+            int score = MinimaxSolver(depth - 1, alpha, beta, &board, move, player);
             if (score > totalScore) {
                 totalScore = score;
             }
@@ -597,11 +609,11 @@ int MinimaxSolver(int depth, int alpha, int beta, Board *board1, Movement moveEv
         all = realloc(all, 0);
     } else {
         totalScore = INT_MAX;
-        Movement *all = getAllPossibleMoves(&board, BLACK_PIECE);
-        int numberOfMoves = getNumberOfMoves(&board, BLACK_PIECE);
+        Movement *all = getAllPossibleMoves(&board, BLACK_PLAYER);
+        int numberOfMoves = getNumberOfMoves(&board, BLACK_PLAYER);
         for (int i = 0; i < numberOfMoves; ++i) {
             Movement move = all[i];
-            int score = MinimaxSolver(depth - 1, alpha, beta, &board, move);
+            int score = MinimaxSolver(depth - 1, alpha, beta, &board, move, player);
             if (score < totalScore) {
                 totalScore = score;
             }
@@ -653,7 +665,7 @@ void goBack(Board *board) {
             m[i] = board->historyBack[i];
         }
         Board boardTmp;
-        if (board->custom){
+        if (board->custom) {
             boardTmp = copyBoard(*board);
         }
         board->historyForward = realloc(board->historyForward, sizeof(Movement) * (board->noOfMovesFoward + 1));
@@ -661,10 +673,10 @@ void goBack(Board *board) {
         board->noOfMovesFoward += 1;
         int moves = board->noOfMovesBack;
         initializeBoard(board);
-        if(boardTmp.custom){
-            for(int i=0; i<board->size;i++){
+        if (boardTmp.custom) {
+            for (int i = 0; i < board->size; i++) {
                 for (int j = 0; j < board->size; j++) {
-                    board->initialState[i][j].pieceType= boardTmp.initialState[i][j].pieceType;
+                    board->initialState[i][j].pieceType = boardTmp.initialState[i][j].pieceType;
                 }
             }
             setCustomBoardState(board);
@@ -698,14 +710,14 @@ void goForward(Board *board) {
             historyRebuild[i] = board->historyBack[i];
         }
         Board boardTmp;
-        if (board->custom){
+        if (board->custom) {
             boardTmp = copyBoard(*board);
         }
         initializeBoard(board);
-        if(boardTmp.custom){
-            for(int i=0; i<board->size;i++){
+        if (boardTmp.custom) {
+            for (int i = 0; i < board->size; i++) {
                 for (int j = 0; j < board->size; j++) {
-                    board->initialState[i][j].pieceType= boardTmp.initialState[i][j].pieceType;
+                    board->initialState[i][j].pieceType = boardTmp.initialState[i][j].pieceType;
                 }
             }
             setCustomBoardState(board);
@@ -739,7 +751,7 @@ void removeHistoryFoward(Board *board) {
 void makeRealMove(Board *board, Movement lastMove) {
     board->lastPiecetypeMoved = lastMove.pieceType;
     if (lastMove.x < 0 || lastMove.x > board->size - 1 || lastMove.y < 0 || lastMove.y > board->size - 1 ||
-        !(lastMove.pieceType == BLACK_PIECE || lastMove.pieceType == WHITE_PIECE))
+        !(lastMove.pieceType == BLACK_PLAYER || lastMove.pieceType == WHITE_PLAYER))
         return;
     board->historyBack = realloc(board->historyBack, sizeof(Movement) * (board->noOfMovesBack + 1));
     board->historyBack[board->noOfMovesBack] = lastMove;
@@ -753,7 +765,7 @@ void makeRealMove(Board *board, Movement lastMove) {
  * @param lastMove a Movement type structure
  */
 void makeMove(Board *board, Movement lastMove) {
-    char opponent = (lastMove.pieceType == WHITE_PIECE) ? BLACK_PIECE : WHITE_PIECE;
+    char opponent = (lastMove.pieceType == WHITE_PLAYER) ? BLACK_PLAYER : WHITE_PLAYER;
 
     int rowIndex, colIndex;
     Board tmp = copyBoard(*board);
