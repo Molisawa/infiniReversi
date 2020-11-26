@@ -13,7 +13,7 @@ int nodes = 0;
  * Initialize the game
  * @param board Receives a Board type structure
  */
-void initializeGame(Board *board, int size, int difficulty, bool custom) {
+void initializeGame(Board *board, int size, int difficulty, bool custom, Player player1, Player player2) {
     board->initialized = 1;
     board->difficulty = difficulty;
     board->noOfMovesBack = 0;
@@ -22,6 +22,8 @@ void initializeGame(Board *board, int size, int difficulty, bool custom) {
     board->historyForward = malloc(sizeof(Movement));
     board->size = size;
     board->custom = custom;
+    board->player1 = player1;
+    board->player2 = player2;
     initializeBoard(board);
 }
 
@@ -98,6 +100,7 @@ int getScorePosition(Board *board, int pieceType) {
  */
 void computerMove(Board *board, PlayerType player) {
     srand(time(NULL));
+    cleanHelpers(board);
     switch (board->difficulty) {
         case EASY:
             makeRealMove(board, randomMovement(board, player));
@@ -221,6 +224,7 @@ bool canGoFoward(Board *board) {
  */
 void SetHelpers(Board *board, PlayerType player) {
     int possibleMoves = 0;
+    cleanHelpers(board);
     PlayerType opponent = player == BLACK_PLAYER ? WHITE_PLAYER : BLACK_PLAYER;
     if (board->lastPiecetypeMoved == player && canMove(board, opponent))
         return;
@@ -264,12 +268,7 @@ int canSkipBlackPiece(Board *board) {
            board->noOfMovesFoward == 0;
 }
 
-/**
- * Evaluate the best possible movement for the CPU
- * @param board Receives a Board type structure
- * @return A structure with the coordinates of the best movement
- */
-Movement bestMove(Board *board, PlayerType player) {
+void cleanHelpers(Board *board){
     int bestScore = 0, x, y;
     for (int i = 0; i < board->size; i++) {
         for (int j = 0; j < board->size; j++) {
@@ -278,6 +277,15 @@ Movement bestMove(Board *board, PlayerType player) {
             }
         }
     }
+}
+
+/**
+ * Evaluate the best possible movement for the CPU
+ * @param board Receives a Board type structure
+ * @return A structure with the coordinates of the best movement
+ */
+Movement bestMove(Board *board, PlayerType player) {
+    int bestScore = 0, x, y;
 
     Movement *allMoves = getAllPossibleMoves(board, player);
     for (int i = 0; i < getNumberOfMoves(board, player); i++) {
@@ -307,13 +315,6 @@ Movement bestMove(Board *board, PlayerType player) {
  */
 Movement bestMinimaxMove(Board *board, PlayerType player) {
     nodes = 0;
-    for (int i = 0; i < board->size; i++) {
-        for (int j = 0; j < board->size; j++) {
-            if (board->state[i][j].pieceType == HELPER) {
-                board->state[i][j].pieceType = VOID;
-            }
-        }
-    }
 
     Movement *allMoves = getAllPossibleMoves(board, player);
     Movement bestMove = (Movement) {.pieceType = NONE, .x = -1, .y=1};
@@ -326,7 +327,7 @@ Movement bestMinimaxMove(Board *board, PlayerType player) {
 
         Movement m = {.pieceType = player, .x = allMoves[i].x, .y = allMoves[i].y};
 
-        int scoreTemp = MinimaxSolver(4, (int) INT_MIN, INT_MAX, &tmp, m, player);
+        int scoreTemp = MinimaxSolver(5, (int) INT_MIN, INT_MAX, &tmp, m, player);
         if (scoreTemp > score) {
             score = scoreTemp;
             bestMove = m;
@@ -346,13 +347,6 @@ Movement bestMinimaxMove(Board *board, PlayerType player) {
  * @return A structure with the coordinates of a random movement.
  */
 Movement randomMovement(Board *board, PlayerType player) {
-    for (int i = 0; i < board->size; i++) {
-        for (int j = 0; j < board->size; j++) {
-            if (board->state[i][j].pieceType == HELPER) {
-                board->state[i][j].pieceType = VOID;
-            }
-        }
-    }
     int possibleMoves = getNumberOfMoves(board, player);
     Movement *moves = getAllPossibleMoves(board, player);
     Movement move;
@@ -536,7 +530,7 @@ bool canMove(Board *board, int pieceType) {
  */
 Board copyBoard(Board board) {
     Board tmp;
-    initializeGame(&tmp, board.size, board.difficulty, board.custom);
+    initializeGame(&tmp, board.size, board.difficulty, board.custom, board.player1, board.player2);
 
     if (board.custom) {
         for (int k = 0; k < board.size; k++) {
@@ -561,7 +555,11 @@ PlayerType nextTurn(Board *board) {
             if (canMove(board, next)) {
                 return next;
             } else return board->lastPiecetypeMoved;
-        } else return NONE;
+        } else {
+            if (board->player1.isHuman == true && next==BLACK_PLAYER) return BLACK_PLAYER;
+            if (board->player2.isHuman == true && next==WHITE_PLAYER) return WHITE_PLAYER;
+            return NONE;
+        }
     } else return NONE;
 }
 
@@ -572,8 +570,10 @@ int MinimaxSolver(int depth, int alpha, int beta, Board *board1, Movement moveEv
     nodes++;
 
     makeMove(board1, moveEval);
-    if (depth == 0 || isGameOver(board1)) {
+    if (depth == 0) {
         return getPointEvaluator(board1, moveEval.pieceType);
+    } else if (isGameOver(board1)) {
+        return getScore(board1, moveEval.pieceType);
     }
 
     int max = moveEval.pieceType == player;
@@ -972,7 +972,7 @@ Board loadGame(char *data) {
         cJSON *is_custom = cJSON_GetObjectItemCaseSensitive(json, "custom");
         if (cJSON_IsNumber(board_size) && board_size != NULL, cJSON_IsNumber(game_difficulty) &&
                                                               game_difficulty != NULL) {
-            initializeGame(&board, board_size->valueint, game_difficulty->valueint, is_custom->valueint);
+            initializeGame(&board, board_size->valueint, game_difficulty->valueint, is_custom->valueint,(Player) {true}, (Player) {false});
             if (is_custom->valueint) {
                 cJSON *piece = NULL;
                 int count = 0;

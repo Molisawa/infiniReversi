@@ -163,8 +163,8 @@ void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenF
     switch (nextTurn(board)) {
 
         case BLACK_PLAYER:
-            CheckPiecePlayed(board, screenFeatures, clicked, mouse);
             SetHelpers(board, BLACK_PLAYER);
+            CheckPiecePlayed(board, screenFeatures, clicked, mouse);
             break;
         case WHITE_PLAYER:
             computerMove(board, WHITE_PLAYER);
@@ -182,6 +182,7 @@ void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenF
     val = getScore(board, WHITE_PLAYER);
     DrawText(TextFormat("%d", val), menu.saveGameButton.x, menu.saveGameButton.height + menu.saveGameButton.y + 120, 20,
              WHITE);
+
 
     if (isGameOver(board)) {
         DrawText("Game Over", (screenFeatures->squareSize * board->size) / 2 - MeasureText("Game Over", 80) / 2,
@@ -654,7 +655,7 @@ void ConfigEditorScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag
     if (overSubs && clicked && *customBoardSize > 0) (*customBoardSize)--;
 
     if (CheckCollisionPointRec(mouse, acceptButton) && clicked) {
-        initializeGame(board, size, EASY, true);
+        initializeGame(board, size, EASY, true, (Player) {true}, (Player) {true});
         *screen = EDITOR;
         *customBoardSize = 0;
         screenFeatures->squareSize = screenFeatures->screenHeight / size;
@@ -751,7 +752,7 @@ void ConfigGameScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag *
     if (overSubs && clicked && *customBoardSize > 0) (*customBoardSize)--;
 
     if (CheckCollisionPointRec(mouse, acceptButton) && clicked) {
-        initializeGame(board, size, *difficulty, true);
+        initializeGame(board, size, *difficulty, true, (Player) {true}, (Player) {false});
         *screen = GAME;
         *difficulty = EASY;
         *customBoardSize = 0;

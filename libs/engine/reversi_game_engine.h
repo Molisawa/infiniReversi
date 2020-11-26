@@ -38,9 +38,7 @@ typedef struct {
 } Movement;
 
 typedef struct {
-    PlayerType pieceType;
     bool isHuman;
-    Difficulty difficulty;
 } Player;
 
 typedef struct {
@@ -55,6 +53,8 @@ typedef struct {
     int size;
     bool custom;
     Piece **initialState;
+    Player player1;
+    Player player2;
 } Board;
 
 
@@ -62,7 +62,7 @@ void setDefaultInitialBoardState(Board *board);
 
 void setCustomBoardState(Board *board);
 
-void initializeGame(Board *b, int size, int difficulty, bool custom);
+void initializeGame(Board *board, int size, int difficulty, bool custom, Player player1, Player player2);
 
 void initializeBoard(Board *board);
 
@@ -97,6 +97,8 @@ bool isGameOver(Board *board);
 int getWinner(Board *board);
 
 void SetHelpers(Board *board, PlayerType player);
+
+void cleanHelpers(Board *board);
 
 void makeMove(Board *board, Movement lastMove);
 
