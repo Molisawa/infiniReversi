@@ -2,8 +2,7 @@
 #pragma ide diagnostic ignored "bugprone-integer-division"
 #pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
 
-#include "reversi_game_engine.h"
-#include "graphic_engine.h"
+#include "libs/graphic/graphic_engine.h"
 #include <stdlib.h>
 
 
