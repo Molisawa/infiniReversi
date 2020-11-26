@@ -17,7 +17,6 @@
 void CheckButtonPressed(Menu *menu, Board *board, ScreenFlag *screen, Vector2 mouse) {
     if (CheckCollisionPointRec(mouse, menu->goBackButton)) {
         goBack(board);
-        SetHelpers(board, BLACK_PLAYER);
     } else if (CheckCollisionPointRec(mouse, menu->goFowardButton)) {
         goForward(board);
     } else if (CheckCollisionPointRec(mouse, menu->saveGameButton)) {
@@ -155,24 +154,24 @@ void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenF
              menu.goFowardButton.y + menu.goFowardButton.height / 2 - 15, 30, canGoFoward(board) ? BLACK : GRAY);
     DrawText("Save game", menu.saveGameButton.x - MeasureText("Save game", 30) / 2 + menu.saveGameButton.width / 2,
              menu.saveGameButton.y + menu.saveGameButton.height / 2 - 15, 30, BLACK);
-    SetHelpers(board, BLACK_PLAYER);
+
 
     if (clicked) {
         CheckButtonPressed(&menu, board, screen, mouse);
     }
     UpdateDrawingState(board, screenFeatures);
-    switch (nextTurn(board)){
+    switch (nextTurn(board)) {
 
-         case BLACK_PLAYER:
-             CheckPiecePlayed(board, screenFeatures, clicked, mouse);
-             SetHelpers(board, BLACK_PLAYER);
-             break;
-         case WHITE_PLAYER:
-             computerMove(board, WHITE_PLAYER);
-             break;
-         case NONE:
-             break;
-     }
+        case BLACK_PLAYER:
+            CheckPiecePlayed(board, screenFeatures, clicked, mouse);
+            SetHelpers(board, BLACK_PLAYER);
+            break;
+        case WHITE_PLAYER:
+            computerMove(board, WHITE_PLAYER);
+            break;
+        case NONE:
+            break;
+    }
 
     DrawText("Your score:", menu.saveGameButton.x, menu.saveGameButton.height + menu.saveGameButton.y + 30, 20, WHITE);
     int val = getScore(board, BLACK_PLAYER);
@@ -491,7 +490,8 @@ void MenuScreen(ScreenFeatures *screenFeatures, int frameCount, MenuOptions menu
     DrawText("v1.0", screenFeatures->screenWidth / 2 - MeasureText("v1.0", 30) / 2,
              screenFeatures->screenHeight / 2 + 375,
              15, WHITE);
-    DrawText("Created by Molisawa and VaniaPZS", screenFeatures->screenWidth - MeasureText("Created by Molisawa and VaniaPZS", 30)/2,
+    DrawText("Created by Molisawa and VaniaPZS",
+             screenFeatures->screenWidth - MeasureText("Created by Molisawa and VaniaPZS", 30) / 2,
              screenFeatures->screenHeight / 2 + 375,
              15, WHITE);
     CheckMenuButtonPressed(menuOptions, screenFlag, board);
