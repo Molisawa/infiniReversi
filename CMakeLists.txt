@@ -6,7 +6,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # Set this to the minimal version you want to support
 find_package(raylib 3.0 QUIET) # Let CMake search for a raylib-config.cmake
-
+include_directories(BEFORE libs)
 add_executable(infinireversi main.c)
 
 add_compile_definitions(SUPPORT_FILEFORMAT_GIF)
