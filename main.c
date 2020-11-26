@@ -3,11 +3,13 @@
 #pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
 
 #include "libs/graphic/graphic_engine.h"
+#include "libs/ai/trainer_ai.h"
 #include <stdlib.h>
 
 
 int main() {
 
+    //train(1000,8);
     InitAudioDevice();
 
     Music music = LoadMusicStream("resources/background.mp3");
