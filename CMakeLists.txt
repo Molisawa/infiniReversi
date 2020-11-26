@@ -9,7 +9,23 @@ find_package(raylib 3.0 QUIET) # Let CMake search for a raylib-config.cmake
 
 add_executable(infinireversi main.c)
 
-include_directories(BEFORE libs)
+add_compile_definitions(SUPPORT_FILEFORMAT_GIF)
+add_compile_definitions(BUILD_SHARED_LIBS)
+add_compile_definitions(BUILD_EXAMPLES=0)
+add_compile_definitions(SUPPORT_CAMERA_SYSTEM=0)
+add_compile_definitions(SUPPORT_VR_SIMULATOR=0)
+add_compile_definitions(SUPPORT_DISTORTION_SHADER=0)
+add_compile_definitions(SUPPORT_IMAGE_GENERATION=0)
+add_compile_definitions(SUPPORT_FILEFORMAT_DDS=0)
+add_compile_definitions(SUPPORT_FILEFORMAT_HDR=0)
+add_compile_definitions(SUPPORT_FILEFORMAT_KTX=0)
+add_compile_definitions(SUPPORT_FILEFORMAT_ASTC=0)
+add_compile_definitions(SUPPORT_FILEFORMAT_OBJ=0)
+add_compile_definitions(SUPPORT_FILEFORMAT_MTL=0)
+add_compile_definitions(SUPPORT_MESH_GENERATION=0)
+add_compile_definitions(SUPPORT_SCREEN_CAPTURE=0)
+add_compile_definitions(SUPPORT_GIF_RECORDING=0)
+
 
 
 # You could change the QUIET above to REQUIRED and remove this if() clause
@@ -52,6 +68,9 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
     endif()
 
 endif()
+
+
+file(COPY resources DESTINATION ${CMAKE_BINARY_DIR})
 
 set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--export-all-symbols")
 add_subdirectory(libs/graphic)

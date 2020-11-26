@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include "reversi_game_engine.h"
-#include "cjson/cJSON.h"
+#include "../cjson/cJSON.h"
 #include <math.h>
 #include <stdio.h>
 #include <time.h>
@@ -31,11 +31,7 @@ void initializeGame(Board *board, int size, int difficulty, bool custom) {
  * @param pieceType receives
  */
 int getPointEvaluator(Board *board, int pieceType) {
-    if (board->noOfMovesBack > 25) {
-        return getScore(board, pieceType);
-    } else {
-        return getScorePosition(board, pieceType);
-    }
+    return getScorePosition(board, pieceType);
 }
 
 /**
@@ -319,18 +315,18 @@ Movement bestMinimaxMove(Board *board, PlayerType player) {
         }
     }
 
-    Movement *allMoves = getAllPossibleMoves(board, WHITE_PLAYER);
-    Movement bestMove = (Movement) {.pieceType = 0, .x = -1, .y=1};
+    Movement *allMoves = getAllPossibleMoves(board, player);
+    Movement bestMove = (Movement) {.pieceType = NONE, .x = -1, .y=1};
     int score = INT_MIN;
-    int numberOfMoves = getNumberOfMoves(board, WHITE_PLAYER);
+    int numberOfMoves = getNumberOfMoves(board, player);
 
     Board *boards = malloc(sizeof(Board) * numberOfMoves);
     for (int i = 0; i < numberOfMoves; i++) {
         Board tmp = copyBoard(*board);
 
-        Movement m = {.pieceType = WHITE_PLAYER, .x = allMoves[i].x, .y = allMoves[i].y};
+        Movement m = {.pieceType = player, .x = allMoves[i].x, .y = allMoves[i].y};
 
-        int scoreTemp = MinimaxSolver(8, (int) INT_MIN, INT_MAX, &tmp, m, player);
+        int scoreTemp = MinimaxSolver(4, (int) INT_MIN, INT_MAX, &tmp, m, player);
         if (scoreTemp > score) {
             score = scoreTemp;
             bestMove = m;
