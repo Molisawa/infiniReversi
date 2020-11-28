@@ -1,4 +1,5 @@
 #include "../engine/reversi_game_engine.h"
+#include <raylib.h>
 
 #ifndef INFINIREVERSI_TRAINER_AI_H
 #define INFINIREVERSI_TRAINER_AI_H

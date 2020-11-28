@@ -9,7 +9,7 @@
 
 int main() {
 
-    //train(1000,8);
+    train(10,8);
     InitAudioDevice();
 
     Music music = LoadMusicStream("resources/background.mp3");

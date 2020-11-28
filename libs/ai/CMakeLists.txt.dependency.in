@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.17)
+project(ready)
+include(ExternalProject)
+ExternalProject_Add(gsl_local
+        URL https://github.com/ampl/gsl/archive/v2.5.0.zip
+        PREFIX ${CMAKE_BINARY_DIR}/gsl
+        BUILD_COMMAND ""
+        CONFIGURE_COMMAND ""
+        INSTALL_COMMAND ""
+        )
