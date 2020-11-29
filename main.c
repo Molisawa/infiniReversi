@@ -1,3 +1,11 @@
+/***************************************************************************************
+*    Title: Infinireversi
+*    Author: Molisawa and VaniaPZS
+*    Date: 2020
+*    Code version: 1.0
+*    Availability: https://github.com/Molisawa/infiniReversi.git
+*
+***************************************************************************************/
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "bugprone-integer-division"
 #pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
