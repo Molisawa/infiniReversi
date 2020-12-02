@@ -38,12 +38,13 @@ DirectoryEntry getDirectories() {
 
     if (d) {
         while ((dir = readdir(d)) != NULL) {
-            char *tmp = calloc(dir->d_namlen + 1, sizeof(char));
-            for (int i = 0; i < dir->d_namlen; i++) {
+            int nameLen = TextLength(dir->d_name);
+            char *tmp = calloc(nameLen + 1, sizeof(char));
+            for (int i = 0; i < nameLen; i++) {
                 tmp[i] = dir->d_name[i];
 
             }
-            tmp[dir->d_namlen] = '\0';
+            tmp[nameLen] = '\0';
             if (IsFileExtension(tmp, ".brd")) {
                 count++;
                 dirs = realloc(dirs, count * sizeof(char *));

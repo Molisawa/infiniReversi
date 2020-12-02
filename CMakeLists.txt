@@ -66,11 +66,11 @@ endif ()
 
 
 file(COPY resources DESTINATION ${CMAKE_BINARY_DIR}/bin)
-
-set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--export-all-symbols")
+if (WIN32)
+    set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--export-all-symbols")
+endif (WIN32)
 add_subdirectory(libs/graphic)
 add_subdirectory(libs/engine)
 add_subdirectory(libs/cjson)
-add_subdirectory(libs/ai)
 
-target_link_libraries(infinireversi ai graphic_engine)
+target_link_libraries(infinireversi graphic_engine)
