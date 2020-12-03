@@ -69,7 +69,7 @@ void DestroyDirectory(DirectoryEntry directory) {
 }
 
 /**
- * Check which piece is being played
+ * Checks if black piece is being played
  * @param board receives a Board type structure
  * @param screenFeatures receives a ScreenFeautres type structure
  * @param clicked receives integer if piece is clicked
@@ -129,7 +129,7 @@ void DrawBoardGrid(Board *board, ScreenFeatures *screenFeatures) {
 }
 
 /**
- * Plays the game screen
+ * Shows the game screen
  * @param board receives a Board type structure
  * @param menu receives a Menu type structure
  * @param screenFeatures receives a ScreenFeatures type structure
@@ -219,7 +219,7 @@ void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenF
 }
 
 /**
- * Shows the screen with the Saved Files
+ * Shows the screen to save files
  * @param board receives a Board type structure
  * @param screenFeatures receives a ScreenFeatures type structure
  * @param filename receives a char with the file name
@@ -278,7 +278,7 @@ void ShowFileSaverScreen(Board *board, ScreenFeatures *screenFeatures, char *fil
 }
 
 /**
- * Loads screen with Load Files
+ * Shows screen with saved games
  * @param board receives a Board type structure
  * @param screenFeatures receives a ScreenFeatures type structure
  * @param screen receives a ScreenFlag type structure
@@ -353,9 +353,9 @@ void LoadFileScreen(Board *board, ScreenFeatures *screenFeatures, ScreenFlag *sc
 }
 
 /**
- *
- * @param board
- * @param screenFeatures
+ * Updates the pieces drawn on the board.
+ * @param board receives a Board type structure
+ * @param screenFeatures receives a ScreenFeatures type structure
  */
 void UpdateDrawingState(Board *board, ScreenFeatures *screenFeatures) {
 
@@ -395,7 +395,7 @@ void UpdateDrawingState(Board *board, ScreenFeatures *screenFeatures) {
 }
 
 /**
- * Gets the menu
+ * Instances a menu
  * @param board receives a Board type structure
  * @param screenFeatures receives a ScreenFeatures type structure
  * @return a Menu type structure with the parameters needed
@@ -434,7 +434,7 @@ MenuOptions getMenuOptions(ScreenFeatures *screenFeatures) {
 }
 
 /**
- * Inits the creen slider (scroll)
+ * Inits the screen slider (scroll)
  * @param slider receives a Slides type structure
  */
 void initSlider(Slider *slider) {
@@ -457,7 +457,7 @@ void initScreenFeatures(ScreenFeatures *features, int screenWidth, int screenHei
 }
 
 /**
- * Creates the Menu Screen
+ * Shows the Menu Screen
  * @param screenFeatures receives a ScreenFatures type structures
  * @param frameCount receives an integer with the frame count
  * @param menuOptions receives a MenuOptions type structure
@@ -504,7 +504,7 @@ void MenuScreen(ScreenFeatures *screenFeatures, int frameCount, MenuOptions menu
 }
 
 /**
- * Creates the Editor Game screen
+ * Shows the Editor Game screen
  * @param screenFeatures receives a ScreenFeatures type structures
  * @param board receives a Board type structure
  * @param piece receives a Piece type structure
@@ -608,7 +608,7 @@ void CheckMenuButtonPressed(MenuOptions menuOptions, ScreenFlag *screen, Board *
 }
 
 /**
- * Creates the Config Editor Screen
+ * Shows the Config Editor Screen
  * @param screenFeatures receives a ScreenFeatures type structure
  * @param board receives a Board type structure
  * @param screen receives a ScreenFlag type structure
@@ -669,7 +669,7 @@ void ConfigEditorScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag
 }
 
 /**
- * Creates the Config Game Screen
+ * Shows the Config Game Screen
  * @param screenFeatures receives a ScreenFeatures type structure
  * @param board receives a Board type structure
  * @param screen receives a ScreenFlag type structure

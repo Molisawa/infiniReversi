@@ -80,7 +80,7 @@ int main() {
         }
 
         BeginDrawing();
-
+        //Checks which screen is being displayed
         switch (*screen) {
             case MENU:
                 UpdateMusicStream(music);
