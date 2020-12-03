@@ -72,7 +72,7 @@ int getPointEvaluator(Board *board, int pieceType);
 
 int getScorePosition(Board *board, int pieceType);
 
-Movement *getAllPossibleMoves(Board *board, PlayerType pieceType);
+Movement *getAllPossibleMoves(Board *board, int pieceType);
 
 void goBack(Board *board);
 
@@ -121,6 +121,8 @@ void computerMove(Board *board, PlayerType player);
 bool canMove(Board *board, int pieceType);
 
 Movement bestMove(Board *board, PlayerType player);
+
+int canSkipBlackPiece(Board *board);
 
 int getScore(Board *board, int pieceType);
 

@@ -69,7 +69,7 @@ void DestroyDirectory(DirectoryEntry directory) {
 }
 
 /**
- * Checks if black piece is being played
+ * Check which piece is being played
  * @param board receives a Board type structure
  * @param screenFeatures receives a ScreenFeautres type structure
  * @param clicked receives integer if piece is clicked
@@ -129,7 +129,7 @@ void DrawBoardGrid(Board *board, ScreenFeatures *screenFeatures) {
 }
 
 /**
- * Shows the game screen
+ * Plays the game screen
  * @param board receives a Board type structure
  * @param menu receives a Menu type structure
  * @param screenFeatures receives a ScreenFeatures type structure
@@ -219,7 +219,7 @@ void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenF
 }
 
 /**
- * Shows the screen to save files
+ * Shows the screen with the Saved Files
  * @param board receives a Board type structure
  * @param screenFeatures receives a ScreenFeatures type structure
  * @param filename receives a char with the file name
@@ -278,7 +278,7 @@ void ShowFileSaverScreen(Board *board, ScreenFeatures *screenFeatures, char *fil
 }
 
 /**
- * Shows screen with saved games
+ * Loads screen with Load Files
  * @param board receives a Board type structure
  * @param screenFeatures receives a ScreenFeatures type structure
  * @param screen receives a ScreenFlag type structure
@@ -353,9 +353,9 @@ void LoadFileScreen(Board *board, ScreenFeatures *screenFeatures, ScreenFlag *sc
 }
 
 /**
- * Updates the pieces drawn on the board.
- * @param board receives a Board type structure
- * @param screenFeatures receives a ScreenFeatures type structure
+ *
+ * @param board
+ * @param screenFeatures
  */
 void UpdateDrawingState(Board *board, ScreenFeatures *screenFeatures) {
 
@@ -395,7 +395,7 @@ void UpdateDrawingState(Board *board, ScreenFeatures *screenFeatures) {
 }
 
 /**
- * Instances a menu
+ * Gets the menu
  * @param board receives a Board type structure
  * @param screenFeatures receives a ScreenFeatures type structure
  * @return a Menu type structure with the parameters needed
@@ -434,7 +434,7 @@ MenuOptions getMenuOptions(ScreenFeatures *screenFeatures) {
 }
 
 /**
- * Inits the screen slider (scroll)
+ * Inits the creen slider (scroll)
  * @param slider receives a Slides type structure
  */
 void initSlider(Slider *slider) {
@@ -457,7 +457,7 @@ void initScreenFeatures(ScreenFeatures *features, int screenWidth, int screenHei
 }
 
 /**
- * Shows the Menu Screen
+ * Creates the Menu Screen
  * @param screenFeatures receives a ScreenFatures type structures
  * @param frameCount receives an integer with the frame count
  * @param menuOptions receives a MenuOptions type structure
@@ -465,7 +465,7 @@ void initScreenFeatures(ScreenFeatures *features, int screenWidth, int screenHei
  * @param board receives a Board type structure
  */
 void MenuScreen(ScreenFeatures *screenFeatures, int frameCount, MenuOptions menuOptions, ScreenFlag *screenFlag,
-                Board *board) {
+                Board *board, ScreenFlag *nextScreen) {
     ClearBackground(DARKGREEN);
     DrawText("INFINIREVERSI", screenFeatures->screenWidth / 2 - MeasureText("INFINIREVERSI", 30) / 2,
              screenFeatures->screenHeight / 2 - 375,
@@ -496,7 +496,7 @@ void MenuScreen(ScreenFeatures *screenFeatures, int frameCount, MenuOptions menu
              screenFeatures->screenWidth - MeasureText("Created by Molisawa and VaniaPZS", 30) / 2,
              screenFeatures->screenHeight / 2 + 375,
              15, WHITE);
-    CheckMenuButtonPressed(menuOptions, screenFlag, board);
+    CheckMenuButtonPressed(menuOptions, screenFlag, board, nextScreen);
 
     EndDrawing();
     UnloadTexture(texture);
@@ -504,7 +504,7 @@ void MenuScreen(ScreenFeatures *screenFeatures, int frameCount, MenuOptions menu
 }
 
 /**
- * Shows the Editor Game screen
+ * Creates the Editor Game screen
  * @param screenFeatures receives a ScreenFeatures type structures
  * @param board receives a Board type structure
  * @param piece receives a Piece type structure
@@ -562,8 +562,10 @@ void EditorScreen(ScreenFeatures *screenFeatures, Board *board, Piece *piece, Sc
             board->initialState[x][y].pieceType = isBlack ? BLACK_PLAYER : WHITE_PLAYER;
 
         if (CheckCollisionPointRec(mouse, helperRect) && (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) ||
-            IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
+            IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {
             board->state[x][y].pieceType = VOID;
+            board->initialState[x][y].pieceType = VOID;
+        }
     }
 
     Rectangle exit = (Rectangle) {margin + 30, screenFeatures->screenHeight - 150, (freeSpace - 60), 100};
@@ -594,82 +596,25 @@ void EditorScreen(ScreenFeatures *screenFeatures, Board *board, Piece *piece, Sc
  * @param screen receives a ScreenFlag type structure
  * @param board receives a Board type structure
  */
-void CheckMenuButtonPressed(MenuOptions menuOptions, ScreenFlag *screen, Board *board) {
+void CheckMenuButtonPressed(MenuOptions menuOptions, ScreenFlag *screen, Board *board, ScreenFlag *nextScreen) {
     bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
     Vector2 mouse = GetMousePosition();
-    if (clicked && CheckCollisionPointRec(mouse, menuOptions.startGameButton))
+    if (clicked && CheckCollisionPointRec(mouse, menuOptions.startGameButton)) {
         *screen = CONFIG_GAME;
-    if (clicked && CheckCollisionPointRec(mouse, menuOptions.loadGameButton))
+        *nextScreen = GAME;
+    }
+    if (clicked && CheckCollisionPointRec(mouse, menuOptions.loadGameButton)) {
         *screen = LOAD;
+    }
     if (clicked && CheckCollisionPointRec(mouse, menuOptions.editorButton)) {
-        *screen = CONFIG_EDITOR;
+        *screen = CONFIG_GAME;
+        *nextScreen = EDITOR;
         board->custom = true;
     }
 }
 
 /**
- * Shows the Config Editor Screen
- * @param screenFeatures receives a ScreenFeatures type structure
- * @param board receives a Board type structure
- * @param screen receives a ScreenFlag type structure
- * @param customBoardSize receives an integer with the custom board size
- */
-void ConfigEditorScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag *screen, int *customBoardSize) {
-    ClearBackground(RAYWHITE);
-    int size = 6 + 2 * *customBoardSize;
-    const char *text = TextFormat("%d", size);
-    DrawText(text, screenFeatures->screenWidth / 2 - MeasureText(text, 120) / 2, screenFeatures->screenHeight / 2 - 180,
-             120, BLACK);
-
-    DrawText("Chose your board size", screenFeatures->screenWidth / 2 - MeasureText("Chose your board size", 70) / 2,
-             screenFeatures->screenHeight / 2 - 300,
-             70, GRAY);
-    int margin = (screenFeatures->screenWidth - 2 * 130) / 3;
-    Rectangle sum = (Rectangle) {margin, screenFeatures->screenHeight / 2 - 15, 130, 130};
-    Rectangle subs = (Rectangle) {margin + sum.x + sum.width, sum.y, sum.width, sum.height};
-
-    Vector2 mouse = GetMousePosition();
-    bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
-    bool overSum = CheckCollisionPointRec(mouse, sum);
-    bool overSubs = CheckCollisionPointRec(mouse, subs);
-
-    DrawRectangleRec(sum, overSum ? LIGHTGRAY : RAYWHITE);
-    DrawText("+", sum.x + sum.width / 2 - MeasureText("+", 100) / 2, sum.y + sum.height / 2 - 50, 100, BLACK);
-    DrawRectangleRec(subs, overSubs ? LIGHTGRAY : RAYWHITE);
-    DrawText("-", subs.x + subs.width / 2 - MeasureText("-", 100) / 2, subs.y + subs.height / 2 - 50, 100, BLACK);
-
-    Rectangle acceptButton = (Rectangle) {screenFeatures->screenWidth / 2 - 100, screenFeatures->screenHeight / 2 + 120,
-                                          200, 80};
-    Rectangle cancelButton = (Rectangle) {screenFeatures->screenWidth / 2 - 100,
-                                          acceptButton.y + acceptButton.height + 50, acceptButton.width,
-                                          acceptButton.height};
-
-    DrawRectangleRec(acceptButton, LIGHTGRAY);
-    DrawRectangleRec(cancelButton, LIGHTGRAY);
-
-    DrawText("Accept", acceptButton.x + acceptButton.width / 2 - MeasureText("Accept", 40) / 2,
-             acceptButton.y + acceptButton.height / 2 - 20, 40, WHITE);
-    DrawText("Cancel", cancelButton.x + cancelButton.width / 2 - MeasureText("Cancel", 40) / 2,
-             cancelButton.y + cancelButton.height / 2 - 20, 40, WHITE);
-
-    if (overSum && clicked) (*customBoardSize)++;
-    if (overSubs && clicked && *customBoardSize > 0) (*customBoardSize)--;
-
-    if (CheckCollisionPointRec(mouse, acceptButton) && clicked) {
-        initializeGame(board, size, EASY, true, (Player) {true}, (Player) {true});
-        *screen = EDITOR;
-        *customBoardSize = 0;
-        screenFeatures->squareSize = screenFeatures->screenHeight / size;
-    }
-    if (CheckCollisionPointRec(mouse, cancelButton) && clicked) {
-        *screen = MENU;
-        *customBoardSize = 0;
-    }
-
-}
-
-/**
- * Shows the Config Game Screen
+ * Creates the Config Game Screen
  * @param screenFeatures receives a ScreenFeatures type structure
  * @param board receives a Board type structure
  * @param screen receives a ScreenFlag type structure
@@ -677,7 +622,7 @@ void ConfigEditorScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag
  * @param difficulty receives a Difficulty type structure
  */
 void ConfigGameScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag *screen, int *customBoardSize,
-                      Difficulty *difficulty) {
+                      Difficulty *difficulty, ScreenFlag *nextScreen) {
 
     ClearBackground(RAYWHITE);
     int size = 6 + 2 * *customBoardSize;
@@ -754,7 +699,7 @@ void ConfigGameScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag *
 
     if (CheckCollisionPointRec(mouse, acceptButton) && clicked) {
         initializeGame(board, size, *difficulty, true, (Player) {true}, (Player) {false});
-        *screen = GAME;
+        *screen = *nextScreen;
         *difficulty = EASY;
         *customBoardSize = 0;
         screenFeatures->squareSize = screenFeatures->screenHeight / size;

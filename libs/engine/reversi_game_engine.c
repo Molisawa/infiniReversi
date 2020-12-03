@@ -221,7 +221,6 @@ bool canGoFoward(Board *board) {
 /**
  * Determine the possible moves that the player can make
  * @param board Receives a Board type structure
- * @param player receives a PlayerType structure
  */
 void SetHelpers(Board *board, PlayerType player) {
     int possibleMoves = 0;
@@ -260,9 +259,15 @@ int getScore(Board *board, int piece) {
 }
 
 /**
-* Cleans the Helpers by setting them to void
-* @param board receives a Board type structure
-*/
+ * Evaluates if there are not more possible moves for Black Piece, if the White Piece
+ * @param board receives a Board type structure
+ * @return 1 if the game is over, the last moved piece is White and there is no forward moves, otherwise, returns 0
+ */
+int canSkipBlackPiece(Board *board) {
+    return !isGameOver(board) && !canMove(board, BLACK_PLAYER) && board->lastPiecetypeMoved == WHITE_PLAYER &&
+           board->noOfMovesFoward == 0;
+}
+
 void cleanHelpers(Board *board){
     int bestScore = 0, x, y;
     for (int i = 0; i < board->size; i++) {
@@ -275,9 +280,8 @@ void cleanHelpers(Board *board){
 }
 
 /**
- * Evaluate the best possible movement, returns the moves that has the biggest score
+ * Evaluate the best possible movement for the CPU
  * @param board Receives a Board type structure
- * @param player receives a PlayerType structure
  * @return A structure with the coordinates of the best movement
  */
 Movement bestMove(Board *board, PlayerType player) {
@@ -305,9 +309,8 @@ Movement bestMove(Board *board, PlayerType player) {
 }
 
 /**
- * Evaluates the best possible movement using MiniMax
+ * Evaluates the best possible movement for the CPU using MiniMax algorithm
  * @param board Receives a Board type structure
- * @param player receives a PlayerType structure
  * @return A structure with the coordinates of the best movement using MiniMax
  */
 Movement bestMinimaxMove(Board *board, PlayerType player) {
@@ -341,7 +344,6 @@ Movement bestMinimaxMove(Board *board, PlayerType player) {
 /**
  * Evaluates a random movement for the CPU
  * @param board Receives a Board type structure
- * @param player receives a PlayerType structure
  * @return A structure with the coordinates of a random movement.
  */
 Movement randomMovement(Board *board, PlayerType player) {
@@ -357,10 +359,10 @@ Movement randomMovement(Board *board, PlayerType player) {
 /**
  * Evaluates all the Possible Movements for CPU and player.
  * @param board Receives a Board type structure
- * @param pieceType receives an PlayerType structure
+ * @param
  * @return A structure with the coordinates of a random movement.
  */
-Movement *getAllPossibleMoves(Board *board, PlayerType pieceType) {
+Movement *getAllPossibleMoves(Board *board, int pieceType) {
     int possibleMoves = 0;
     Movement *moves = malloc(sizeof(Movement));
     for (int i = 0; i < board->size; i++) {
@@ -379,7 +381,7 @@ Movement *getAllPossibleMoves(Board *board, PlayerType pieceType) {
 }
 
 /**
- * Gets the number of legal moves that a piece can make
+ *
  * @param board Receives a Board type structure
  * @param pieceType Receives an integer PieceType
  * @return The number of moves
@@ -546,11 +548,6 @@ Board copyBoard(Board board) {
     return tmp;
 }
 
-/**
-* Gets what piece is going to make the Next Move
-* @param board receives a Board type structure
- * @return the next turn
-*/
 PlayerType nextTurn(Board *board) {
     if (!isGameOver(board)) {
         PlayerType next = board->lastPiecetypeMoved == BLACK_PLAYER ? WHITE_PLAYER : BLACK_PLAYER;
@@ -567,14 +564,8 @@ PlayerType nextTurn(Board *board) {
 }
 
 /**
-* Tests all possible moves and returns the best
-* @param depth receives an integer type data
-* @param beta receives an integer type data
-* @param board1 receives a Board type structure
-* @param moveEval receives a Movement type structure
-* @param player receives a PlayerType structure
-* @return the best possible move
-*/
+ *
+ */
 int MinimaxSolver(int depth, int alpha, int beta, Board *board1, Movement moveEval, PlayerType player) {
     nodes++;
 

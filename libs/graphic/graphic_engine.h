@@ -15,7 +15,7 @@ typedef struct {
 } MenuOptions;
 
 typedef enum {
-    MENU, GAME, SAVE, LOAD, EDITOR, CONFIG_EDITOR, CONFIG_GAME
+    MENU, GAME, SAVE, LOAD, EDITOR, CONFIG_GAME
 } ScreenFlag;
 
 typedef struct {
@@ -44,7 +44,7 @@ void initScreenFeatures(ScreenFeatures *features, int screenWidth, int screenHei
 
 void UpdateDrawingState(Board *board, ScreenFeatures *screenFeatures);
 
-void MenuScreen(ScreenFeatures *, int frameCount, MenuOptions, ScreenFlag *, Board *);
+void MenuScreen(ScreenFeatures *, int frameCount, MenuOptions, ScreenFlag *, Board *, ScreenFlag *);
 
 void DrawBoardGrid(Board *board, ScreenFeatures *screenFeatures);
 
@@ -66,11 +66,9 @@ void PlayScreen(Board *board, Menu menu, ScreenFeatures *screenFeatures, ScreenF
 void ShowFileSaverScreen(Board *board, ScreenFeatures *screenFeatures, char *filename, int frameCounter, Vector2 mouse,
                          ScreenFlag *screen, int *numOfChars, ScreenFlag *);
 
-void CheckMenuButtonPressed(MenuOptions, ScreenFlag *, Board *);
-
-void ConfigEditorScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag *screen, int*);
+void CheckMenuButtonPressed(MenuOptions, ScreenFlag *, Board *, ScreenFlag *);
 
 void ConfigGameScreen(ScreenFeatures *screenFeatures, Board *board, ScreenFlag *screen, int *customBoardSize,
-                      Difficulty *difficulty);
+                      Difficulty *difficulty, ScreenFlag *);
 
 #endif //INFINIREVERSI_GRAPHIC_ENGINE_H

@@ -31,6 +31,8 @@ int main() {
 
     ScreenFlag *lastScreen = malloc(sizeof(ScreenFlag));
 
+    ScreenFlag *nextScreen = malloc(sizeof(ScreenFlag));
+
     char filename[11] = "";
     int numOfChars = 0;
     int frameCounter = 0;
@@ -80,11 +82,11 @@ int main() {
         }
 
         BeginDrawing();
-        //Checks which screen is being displayed
+
         switch (*screen) {
             case MENU:
                 UpdateMusicStream(music);
-                MenuScreen(&screenF, frameCounter, menuOptions, screen, &board);
+                MenuScreen(&screenF, frameCounter, menuOptions, screen, &board, nextScreen);
                 break;
             case GAME:
                 *lastScreen = GAME;
@@ -106,12 +108,8 @@ int main() {
                 EditorScreen(&screenF, &board, &pieceSelected, screen);
                 EndDrawing();
                 break;
-            case CONFIG_EDITOR:
-                ConfigEditorScreen(&screenF, &board, screen, &customBoardSize);
-                EndDrawing();
-                break;
             case CONFIG_GAME:
-                ConfigGameScreen(&screenF, &board, screen, &customBoardSize, &difficulty);
+                ConfigGameScreen(&screenF, &board, screen, &customBoardSize, &difficulty, nextScreen);
                 EndDrawing();
                 break;
         }
@@ -122,6 +120,7 @@ int main() {
 
     free(screen);
     free(lastScreen);
+    free(nextScreen);
     UnloadMusicStream(music);
     CloseAudioDevice();
     CloseWindow();
